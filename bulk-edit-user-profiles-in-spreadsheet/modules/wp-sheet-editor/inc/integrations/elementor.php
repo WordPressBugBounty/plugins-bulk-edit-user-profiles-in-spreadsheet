@@ -52,18 +52,10 @@ if ( ! class_exists( 'WPSE_Elementor_Integration' ) ) {
 					$post_type,
 					array(
 						'data_type'                => 'post_data',
-						'unformatted'              => array(
-							'renderer' => 'wp_external_button',
-							'readOnly' => true,
-						),
 						'column_width'             => 115,
 						'title'                    => __( 'Elementor', VGSE()->textname ),
 						'type'                     => 'external_button',
 						'supports_formulas'        => false,
-						'formatted'                => array(
-							'renderer' => 'wp_external_button',
-							'readOnly' => true,
-						),
 						'allow_to_hide'            => true,
 						'allow_to_save'            => false,
 						'allow_to_rename'          => true,

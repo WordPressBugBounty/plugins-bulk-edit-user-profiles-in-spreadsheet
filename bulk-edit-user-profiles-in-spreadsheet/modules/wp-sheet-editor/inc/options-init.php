@@ -339,9 +339,10 @@ if ( ! class_exists( 'WPSE_Options_Page' ) ) {
 					array(
 						'id'      => 'be_allowed_user_roles',
 						'title'   => __( 'User roles that can use the spreadsheet editor', 'vg_sheet_editor' ),
-						'desc'    => __( 'The plugin will not initialize for the user roles not selected here.', 'vg_sheet_editor' ),
+						'desc'    => __( 'The plugin will not initialize for the user roles not selected here. Leave empty and the editor will initialize for any role that has permission to edit this data source.', 'vg_sheet_editor' ),
 						'type'    => 'new_select',
 						'multi'   => true,
+						'class_name' => 'select2',
 						'options' => array_combine( array_keys( $roles->roles ), array_keys( $roles->roles ) ),
 					),
 					array(
@@ -521,7 +522,8 @@ if ( ! class_exists( 'WPSE_Options_Page' ) ) {
 						'type'    => 'new_select',
 						'multi'   => true,
 						'options' => array( $helpers, 'get_allowed_post_types' ),
-						'title'   => __( 'Spreadsheets enabled for these post types', 'vg_sheet_editor' ),
+						'title'   => __( 'Enabled spreadsheets', 'vg_sheet_editor' ),
+						'class_name' => 'select2',
 					),
 					array(
 						'id'      => 'disable_help_toolbar',

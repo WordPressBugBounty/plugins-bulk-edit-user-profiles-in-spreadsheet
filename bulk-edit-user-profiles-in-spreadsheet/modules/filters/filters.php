@@ -49,7 +49,6 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 
 					// Start auto export if the URL contains wpse_auto_export=1
 					jQuery('body').on('vgSheetEditor:afterRowsInsert', function (event, data) {
-						console.log('data', data);
 						if (data.length && window.location.href.indexOf('wpse_auto_export=1') > -1) {
 							jQuery('[data-remodal-target="export-csv-modal"]').click();
 							jQuery('.export-csv-modal .export-columns option').prop('selected', true).trigger('change');
@@ -426,6 +425,13 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 						unset( $out['meta_query'][ $index ] );
 					}
 				}
+				if ( count( $out['meta_query'] ) > 50 ) {
+					$out['meta_query'] = array_slice( $out['meta_query'], 0, 50 );
+				}
+			}
+			// Limit the number of filters to prevent the case where they set a huge number of filters and have difficulty removing them in the UI
+			if ( count( $out ) > 50 ) {
+				$out = array_slice( $out, 0, 50 );
 			}
 
 			return apply_filters( 'vg_sheet_editor/filters/last_session_filters', $out );

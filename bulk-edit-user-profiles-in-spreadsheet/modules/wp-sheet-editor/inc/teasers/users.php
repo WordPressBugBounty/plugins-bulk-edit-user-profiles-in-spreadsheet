@@ -26,7 +26,7 @@ if (!class_exists('WP_Sheet_Editor_Users_Teaser')) {
 			if (wp_doing_ajax() || !is_admin() || isset($sheets['user'])) {
 				return $sheets;
 			}
-			$install_url = VGSE()->get_plugin_install_url('Bulk Edit and Create User Profiles – WP Sheet Editor');
+			$install_url = VGSE()->get_plugin_install_url('Bulk Edit and Create User Profiles - WP Sheet Editor');
 			$sheets['user'] = array(
 				'key' => 'user',
 				'label' => __('Users'),
@@ -52,7 +52,7 @@ if (!class_exists('WP_Sheet_Editor_Users_Teaser')) {
 			</div>
 			<script>
 				jQuery(window).on('load', function () {
-					jQuery('.wpse-notice .notice-dismiss').click(function () {
+					jQuery('.wpse-notice .notice-dismiss').on('click', function () {
 						console.log('click');
 						jQuery.post(ajaxurl, {
 							action: 'vgse_notice_dismiss',

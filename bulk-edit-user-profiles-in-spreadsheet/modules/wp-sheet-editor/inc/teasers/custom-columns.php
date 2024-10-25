@@ -56,8 +56,6 @@ if (!class_exists('WP_Sheet_Editor_Custom_Columns_Teaser')) {
 				$column_args = array();
 				if ($is_locked) {
 					$column_args = array(
-						'unformatted' => array('renderer' => 'html', 'readOnly' => true),
-						'formatted' => array('renderer' => 'html', 'readOnly' => true),
 						'allow_to_save' => false,
 						'is_locked' => $is_locked,
 						'lock_template_key' => 'lock_cell_template_pro',
@@ -73,6 +71,8 @@ if (!class_exists('WP_Sheet_Editor_Custom_Columns_Teaser')) {
 					'allow_to_rename' => true,
 								), $column_args));
 			}
+			
+			$editor->args['columns']->clear_cache( $post_type );
 		}
 
 		/**

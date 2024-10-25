@@ -22,9 +22,6 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 			if ( $this->secret_key ) {
 				return $this->secret_key;
 			}
-			if ( ! get_option( 'vgse_secret_key' ) ) {
-				update_option( 'vgse_secret_key', md5( VGSE()->helpers->get_uuid() ), false );
-			}
 			// We use the secret key to add extra security to the file names
 			$this->secret_key = get_option( 'vgse_secret_key' );
 			return $this->secret_key;

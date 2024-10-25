@@ -304,9 +304,18 @@
 				data: data
 			}).success(function (response) {
 				// Remove the hash from the url so it doesn't open the settings popup again after reload
-				window.location.hash = '';
-				alert(<?php echo json_encode(esc_html__('Settings saved', $this->textname)); ?>);
+				// if(window.location.hash){
+				// 	window.location.hash = '';
+				// }
 				jQuery('body').trigger('vgfpsdkSettings/AfterSaved', response);
+				
+				jQuery('form.wpse-set-settings .wpse-settings-saved-notice').remove();
+				jQuery('form.wpse-set-settings button[type="submit"]').after('<p class="wpse-settings-saved-notice" style="background-color: #b0fdb0;color: black;padding: 15px;"></p>');
+				jQuery('form.wpse-set-settings .wpse-settings-saved-notice').text(<?php echo json_encode(esc_html__('Settings saved', $this->textname)); ?>);
+
+				setInterval(() => {					
+					jQuery('form.wpse-set-settings .wpse-settings-saved-notice').remove();
+				}, 5000);
 				jQuery('form.wpse-set-settings button[type="submit"]').each(function () {
 					if (jQuery(this).data('originalText')) {
 						jQuery(this).text(jQuery(this).data('originalText'));

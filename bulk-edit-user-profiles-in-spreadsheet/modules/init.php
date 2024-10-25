@@ -92,7 +92,11 @@ if ( !class_exists( 'WP_Sheet_Editor_CORE_Modules_Init' ) ) {
                 }
             }
             $plugin_inc_files = glob( untrailingslashit( $this->product_directory ) . '/inc/*.php' );
-            $inc_files = array_merge( glob( untrailingslashit( __DIR__ ) . '/*.php' ), $plugin_inc_files, glob( untrailingslashit( $this->product_directory ) . '/inc/integrations/*.php' ) );
+            $inc_files = array_merge( glob( untrailingslashit( __DIR__ ) . '/*.php' ), $plugin_inc_files );
+            // The integration files will be loaded after the plugins have loaded
+            if ( doing_action( 'plugins_loaded' ) ) {
+                $inc_files = array_merge( $inc_files, glob( untrailingslashit( $this->product_directory ) . '/inc/integrations/*.php' ) );
+            }
             foreach ( $inc_files as $inc_file ) {
                 if ( !is_file( $inc_file ) ) {
                     continue;

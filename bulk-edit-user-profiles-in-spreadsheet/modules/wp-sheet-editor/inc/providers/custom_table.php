@@ -2,14 +2,15 @@
 
 class VGSE_Provider_Custom_table extends VGSE_Provider_Abstract {
 
-	private static $instance      = false;
-	var $key                      = 'custom_table';
-	var $is_post_type             = false;
-	var $last_request             = null;
-	static $data_store            = array();
-	public $args                  = array();
-	var $table_columns_cache      = array();
-	var $post_data_table_id_cache = array();
+	private static $instance         = false;
+	public $key                      = 'custom_table';
+	public $is_post_type             = false;
+	public $last_request             = null;
+	public static $data_store        = array();
+	public $args                     = array();
+	public $table_columns_cache      = array();
+	public $post_data_table_id_cache = array();
+	public $items_cache              = array();
 
 	private function __construct() {
 	}
@@ -96,7 +97,8 @@ class VGSE_Provider_Custom_table extends VGSE_Provider_Abstract {
 	}
 
 	function get_arg( $key, $post_type ) {
-		$this->maybe_build_table_schema( $post_type );
+		// Used prefetch_tables_structure instead of maybe_build_table_schema because it uses cache internally
+		$this->prefetch_tables_structure( array( $post_type ) );
 
 		return isset( $this->args[ $post_type ][ $key ] ) ? $this->args[ $post_type ][ $key ] : false;
 	}
@@ -312,7 +314,13 @@ class VGSE_Provider_Custom_table extends VGSE_Provider_Abstract {
 		if ( ! empty( $this->args[ $post_type ] ) ) {
 			return;
 		}
-		$columns = $this->_get_table_columns( $post_type );
+
+		$columns        = $this->_get_table_columns( $post_type );
+		$primary_column = $this->get_post_data_table_id_key( $post_type );
+		$first_column   = current( $columns );
+		if ( empty( $primary_column ) && ( empty( $first_column ) || $first_column['type'] !== 'numeric' ) ) {
+			return;
+		}
 
 		$schema = array();
 
@@ -330,7 +338,7 @@ class VGSE_Provider_Custom_table extends VGSE_Provider_Abstract {
 			}
 
 			if ( is_null( $sample_values ) ) {
-				$sample_values = $wpdb->get_col( "SELECT $column_key FROM $post_type GROUP BY $column_key ORDER BY LENGTH($column_key) DESC LIMIT 4" );
+				$sample_values = $wpdb->get_col( "SELECT $column_key FROM $post_type GROUP BY $column_key ORDER BY LENGTH($column_key) DESC LIMIT 2" );
 			}
 			if ( empty( $sample_values ) ) {
 				$sample_values = array();
@@ -351,12 +359,7 @@ class VGSE_Provider_Custom_table extends VGSE_Provider_Abstract {
 		if ( empty( $schema ) ) {
 			return;
 		}
-		$searchable_columns = $this->get_searchable_column_keys( $post_type );
-		$primary_column     = $this->get_post_data_table_id_key( $post_type );
-		$first_column       = current( $schema );
-		if ( empty( $primary_column ) && ( empty( $first_column ) || $first_column['type'] !== 'numeric' ) ) {
-			return;
-		}
+		$searchable_columns       = $this->get_searchable_column_keys( $post_type );
 		$this->args[ $post_type ] = apply_filters(
 			'vg_sheet_editor/provider/custom_table/table_schema',
 			array(
@@ -425,6 +428,11 @@ class VGSE_Provider_Custom_table extends VGSE_Provider_Abstract {
 		);
 		$reserved_keys = array_keys( $defaults );
 		$args          = wp_parse_args( $args, $defaults );
+
+		// Don't order the rows when we just need the count
+		if ( $args['query_select'] === 'COUNT(*)' ) {
+			$args['order_by'] = '';
+		}
 		// Sort array by key to normalize the cache
 		ksort( $args );
 
@@ -748,6 +756,10 @@ class VGSE_Provider_Custom_table extends VGSE_Provider_Abstract {
 	}
 
 	function get_item( $id, $format = null ) {
+		$cache_key = 'i' . $id . $format;
+		if ( isset( $this->items_cache[ $cache_key ] ) ) {
+			return $this->items_cache[ $cache_key ];
+		}
 		$post_type = VGSE()->helpers->get_provider_from_query_string();
 		$rows      = $this->_get_rows(
 			array(
@@ -757,6 +769,7 @@ class VGSE_Provider_Custom_table extends VGSE_Provider_Abstract {
 		);
 
 		if ( empty( $rows ) ) {
+			$this->items_cache[ $cache_key ] = false;
 			return false;
 		}
 		$row = current( $rows );
@@ -765,7 +778,10 @@ class VGSE_Provider_Custom_table extends VGSE_Provider_Abstract {
 		if ( $format == OBJECT ) {
 			$row = (object) $row;
 		}
-		return apply_filters( 'vg_sheet_editor/provider/custom_table/get_item', $row, $id, $format );
+		$out = apply_filters( 'vg_sheet_editor/provider/custom_table/get_item', $row, $id, $format );
+
+		$this->items_cache[ $cache_key ] = $out;
+		return $out;
 	}
 
 	function _get_meta_value_column_key( $post_type ) {
@@ -964,8 +980,8 @@ class VGSE_Provider_Custom_table extends VGSE_Provider_Abstract {
 
 	function get_meta_field_unique_values( $meta_key, $post_type = null ) {
 		global $wpdb;
-		$post_meta_table       = $this->get_meta_table_name( $post_type );
-		$meta_value_column     = $this->_get_meta_value_column_key( $post_type );
+		$post_meta_table   = $this->get_meta_table_name( $post_type );
+		$meta_value_column = $this->_get_meta_value_column_key( $post_type );
 
 		if ( $post_meta_table === $post_type ) {
 			$values = apply_filters( 'vg_sheet_editor/provider/custom_table/meta_field_unique_values', array(), $meta_key, $post_type );

@@ -207,7 +207,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 
 		function _register_item( $key, $args = array() ) {
 			$defaults = array(
-				'data_type'                         => 'post_data', // (post_data,post_meta|meta_data|post_terms)
+				'data_type'                         => 'post_data', // (post_data|meta_data|post_terms)
 				'column_width'                      => null,
 				'title'                             => trim( ucwords( str_replace( array( '-', '_' ), ' ', $key ) ) ),
 				'type'                              => '', // String boton_gallery|boton_gallery_multiple|view_post|handsontable|metabox|(empty)

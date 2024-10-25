@@ -52,7 +52,7 @@ if (!class_exists('WP_Sheet_Editor_Coupons_Teaser')) {
 			</div>
 			<script>
 				jQuery(window).on('load', function () {
-					jQuery('.wpse-notice .notice-dismiss').click(function () {
+					jQuery('.wpse-notice .notice-dismiss').on('click', function () {
 						console.log('click');
 						jQuery.post(ajaxurl, {
 							action: 'vgse_notice_dismiss',

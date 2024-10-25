@@ -25,7 +25,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Data' ) ) {
 				if ( $item === 'ID' ) {
 					$out = $id;
 				} elseif ( $item === 'post_title' ) {
-					$post_title = $post->post_title;
+					$post_title = html_entity_decode( $post->post_title );
 					if ( $post->post_type === 'attachment' && empty( $post_title ) ) {
 						$out = basename( $post->guid );
 					} else {

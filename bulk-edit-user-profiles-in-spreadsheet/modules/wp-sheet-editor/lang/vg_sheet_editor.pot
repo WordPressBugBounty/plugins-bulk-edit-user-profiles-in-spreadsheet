@@ -7,31 +7,31 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-07-31T17:07:45+00:00\n"
+"POT-Creation-Date: 2024-10-25T03:42:47+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 
-#: acf/acf.php:91
+#: acf/acf.php:90
 msgid "ACF: Show checkboxes as multi select dropdowns?"
 msgstr ""
 
-#: acf/acf.php:92
+#: acf/acf.php:91
 msgid "By default, we show every checkbox as a separate column, but if you have checkboxes with many options you might want to use one column with a dropdown instead."
 msgstr ""
 
-#: acf/acf.php:378
+#: acf/acf.php:377
 msgid "You need to configure your Google Maps API key to save the Google Maps columns. This is required by Advanced Custom Fields, <a href=\"https://www.advancedcustomfields.com/blog/google-maps-api-settings/\" target=\"_blank\">you can follow this tutorial</a>"
 msgstr ""
 
-#: acf/acf.php:939
+#: acf/acf.php:929
 msgid "Enter a title"
 msgstr ""
 
-#: acf/acf.php:962
+#: acf/acf.php:952
 msgid "Enter titles separated by %s"
 msgstr ""
 
-#: acf/acf.php:1250
+#: acf/acf.php:1237
 msgid "Row"
 msgstr ""
 
@@ -40,19 +40,19 @@ msgstr ""
 #: columns-manager/inc/column-groups.php:281
 #: columns-resizing/columns-resizing.php:59
 #: columns-visibility/columns-visibility.php:213
-#: formulas/formulas.php:591
+#: formulas/formulas.php:590
 #: spreadsheet-setup/spreadsheet-setup.php:285
 #: universal-sheet/universal-sheet.php:144
-#: woocommerce/inc/attributes.php:799
-#: woocommerce/inc/attributes.php:1019
-#: woocommerce/inc/downloadable.php:368
-#: woocommerce/inc/downloadable.php:387
-#: woocommerce/inc/variations.php:1926
-#: woocommerce/inc/variations.php:1952
-#: wp-sheet-editor/dev/inc/api/editor.php:179
-#: wp-sheet-editor/dev/wp-sheet-editor.php:1179
-#: wp-sheet-editor/dev/wp-sheet-editor.php:1193
-#: wp-sheet-editor/dev/wp-sheet-editor.php:1204
+#: woocommerce/inc/attributes.php:797
+#: woocommerce/inc/attributes.php:1017
+#: woocommerce/inc/downloadable.php:342
+#: woocommerce/inc/downloadable.php:361
+#: woocommerce/inc/variations.php:1937
+#: woocommerce/inc/variations.php:1963
+#: wp-sheet-editor/dev/inc/api/editor.php:180
+#: wp-sheet-editor/dev/wp-sheet-editor.php:1184
+#: wp-sheet-editor/dev/wp-sheet-editor.php:1198
+#: wp-sheet-editor/dev/wp-sheet-editor.php:1209
 msgid "You dont have enough permissions to view this page."
 msgstr ""
 
@@ -87,7 +87,7 @@ msgstr ""
 #: advanced-filters/advanced-filters.php:729
 #: advanced-filters/advanced-filters.php:786
 #: advanced-filters/advanced-filters.php:843
-#: filters/filters.php:551
+#: filters/filters.php:557
 msgid "Select..."
 msgstr ""
 
@@ -104,8 +104,8 @@ msgid "Old slug"
 msgstr ""
 
 #: advanced-filters/advanced-filters.php:795
-#: filters/filters.php:519
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:676
+#: filters/filters.php:525
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:623
 msgid "Author"
 msgstr ""
 
@@ -118,7 +118,7 @@ msgid "Modified Date (GMT)"
 msgstr ""
 
 #: advanced-filters/advanced-filters.php:798
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:739
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:674
 msgid "Comments"
 msgstr ""
 
@@ -127,12 +127,12 @@ msgid "Ping status"
 msgstr ""
 
 #: advanced-filters/advanced-filters.php:800
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:515
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:503
 msgid "URL Slug"
 msgstr ""
 
 #: advanced-filters/advanced-filters.php:801
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:773
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:704
 msgid "Page Parent"
 msgstr ""
 
@@ -161,16 +161,16 @@ msgid "Operator"
 msgstr ""
 
 #: advanced-filters/advanced-filters.php:848
-#: woocommerce/inc/attributes.php:779
-#: woocommerce/inc/attributes.php:780
-#: woocommerce/inc/variations.php:727
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:949
+#: woocommerce/inc/attributes.php:777
+#: woocommerce/inc/attributes.php:778
+#: woocommerce/inc/variations.php:723
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:863
 msgid "Value"
 msgstr ""
 
 #: advanced-filters/advanced-filters.php:853
 #: advanced-filters/advanced-filters.php:879
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:289
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:288
 msgid "Add new"
 msgstr ""
 
@@ -305,13 +305,13 @@ msgid "Please select the background color"
 msgstr ""
 
 #: columns-manager/columns-manager.php:104
-#: formulas/inc/ui.php:633
+#: formulas/inc/ui.php:619
 msgid "Clear value"
 msgstr ""
 
 #: columns-manager/columns-manager.php:106
 #: custom-columns/views/settings-page.php:149
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:277
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:276
 #: wp-sheet-editor/dev/views/post-types-form.php:31
 #: wp-sheet-editor/dev/views/settings-form.php:124
 msgid "Save"
@@ -336,7 +336,7 @@ msgid "Columns manager"
 msgstr ""
 
 #: columns-manager/columns-manager.php:560
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:844
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:764
 msgid ". Add child categories using this format: Parent > child1 > child2"
 msgstr ""
 
@@ -350,8 +350,8 @@ msgstr ""
 
 #: columns-manager/columns-manager.php:1125
 #: wp-sheet-editor/dev/inc/api/bootstrap.php:194
-#: wp-sheet-editor/dev/inc/options-init.php:632
-#: wp-sheet-editor/dev/inc/options-init.php:635
+#: wp-sheet-editor/dev/inc/options-init.php:634
+#: wp-sheet-editor/dev/inc/options-init.php:637
 #: wp-sheet-editor/dev/views/quick-setup.php:101
 msgid "Settings"
 msgstr ""
@@ -382,7 +382,7 @@ msgid "File ID"
 msgstr ""
 
 #: columns-manager/columns-manager.php:1172
-#: formulas/inc/ui.php:1009
+#: formulas/inc/ui.php:995
 #: universal-sheet/views/import-modal.php:43
 msgid "File URL"
 msgstr ""
@@ -392,21 +392,21 @@ msgid "Use default"
 msgstr ""
 
 #: columns-manager/columns-manager.php:1176
-#: formulas/inc/ui.php:565
+#: formulas/inc/ui.php:551
 #: woocommerce/inc/attributes.php:281
 msgid "Yes"
 msgstr ""
 
 #: columns-manager/columns-manager.php:1177
-#: formulas/inc/ui.php:565
+#: formulas/inc/ui.php:551
 #: woocommerce/inc/attributes.php:281
 msgid "No"
 msgstr ""
 
 #: columns-manager/columns-manager.php:1180
 #: columns-manager/columns-manager.php:1185
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:477
-#: wp-sheet-editor/dev/inc/api/custom-tables-bootstrap.php:22
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:478
+#: wp-sheet-editor/dev/inc/api/custom-tables-bootstrap.php:21
 msgid "ID"
 msgstr ""
 
@@ -420,7 +420,7 @@ msgid "Email"
 msgstr ""
 
 #: columns-manager/columns-manager.php:1186
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:498
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:493
 #: wp-sheet-editor/dev/inc/teasers/post-types.php:93
 #: wp-sheet-editor/dev/inc/teasers/post-types.php:108
 msgid "Title"
@@ -444,14 +444,12 @@ msgid "Term ID"
 msgstr ""
 
 #: columns-manager/columns-manager.php:1195
-#: woocommerce/inc/attributes.php:779
-#: woocommerce/inc/attributes.php:780
-#: woocommerce/inc/downloadable.php:258
-#: woocommerce/inc/downloadable.php:259
-#: woocommerce/inc/variations.php:726
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:870
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:871
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:948
+#: woocommerce/inc/attributes.php:777
+#: woocommerce/inc/attributes.php:778
+#: woocommerce/inc/downloadable.php:234
+#: woocommerce/inc/downloadable.php:235
+#: woocommerce/inc/variations.php:722
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:862
 msgid "Name"
 msgstr ""
 
@@ -492,7 +490,7 @@ msgid "File upload"
 msgstr ""
 
 #: columns-manager/columns-manager.php:1218
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:628
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:583
 #: wp-sheet-editor/dev/inc/teasers/post-types.php:97
 msgid "Date"
 msgstr ""
@@ -522,8 +520,8 @@ msgid "URL"
 msgstr ""
 
 #: columns-manager/columns-manager.php:1226
-#: formulas/inc/ui.php:347
-#: formulas/inc/ui.php:375
+#: formulas/inc/ui.php:333
+#: formulas/inc/ui.php:361
 msgid "Number"
 msgstr ""
 
@@ -540,8 +538,8 @@ msgid "Color picker"
 msgstr ""
 
 #: columns-manager/columns-manager.php:1235
-#: wp-sheet-editor/dev/inc/api/helpers.php:960
-#: wp-sheet-editor/dev/inc/api/helpers.php:966
+#: wp-sheet-editor/dev/inc/api/helpers.php:1019
+#: wp-sheet-editor/dev/inc/api/helpers.php:1025
 msgid "Default"
 msgstr ""
 
@@ -705,8 +703,8 @@ msgid "Spreadsheet views"
 msgstr ""
 
 #: columns-manager/inc/column-groups.php:82
-#: wp-sheet-editor/dev/inc/options-init.php:630
-#: wp-sheet-editor/dev/wp-sheet-editor.php:1164
+#: wp-sheet-editor/dev/inc/options-init.php:632
+#: wp-sheet-editor/dev/wp-sheet-editor.php:1169
 msgid "WP Sheet Editor"
 msgstr ""
 
@@ -731,7 +729,7 @@ msgid "We will save this group of columns as a spreadsheet view and you can swit
 msgstr ""
 
 #: columns-renaming/columns-renaming.php:45
-#: wp-sheet-editor/dev/inc/api/editor.php:347
+#: wp-sheet-editor/dev/inc/api/editor.php:349
 msgid "Rename column"
 msgstr ""
 
@@ -740,10 +738,10 @@ msgstr ""
 #: columns-visibility/columns-visibility.php:169
 #: columns-visibility/columns-visibility.php:209
 #: universal-sheet/universal-sheet.php:139
-#: woocommerce/inc/attributes.php:795
-#: woocommerce/inc/attributes.php:1015
-#: woocommerce/inc/variations.php:1518
-#: woocommerce/inc/variations.php:1547
+#: woocommerce/inc/attributes.php:793
+#: woocommerce/inc/attributes.php:1013
+#: woocommerce/inc/variations.php:1527
+#: woocommerce/inc/variations.php:1558
 #: wp-sheet-editor/dev/inc/ajax.php:83
 #: wp-sheet-editor/dev/inc/ajax.php:170
 #: wp-sheet-editor/dev/inc/ajax.php:203
@@ -816,19 +814,19 @@ msgstr ""
 
 #: columns-visibility/views/form.php:59
 #: columns-visibility/views/form.php:109
-#: wp-sheet-editor/dev/inc/api/editor.php:315
+#: wp-sheet-editor/dev/inc/api/editor.php:317
 msgid "Remove column completely. If you want to use it later you can disable it by dragging and dropping to the right column"
 msgstr ""
 
 #: columns-visibility/views/form.php:61
 #: columns-visibility/views/form.php:111
-#: wp-sheet-editor/dev/inc/api/editor.php:309
+#: wp-sheet-editor/dev/inc/api/editor.php:311
 msgid "Disable column. You can enable it later."
 msgstr ""
 
 #: columns-visibility/views/form.php:62
 #: columns-visibility/views/form.php:112
-#: wp-sheet-editor/dev/inc/api/editor.php:310
+#: wp-sheet-editor/dev/inc/api/editor.php:312
 msgid "Enable column"
 msgstr ""
 
@@ -881,8 +879,8 @@ msgid "- We can help you."
 msgstr ""
 
 #: columns-visibility/views/form.php:151
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:292
-#: wp-sheet-editor/dev/wp-sheet-editor.php:1073
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:295
+#: wp-sheet-editor/dev/wp-sheet-editor.php:1078
 msgid "Contact us"
 msgstr ""
 
@@ -895,13 +893,13 @@ msgid "Apply settings"
 msgstr ""
 
 #: columns-visibility/views/form.php:166
-#: filters/filters.php:584
+#: filters/filters.php:590
 #: formulas/inc/ui.php:153
 #: posts-templates/posts-templates.php:107
 #: universal-sheet/views/import-modal.php:231
 #: woocommerce/views/spreadsheet-create-variations-modal.php:112
-#: wp-sheet-editor/dev/inc/api/logger.php:217
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:297
+#: wp-sheet-editor/dev/inc/api/logger.php:214
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:300
 #: wp-sheet-editor/dev/inc/teasers/formulas.php:76
 #: wp-sheet-editor/dev/inc/teasers/frontend.php:78
 #: wp-sheet-editor/dev/inc/teasers/post-types.php:133
@@ -914,53 +912,53 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: custom-columns/custom-columns.php:438
+#: custom-columns/custom-columns.php:442
 msgid "Add columns for custom fields"
 msgstr ""
 
-#: custom-columns/custom-columns.php:587
+#: custom-columns/custom-columns.php:591
 msgid "Missing columns"
 msgstr ""
 
-#: custom-columns/custom-columns.php:629
+#: custom-columns/custom-columns.php:633
 msgid "Missing post type or column_key"
 msgstr ""
 
-#: custom-columns/custom-columns.php:632
-#: custom-columns/custom-columns.php:659
-#: custom-columns/custom-columns.php:682
+#: custom-columns/custom-columns.php:636
+#: custom-columns/custom-columns.php:663
+#: custom-columns/custom-columns.php:686
 msgid "You are not allowed to do this action. Please reload the page or log in again."
 msgstr ""
 
-#: custom-columns/custom-columns.php:648
+#: custom-columns/custom-columns.php:652
 msgid "The meta field was deleted successfully"
 msgstr ""
 
-#: custom-columns/custom-columns.php:656
+#: custom-columns/custom-columns.php:660
 msgid "Missing post type, old_column_key, or new_column_key; or the old and new key are the same."
 msgstr ""
 
-#: custom-columns/custom-columns.php:672
+#: custom-columns/custom-columns.php:676
 msgid "The meta key was renamed successfully"
 msgstr ""
 
-#: custom-columns/custom-columns.php:676
+#: custom-columns/custom-columns.php:680
 msgid "The meta key couldnt be renamed."
 msgstr ""
 
-#: custom-columns/custom-columns.php:713
+#: custom-columns/custom-columns.php:717
 msgid "Columns could not be saved. Try again."
 msgstr ""
 
-#: custom-columns/custom-columns.php:716
+#: custom-columns/custom-columns.php:720
 msgid "Changes saved"
 msgstr ""
 
-#: custom-columns/custom-columns.php:730
+#: custom-columns/custom-columns.php:734
 msgid "Are you sure you want to delete this column?"
 msgstr ""
 
-#: custom-columns/custom-columns.php:738
+#: custom-columns/custom-columns.php:742
 msgid "Custom columns"
 msgstr ""
 
@@ -972,7 +970,7 @@ msgstr ""
 #: wp-sheet-editor/dev/views/quick-setup.php:28
 #: wp-sheet-editor/dev/views/settings-page.php:5
 #: wp-sheet-editor/dev/views/whats-new.php:12
-#: wp-sheet-editor/dev/wp-sheet-editor.php:1170
+#: wp-sheet-editor/dev/wp-sheet-editor.php:1175
 msgid "Sheet Editor"
 msgstr ""
 
@@ -1127,7 +1125,7 @@ msgstr ""
 
 #: custom-columns/views/settings-page.php:148
 #: spreadsheet-setup/views/page.php:45
-#: wp-sheet-editor/dev/inc/api/editor.php:360
+#: wp-sheet-editor/dev/inc/api/editor.php:362
 msgid "Add new column"
 msgstr ""
 
@@ -1144,158 +1142,158 @@ msgid "There are some post types in WordPress that are private, they don't appea
 msgstr ""
 
 #: factory.php:238
-#: wp-sheet-editor/dev/wp-sheet-editor.php:1373
+#: wp-sheet-editor/dev/wp-sheet-editor.php:1378
 msgid "My license"
 msgstr ""
 
-#: filters/filters.php:196
+#: filters/filters.php:195
 msgid "To search among all posts use the Search tool. Use this to locate and highlight one value in the loaded rows in the spreadsheet. I.e. highlight a SKU or email or title."
 msgstr ""
 
-#: filters/filters.php:197
+#: filters/filters.php:196
 msgid "Locate cell"
 msgstr ""
 
-#: filters/filters.php:198
+#: filters/filters.php:197
 msgid "Locate cell."
 msgstr ""
 
-#: filters/filters.php:206
+#: filters/filters.php:205
 msgid "Enter a word and we will find the first matching column. You will avoid scrolling through dozens of columns to find the one you need."
 msgstr ""
 
+#: filters/filters.php:206
 #: filters/filters.php:207
-#: filters/filters.php:208
 msgid "Locate column"
 msgstr ""
 
-#: filters/filters.php:223
-#: filters/filters.php:235
-#: filters/filters.php:532
+#: filters/filters.php:222
+#: filters/filters.php:234
+#: filters/filters.php:538
 msgid "Search"
 msgstr ""
 
-#: filters/filters.php:235
+#: filters/filters.php:234
 msgid "Quick search"
 msgstr ""
 
-#: filters/filters.php:235
+#: filters/filters.php:234
 msgid "Enter a keyword"
 msgstr ""
 
-#: filters/filters.php:502
+#: filters/filters.php:508
 msgid "Contains keyword"
 msgstr ""
 
-#: filters/filters.php:503
+#: filters/filters.php:509
 msgid "It searches in the post title and post content. Search by multiple keywords separating keywords with a semicolon (;)"
 msgstr ""
 
-#: filters/filters.php:512
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:719
+#: filters/filters.php:518
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:658
 #: wp-sheet-editor/dev/inc/teasers/post-types.php:99
 msgid "Status"
 msgstr ""
 
-#: filters/filters.php:570
+#: filters/filters.php:576
 msgid "Enter a username or email..."
 msgstr ""
 
-#: filters/filters.php:583
+#: filters/filters.php:589
 msgid "Run search"
 msgstr ""
 
-#: formulas/formulas.php:84
+#: formulas/formulas.php:83
 msgid "Invalid #898AJSI. The replace requires 2 parameters, we received one"
 msgstr ""
 
-#: formulas/formulas.php:97
+#: formulas/formulas.php:96
 msgid "Invalid #8W89PQ. Math formula is empty."
 msgstr ""
 
-#: formulas/formulas.php:102
+#: formulas/formulas.php:101
 msgid "Invalid #PQ8SPQ. The math formula contains a comma: %s"
 msgstr ""
 
-#: formulas/formulas.php:107
+#: formulas/formulas.php:106
 msgid "Invalid #8W89PWQ. Math formula is invalid."
 msgstr ""
 
-#: formulas/formulas.php:118
+#: formulas/formulas.php:117
 msgid "Invalid #PQ8PHP. The PHP function does not exist: %s"
 msgstr ""
 
-#: formulas/formulas.php:123
+#: formulas/formulas.php:122
 msgid "Invalid #8W23CV. We accept MATH and REPLACE formulas only, we received an unknown formula type."
 msgstr ""
 
-#: formulas/formulas.php:179
+#: formulas/formulas.php:178
 msgid "The random values could not be read."
 msgstr ""
 
-#: formulas/formulas.php:319
+#: formulas/formulas.php:318
 msgid "The math formula can't be applied. We found some existing data is not numeric. Data found: %1$s, ID: %2$d"
 msgstr ""
 
-#: formulas/formulas.php:334
+#: formulas/formulas.php:333
 msgid "Error. The math engine could not execute the math operation: %1$s, ID: %2$d"
 msgstr ""
 
-#: formulas/formulas.php:450
+#: formulas/formulas.php:449
 msgid "The search parameter must contain $current_value$ only"
 msgstr ""
 
-#: formulas/formulas.php:458
+#: formulas/formulas.php:457
 msgid "Value in the replace section is not valid"
 msgstr ""
 
-#: formulas/formulas.php:838
+#: formulas/formulas.php:837
 msgid "You do not have permission to delete posts."
 msgstr ""
 
-#: formulas/formulas.php:894
+#: formulas/formulas.php:897
 msgid "Missing number and time unit."
 msgstr ""
 
-#: formulas/formulas.php:898
+#: formulas/formulas.php:901
 msgid "Invalid time unit."
 msgstr ""
 
-#: formulas/formulas.php:903
+#: formulas/formulas.php:906
 msgid "Please indicate which terms you want to remove."
 msgstr ""
 
-#: formulas/formulas.php:909
+#: formulas/formulas.php:912
 msgid "Only administrators are allowed to send emails to users."
 msgstr ""
 
-#: formulas/formulas.php:912
+#: formulas/formulas.php:915
 msgid "Please enter the email subject and email message."
 msgstr ""
 
-#: formulas/formulas.php:916
+#: formulas/formulas.php:919
 msgid "The column selected is not valid."
 msgstr ""
 
-#: formulas/formulas.php:966
+#: formulas/formulas.php:969
 msgid "Error. The status column must be enabled in the spreadsheet before we can remove duplicates."
 msgstr ""
 
-#: formulas/formulas.php:1260
+#: formulas/formulas.php:1263
 #: wp-sheet-editor/dev/inc/ajax.php:294
-#: wp-sheet-editor/dev/inc/api/helpers.php:889
+#: wp-sheet-editor/dev/inc/api/helpers.php:926
 msgid "Error: %s"
 msgstr ""
 
-#: formulas/formulas.php:1297
+#: formulas/formulas.php:1302
 msgid "Bulk edit not executed. No items found matching the criteria."
 msgstr ""
 
-#: formulas/formulas.php:1317
+#: formulas/formulas.php:1324
 msgid "<p>Complete</p>."
 msgstr ""
 
-#: formulas/formulas.php:1334
+#: formulas/formulas.php:1341
 msgid "<p class=\"success-message\" data-column-key=\"%s\"><b>Editing the field: {column_label}</b>. Items to process: {total}, Progress: {progress_percentage}%%, We have updated {edited} items.</p>"
 msgstr ""
 
@@ -1426,465 +1424,465 @@ msgstr ""
 msgid "Remove duplicates with same title and content (delete the oldest)"
 msgstr ""
 
-#: formulas/inc/ui.php:255
+#: formulas/inc/ui.php:241
 msgid "More options"
 msgstr ""
 
-#: formulas/inc/ui.php:302
+#: formulas/inc/ui.php:288
 msgid "The bulk edit is missing important information, please fill the form."
 msgstr ""
 
-#: formulas/inc/ui.php:303
+#: formulas/inc/ui.php:289
 msgid "Select type of edit"
 msgstr ""
 
-#: formulas/inc/ui.php:304
+#: formulas/inc/ui.php:290
 msgid "- -"
 msgstr ""
 
-#: formulas/inc/ui.php:305
+#: formulas/inc/ui.php:291
 msgid "You entered an invalid formula. Please double check or contact us."
 msgstr ""
 
-#: formulas/inc/ui.php:310
+#: formulas/inc/ui.php:296
 msgid "Remove terms from posts"
 msgstr ""
 
-#: formulas/inc/ui.php:311
+#: formulas/inc/ui.php:297
 msgid "Enter one or multiple term names separated with %s or new lines. Enter the full hierarchy like \"Parent > Child\" to remove subcategories"
 msgstr ""
 
-#: formulas/inc/ui.php:334
+#: formulas/inc/ui.php:320
 msgid "Add time to existing dates"
 msgstr ""
 
-#: formulas/inc/ui.php:335
+#: formulas/inc/ui.php:321
 msgid "Add hours, days, weeks, months, or years to the existing dates.<br>If the existing date is empty, we will use the current date as a base."
 msgstr ""
 
-#: formulas/inc/ui.php:355
-#: formulas/inc/ui.php:383
+#: formulas/inc/ui.php:341
+#: formulas/inc/ui.php:369
 msgid "Minutes"
 msgstr ""
 
-#: formulas/inc/ui.php:355
-#: formulas/inc/ui.php:383
+#: formulas/inc/ui.php:341
+#: formulas/inc/ui.php:369
 msgid "Days"
 msgstr ""
 
-#: formulas/inc/ui.php:355
-#: formulas/inc/ui.php:383
+#: formulas/inc/ui.php:341
+#: formulas/inc/ui.php:369
 msgid "Weeks"
 msgstr ""
 
-#: formulas/inc/ui.php:355
-#: formulas/inc/ui.php:383
+#: formulas/inc/ui.php:341
+#: formulas/inc/ui.php:369
 msgid "Months"
 msgstr ""
 
-#: formulas/inc/ui.php:355
-#: formulas/inc/ui.php:383
+#: formulas/inc/ui.php:341
+#: formulas/inc/ui.php:369
 msgid "Years"
 msgstr ""
 
-#: formulas/inc/ui.php:356
-#: formulas/inc/ui.php:384
+#: formulas/inc/ui.php:342
+#: formulas/inc/ui.php:370
 msgid "Time unit"
 msgstr ""
 
-#: formulas/inc/ui.php:362
+#: formulas/inc/ui.php:348
 msgid "Deduct time from existing dates"
 msgstr ""
 
-#: formulas/inc/ui.php:363
+#: formulas/inc/ui.php:349
 msgid "Deduct a number of hours, days, weeks, months, or years to the existing dates.<br>If the existing date is empty, we will use the current date as a base."
 msgstr ""
 
-#: formulas/inc/ui.php:390
+#: formulas/inc/ui.php:376
 msgid "Math operation"
 msgstr ""
 
-#: formulas/inc/ui.php:391
+#: formulas/inc/ui.php:377
 msgid "Update existing value with the result of a math operation.<br>The result is rounded to the 2 nearest decimals. I.e. 3.845602 becomes 3.85"
 msgstr ""
 
-#: formulas/inc/ui.php:403
+#: formulas/inc/ui.php:389
 msgid "Math formula"
 msgstr ""
 
-#: formulas/inc/ui.php:404
+#: formulas/inc/ui.php:390
 msgid "Example 1: $current_value$ + 2 * 5. <br/>Example 2: $_regular_price$ * 0.7 (Set regular price - 30%)"
 msgstr ""
 
-#: formulas/inc/ui.php:411
+#: formulas/inc/ui.php:397
 #: woocommerce/woocommerce.php:242
 msgid "Decrease by percentage"
 msgstr ""
 
-#: formulas/inc/ui.php:412
+#: formulas/inc/ui.php:398
 msgid "Decrease the existing value by a percentage.<br>The result is rounded to the 2 nearest decimals. I.e. 3.845602 becomes 3.85"
 msgstr ""
 
-#: formulas/inc/ui.php:425
-#: formulas/inc/ui.php:446
+#: formulas/inc/ui.php:411
+#: formulas/inc/ui.php:432
 #: woocommerce/woocommerce.php:225
 msgid "Decrease by"
 msgstr ""
 
-#: formulas/inc/ui.php:426
-#: formulas/inc/ui.php:468
+#: formulas/inc/ui.php:412
+#: formulas/inc/ui.php:454
 msgid "Enter the percentage number."
 msgstr ""
 
-#: formulas/inc/ui.php:432
+#: formulas/inc/ui.php:418
 msgid "Decrease by number"
 msgstr ""
 
-#: formulas/inc/ui.php:433
+#: formulas/inc/ui.php:419
 msgid "Decrease the existing value by a number.<br>The result is rounded to the 2 nearest decimals. I.e. 3.845602 becomes 3.85"
 msgstr ""
 
-#: formulas/inc/ui.php:447
-#: formulas/inc/ui.php:489
-#: formulas/inc/ui.php:607
+#: formulas/inc/ui.php:433
+#: formulas/inc/ui.php:475
+#: formulas/inc/ui.php:593
 msgid "Enter the number."
 msgstr ""
 
-#: formulas/inc/ui.php:453
+#: formulas/inc/ui.php:439
 msgid "Increase by percentage"
 msgstr ""
 
-#: formulas/inc/ui.php:454
+#: formulas/inc/ui.php:440
 msgid "Increase the existing value by a percentage.<br>The result is rounded to the 2 nearest decimals. I.e. 3.845602 becomes 3.85"
 msgstr ""
 
-#: formulas/inc/ui.php:467
-#: formulas/inc/ui.php:488
+#: formulas/inc/ui.php:453
+#: formulas/inc/ui.php:474
 msgid "Increase by"
 msgstr ""
 
-#: formulas/inc/ui.php:474
+#: formulas/inc/ui.php:460
 msgid "Increase by number"
 msgstr ""
 
-#: formulas/inc/ui.php:475
+#: formulas/inc/ui.php:461
 msgid "Increase the existing value by a number.<br>The result is rounded to the 2 nearest decimals. I.e. 3.845602 becomes 3.85"
 msgstr ""
 
-#: formulas/inc/ui.php:495
+#: formulas/inc/ui.php:481
 msgid "Set value"
 msgstr ""
 
-#: formulas/inc/ui.php:496
+#: formulas/inc/ui.php:482
 msgid "Replace existing value with this value. <a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more</a>"
 msgstr ""
 
-#: formulas/inc/ui.php:510
+#: formulas/inc/ui.php:496
 msgid "Set random value"
 msgstr ""
 
-#: formulas/inc/ui.php:511
+#: formulas/inc/ui.php:497
 msgid "Replace existing value with a random value from this list. Enter the values separated with | if you want to select from a predefined list, or enter 2 dates separated with > if you want to select any date from that range"
 msgstr ""
 
-#: formulas/inc/ui.php:529
+#: formulas/inc/ui.php:515
 msgid "Remove everything after some text"
 msgstr ""
 
-#: formulas/inc/ui.php:530
+#: formulas/inc/ui.php:516
 msgid "I.e. A value like \"My great title (234343)\" can become \"My great title\" by removing everything after \" (\""
 msgstr ""
 
-#: formulas/inc/ui.php:539
+#: formulas/inc/ui.php:525
 msgid "Remove everything after this text"
 msgstr ""
 
-#: formulas/inc/ui.php:542
+#: formulas/inc/ui.php:528
 msgid "Remove the text too?"
 msgstr ""
 
-#: formulas/inc/ui.php:544
+#: formulas/inc/ui.php:530
 msgid "Yes, remove everything after the text, including the text"
 msgstr ""
 
-#: formulas/inc/ui.php:544
+#: formulas/inc/ui.php:530
 msgid "No, remove everything after the text, without including the text"
 msgstr ""
 
-#: formulas/inc/ui.php:550
+#: formulas/inc/ui.php:536
 msgid "Remove everything before some text"
 msgstr ""
 
-#: formulas/inc/ui.php:551
+#: formulas/inc/ui.php:537
 msgid "I.e. A value like \"(234343) My great title\" can become \"My great title\" by removing everything before \") \""
 msgstr ""
 
-#: formulas/inc/ui.php:560
+#: formulas/inc/ui.php:546
 msgid "Remove everything before this"
 msgstr ""
 
-#: formulas/inc/ui.php:563
+#: formulas/inc/ui.php:549
 msgid "Remove the text from above too?"
 msgstr ""
 
-#: formulas/inc/ui.php:571
-#: formulas/inc/ui.php:1016
+#: formulas/inc/ui.php:557
+#: formulas/inc/ui.php:1002
 msgid "Replace"
 msgstr ""
 
-#: formulas/inc/ui.php:572
+#: formulas/inc/ui.php:558
 msgid "Replace a word, phrase, or number with a new value. <a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more</a>"
 msgstr ""
 
-#: formulas/inc/ui.php:581
-#: formulas/inc/ui.php:1089
+#: formulas/inc/ui.php:567
+#: formulas/inc/ui.php:1075
 msgid "Replace this"
 msgstr ""
 
-#: formulas/inc/ui.php:585
-#: formulas/inc/ui.php:1102
+#: formulas/inc/ui.php:571
+#: formulas/inc/ui.php:1088
 msgid "With this"
 msgstr ""
 
-#: formulas/inc/ui.php:591
+#: formulas/inc/ui.php:577
 msgid "Generate excerpt"
 msgstr ""
 
-#: formulas/inc/ui.php:592
+#: formulas/inc/ui.php:578
 msgid "If the column has a very long text, we will remove the html and shorten it to a number of words."
 msgstr ""
 
-#: formulas/inc/ui.php:606
+#: formulas/inc/ui.php:592
 msgid "Maximum number of words"
 msgstr ""
 
-#: formulas/inc/ui.php:613
+#: formulas/inc/ui.php:599
 msgid "Capitalize words"
 msgstr ""
 
-#: formulas/inc/ui.php:614
+#: formulas/inc/ui.php:600
 msgid "Capitalize the first letter of every word in the field. I.e. convert \"my title\" into \"My Title\"."
 msgstr ""
 
-#: formulas/inc/ui.php:634
+#: formulas/inc/ui.php:620
 msgid "Remove the existing value and leave the field empty. <a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more</a>"
 msgstr ""
 
-#: formulas/inc/ui.php:653
+#: formulas/inc/ui.php:639
 msgid "Remove duplicates"
 msgstr ""
 
-#: formulas/inc/ui.php:654
-#: formulas/inc/ui.php:671
+#: formulas/inc/ui.php:640
+#: formulas/inc/ui.php:657
 msgid "<a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more</a>"
 msgstr ""
 
-#: formulas/inc/ui.php:662
-#: formulas/inc/ui.php:679
+#: formulas/inc/ui.php:648
+#: formulas/inc/ui.php:665
 msgid "Which duplicates do you want to delete?"
 msgstr ""
 
-#: formulas/inc/ui.php:664
-#: formulas/inc/ui.php:681
+#: formulas/inc/ui.php:650
+#: formulas/inc/ui.php:667
 msgid "Delete the newest items and keep the oldest item"
 msgstr ""
 
-#: formulas/inc/ui.php:664
-#: formulas/inc/ui.php:681
+#: formulas/inc/ui.php:650
+#: formulas/inc/ui.php:667
 msgid "Delete the old items and keep the newest item"
 msgstr ""
 
-#: formulas/inc/ui.php:670
+#: formulas/inc/ui.php:656
 msgid "Remove duplicates with same title and content"
 msgstr ""
 
-#: formulas/inc/ui.php:687
+#: formulas/inc/ui.php:673
 msgid "Append"
 msgstr ""
 
-#: formulas/inc/ui.php:696
+#: formulas/inc/ui.php:682
 msgid "Enter the value to append to the existing value."
 msgstr ""
 
-#: formulas/inc/ui.php:702
+#: formulas/inc/ui.php:688
 msgid "Prepend"
 msgstr ""
 
-#: formulas/inc/ui.php:714
+#: formulas/inc/ui.php:700
 msgid "Enter the value to prepend to the existing value."
 msgstr ""
 
-#: formulas/inc/ui.php:720
+#: formulas/inc/ui.php:706
 msgid "Custom formula"
 msgstr ""
 
-#: formulas/inc/ui.php:732
+#: formulas/inc/ui.php:718
 msgid "Only for advanced users. <a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more.</a>"
 msgstr ""
 
-#: formulas/inc/ui.php:738
+#: formulas/inc/ui.php:724
 msgid "Send email"
 msgstr ""
 
-#: formulas/inc/ui.php:739
+#: formulas/inc/ui.php:725
 msgid "<p>Send email notifications to users in bulk, and create advanced segments using the advanced search.</p><p>For example, you can filter a spreadsheet of customers/users/forum users/affiliates/blog commenters by country, city, state, orders count, etc and send them important emails.</p><p>We recommend that you use a SMTP plugin to improve the email deliverability and take into account the users consent and privacy laws.</p>"
 msgstr ""
 
-#: formulas/inc/ui.php:751
+#: formulas/inc/ui.php:737
 msgid "Email subject"
 msgstr ""
 
-#: formulas/inc/ui.php:751
+#: formulas/inc/ui.php:737
 msgid "You can use variables to insert the value of any column."
 msgstr ""
 
-#: formulas/inc/ui.php:758
+#: formulas/inc/ui.php:744
 msgid "Email message"
 msgstr ""
 
-#: formulas/inc/ui.php:758
+#: formulas/inc/ui.php:744
 msgid "We recommend that you create a message that looks like it was written personally, you should add your logo, message, and email signature. You can use variables to insert the value of any column."
 msgstr ""
 
-#: formulas/inc/ui.php:765
+#: formulas/inc/ui.php:751
 msgid "Reply to"
 msgstr ""
 
-#: formulas/inc/ui.php:765
+#: formulas/inc/ui.php:751
 msgid "People will reply to this email address"
 msgstr ""
 
-#: formulas/inc/ui.php:768
+#: formulas/inc/ui.php:754
 msgid "Only send one email per email address?"
 msgstr ""
 
-#: formulas/inc/ui.php:768
+#: formulas/inc/ui.php:754
 msgid "One email per user means that if 3 rows have the same email address, only one row will trigger an email and the others will be skipped. One email per row means that if 3 rows have the same email address, we'll send 3 emails to the same address (one per row)."
 msgstr ""
 
-#: formulas/inc/ui.php:770
+#: formulas/inc/ui.php:756
 msgid "Send one email per user"
 msgstr ""
 
-#: formulas/inc/ui.php:770
+#: formulas/inc/ui.php:756
 msgid "Send one email per row"
 msgstr ""
 
-#: formulas/inc/ui.php:776
+#: formulas/inc/ui.php:762
 msgid "PHP Function"
 msgstr ""
 
-#: formulas/inc/ui.php:788
+#: formulas/inc/ui.php:774
 msgid "For advanced users. Enter the name of your PHP function and we will pass 2 parameters: $current_data (string with current value of the column) and $row_id, the function must accept the 2 parameters and return the modified value as a string. We will automatically save it if the value changed. <a class=\"formulas-action-tip-link\" href=\"%s#php-functions\" target=\"_blank\">Read more.</a>"
 msgstr ""
 
-#: formulas/inc/ui.php:794
+#: formulas/inc/ui.php:780
 msgid "Copy from other columns"
 msgstr ""
 
-#: formulas/inc/ui.php:799
+#: formulas/inc/ui.php:785
 msgid "Copy the value of other fields into this field.<br/>Example, copy \"sale price\" into the \"regular price\" field."
 msgstr ""
 
-#: formulas/inc/ui.php:810
+#: formulas/inc/ui.php:796
 msgid "Copy from this column"
 msgstr ""
 
-#: formulas/inc/ui.php:886
+#: formulas/inc/ui.php:872
 msgid "We will replace the existing media file(s) with these file(s)."
 msgstr ""
 
-#: formulas/inc/ui.php:897
-#: formulas/inc/ui.php:922
-#: formulas/inc/ui.php:947
+#: formulas/inc/ui.php:883
+#: formulas/inc/ui.php:908
+#: formulas/inc/ui.php:933
 msgid "Upload the files"
 msgstr ""
 
-#: formulas/inc/ui.php:904
-#: formulas/inc/ui.php:929
-#: formulas/inc/ui.php:954
+#: formulas/inc/ui.php:890
+#: formulas/inc/ui.php:915
+#: formulas/inc/ui.php:940
 msgid "File URLs"
 msgstr ""
 
-#: formulas/inc/ui.php:905
-#: formulas/inc/ui.php:930
-#: formulas/inc/ui.php:955
+#: formulas/inc/ui.php:891
+#: formulas/inc/ui.php:916
+#: formulas/inc/ui.php:941
 msgid "Enter the URLs separated by commas. They can be from your own site."
 msgstr ""
 
-#: formulas/inc/ui.php:911
+#: formulas/inc/ui.php:897
 msgid "We will prepend the new file(s) to the existing media file(s)."
 msgstr ""
 
-#: formulas/inc/ui.php:936
+#: formulas/inc/ui.php:922
 msgid "We will append the new file(s) to the existing media file(s)."
 msgstr ""
 
-#: formulas/inc/ui.php:961
-#: formulas/inc/ui.php:1017
+#: formulas/inc/ui.php:947
+#: formulas/inc/ui.php:1003
 msgid "Replace a media file with other file"
 msgstr ""
 
-#: formulas/inc/ui.php:970
+#: formulas/inc/ui.php:956
 msgid "Replace these files"
 msgstr ""
 
-#: formulas/inc/ui.php:971
-#: formulas/inc/ui.php:979
+#: formulas/inc/ui.php:957
+#: formulas/inc/ui.php:965
 msgid "Enter the URLs separated by commas. They must be from your own site."
 msgstr ""
 
-#: formulas/inc/ui.php:978
+#: formulas/inc/ui.php:964
 msgid "With these files"
 msgstr ""
 
-#: formulas/inc/ui.php:991
+#: formulas/inc/ui.php:977
 msgid "We will replace the existing media file with this file."
 msgstr ""
 
-#: formulas/inc/ui.php:1002
+#: formulas/inc/ui.php:988
 msgid "Upload the file"
 msgstr ""
 
-#: formulas/inc/ui.php:1010
+#: formulas/inc/ui.php:996
 msgid "Enter the URL. It can be an URL from your own site (Example http://site.com/wp-content/uploads/2016/01/file.jpg) or an external URL."
 msgstr ""
 
-#: formulas/inc/ui.php:1026
+#: formulas/inc/ui.php:1012
 msgid "Replace this file"
 msgstr ""
 
-#: formulas/inc/ui.php:1027
-#: formulas/inc/ui.php:1035
+#: formulas/inc/ui.php:1013
+#: formulas/inc/ui.php:1021
 msgid "Enter the URL. It must be an URL from your own site. Example: http://site.com/wp-content/uploads/2016/01/file.jpg"
 msgstr ""
 
-#: formulas/inc/ui.php:1034
+#: formulas/inc/ui.php:1020
 msgid "With this file"
 msgstr ""
 
-#: formulas/inc/ui.php:1073
+#: formulas/inc/ui.php:1059
 msgid "We will replace the existing terms with these terms."
 msgstr ""
 
-#: formulas/inc/ui.php:1078
+#: formulas/inc/ui.php:1064
 msgid "Enter the new terms separated by %s . You can add hierarchy like parent > child > child"
 msgstr ""
 
-#: formulas/inc/ui.php:1084
+#: formulas/inc/ui.php:1070
 msgid "Replace some term(s) with new term(s). <a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more</a>"
 msgstr ""
 
-#: formulas/inc/ui.php:1090
-#: formulas/inc/ui.php:1103
+#: formulas/inc/ui.php:1076
+#: formulas/inc/ui.php:1089
 msgid "You must enter the full hierarchy like parent > child"
 msgstr ""
 
-#: formulas/inc/ui.php:1121
+#: formulas/inc/ui.php:1107
 msgid "Terms"
 msgstr ""
 
-#: formulas/inc/ui.php:1122
+#: formulas/inc/ui.php:1108
 msgid "Enter the full hierarchy like parent > child"
 msgstr ""
 
@@ -2039,7 +2037,7 @@ msgid "Not found in Trash"
 msgstr ""
 
 #: frontend-sheet/frontend-sheet.php:434
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:805
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:728
 msgid "Featured Image"
 msgstr ""
 
@@ -2470,7 +2468,7 @@ msgid "What app will you use to edit this file? (optional)"
 msgstr ""
 
 #: universal-sheet/views/export-modal.php:66
-#: wp-sheet-editor/dev/inc/api/editor.php:326
+#: wp-sheet-editor/dev/inc/api/editor.php:328
 msgid "Name of this export (optional)"
 msgstr ""
 
@@ -2704,7 +2702,7 @@ msgid "View log"
 msgstr ""
 
 #: woocommerce/inc/attributes.php:69
-#: woocommerce/inc/attributes.php:715
+#: woocommerce/inc/attributes.php:714
 msgid "Product attributes"
 msgstr ""
 
@@ -2764,133 +2762,127 @@ msgstr ""
 msgid "Custom attribute: %s"
 msgstr ""
 
-#: woocommerce/inc/attributes.php:684
+#: woocommerce/inc/attributes.php:683
 msgid "Enter multiple attributes separated by |"
 msgstr ""
 
+#: woocommerce/inc/attributes.php:727
 #: woocommerce/inc/attributes.php:729
-#: woocommerce/inc/attributes.php:731
 msgid "Edit attributes"
 msgstr ""
 
-#: woocommerce/inc/attributes.php:732
+#: woocommerce/inc/attributes.php:730
 msgid "Note: Separate values with the character %1$s<br/>We recommend using Global Attributes if you will use them in many products.<a href=\"%2$s\" target=\"_blank\">Create Global Attribute</a><br>Global attributes have their own columns in the spreadsheet. You can edit them in the columns (faster) or using this popup.<br/><span class=\"vg-only-variations-enabled\">If you are editing the attributes of variations, the variation must be enabled, otherwise the attributes won't be saved.</span>"
 msgstr ""
 
-#: woocommerce/inc/attributes.php:779
+#: woocommerce/inc/attributes.php:777
 msgid "Position"
 msgstr ""
 
-#: woocommerce/inc/attributes.php:779
+#: woocommerce/inc/attributes.php:777
 msgid "Is visible?"
 msgstr ""
 
-#: woocommerce/inc/attributes.php:779
+#: woocommerce/inc/attributes.php:777
 msgid "Used for variation?"
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:110
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:669
+#: woocommerce/inc/downloadable.php:108
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:644
 msgid "Downloadable"
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:132
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:803
+#: woocommerce/inc/downloadable.php:126
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:768
 msgid "Download limit"
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:148
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:815
+#: woocommerce/inc/downloadable.php:138
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:778
 msgid "Download expiry"
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:164
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:827
+#: woocommerce/inc/downloadable.php:150
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:788
 msgid "Download type"
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:171
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:831
+#: woocommerce/inc/downloadable.php:156
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:792
 msgid "Standard Product"
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:172
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:832
+#: woocommerce/inc/downloadable.php:157
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:793
 msgid "Application/Software"
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:173
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:833
+#: woocommerce/inc/downloadable.php:158
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:794
 msgid "Music"
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:186
+#: woocommerce/inc/downloadable.php:169
 msgid "Download files : names"
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:194
+#: woocommerce/inc/downloadable.php:176
 msgid "This is optional. Leave empty to use the name from the URLs. Enter multiple names separated by commas"
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:206
+#: woocommerce/inc/downloadable.php:186
 msgid "Download files : URLs"
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:213
+#: woocommerce/inc/downloadable.php:192
 msgid "Enter multiple URLs separated by commas"
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:229
-#: woocommerce/inc/downloadable.php:233
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:842
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:846
+#: woocommerce/inc/downloadable.php:205
+#: woocommerce/inc/downloadable.php:209
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:802
 msgid "Download files"
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:231
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:844
+#: woocommerce/inc/downloadable.php:207
 msgid "Edit files"
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:234
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:847
+#: woocommerce/inc/downloadable.php:210
 msgid "Copy files from this product: (You need to save the changes afterwards.)"
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:234
+#: woocommerce/inc/downloadable.php:210
 #: woocommerce/views/spreadsheet-create-variations-modal.php:21
 #: woocommerce/views/spreadsheet-create-variations-modal.php:48
 #: woocommerce/views/spreadsheet-create-variations-modal.php:89
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:847
 msgid "Select product..."
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:258
-#: woocommerce/inc/downloadable.php:259
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:870
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:871
+#: woocommerce/inc/downloadable.php:234
+#: woocommerce/inc/downloadable.php:235
 msgid "File (url or path)"
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:289
+#: woocommerce/inc/downloadable.php:263
 msgid "We will save these files. Existing files will be overwritten. Enter file URL only, you can enter multiple URLs separated by comma."
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:293
+#: woocommerce/inc/downloadable.php:267
 msgid "We will append the new file to the existing files in the products. Enter file URL only, you can enter multiple URLs separated by comma."
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:371
+#: woocommerce/inc/downloadable.php:345
 #: woocommerce/inc/variations.php:508
-#: woocommerce/inc/variations.php:1585
+#: woocommerce/inc/variations.php:1596
 msgid "Please select a product."
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:401
+#: woocommerce/inc/downloadable.php:375
 msgid "Files saved."
 msgstr ""
 
-#: woocommerce/inc/downloadable.php:404
+#: woocommerce/inc/downloadable.php:378
 msgid "The files could not be saved."
 msgstr ""
 
@@ -2911,8 +2903,8 @@ msgid "Activate this option if your external file is the main database of your p
 msgstr ""
 
 #: woocommerce/inc/import-export.php:198
-#: woocommerce/woocommerce.php:720
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:500
+#: woocommerce/woocommerce.php:719
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:499
 msgid "Type"
 msgstr ""
 
@@ -2986,22 +2978,22 @@ msgstr ""
 msgid "Here is a <a href=\"%s\" target=\"_blank\">sample CSV</a> containing all types of products."
 msgstr ""
 
-#: woocommerce/inc/import-export.php:735
+#: woocommerce/inc/import-export.php:734
 msgid "One variation row has a parent product that does not exist. The \"parent\" column contains the %1$s: %2$s. Please correct it and start a new import"
 msgstr ""
 
-#: woocommerce/inc/import-export.php:823
+#: woocommerce/inc/import-export.php:822
 msgid "There is an error in the CSV Data. You are saving the SKU \"%s\" as a simple product, but the same SKU already exists as a variation in WordPress. Please edit your CSV file to use a different SKU, or verify if the CSV row should be a variation of another product instead."
 msgstr ""
 
-#: woocommerce/inc/import-export.php:955
+#: woocommerce/inc/import-export.php:954
 msgid "Error: We weren't able to export data for product ID %1$d because WooCommerce didn't recognize the ID, please make sure this product ID has a valid product type and status. Row: %2$s"
 msgstr ""
 
 #: woocommerce/inc/variations.php:36
 #: woocommerce/views/spreadsheet-create-variations-modal.php:10
 #: woocommerce/views/spreadsheet-create-variations-modal.php:75
-#: wp-sheet-editor/dev/inc/api/editor.php:345
+#: wp-sheet-editor/dev/inc/api/editor.php:347
 msgid "Create variations"
 msgstr ""
 
@@ -3046,92 +3038,92 @@ msgstr ""
 msgid "We automatically allow columns for variations if at least one variation is using that field."
 msgstr ""
 
-#: woocommerce/inc/variations.php:666
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:891
+#: woocommerce/inc/variations.php:665
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:814
 msgid "Variation description"
 msgstr ""
 
-#: woocommerce/inc/variations.php:681
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:909
+#: woocommerce/inc/variations.php:677
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:825
 msgid "Variation enabled?"
 msgstr ""
 
+#: woocommerce/inc/variations.php:701
+#: woocommerce/inc/variations.php:703
 #: woocommerce/inc/variations.php:705
-#: woocommerce/inc/variations.php:707
-#: woocommerce/inc/variations.php:709
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:928
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:930
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:932
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:842
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:844
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:846
 msgid "Default attributes"
 msgstr ""
 
-#: woocommerce/inc/variations.php:710
+#: woocommerce/inc/variations.php:706
 msgid "Attributes appear as dropdowns in the product page where the user can select the variation colors, sizes, and any attribute. Here you can define the default options selected in the dropdowns.<br>Separate values with the character %s<br/>This only works for Variable Products and it must have variations, otherwise the default attributes won't be saved.</span>"
 msgstr ""
 
-#: woocommerce/inc/variations.php:1189
+#: woocommerce/inc/variations.php:1185
 #: wp-sheet-editor/dev/inc/teasers/woocommerce.php:138
 msgid "Variation: %s"
 msgstr ""
 
-#: woocommerce/inc/variations.php:1346
-#: woocommerce/inc/variations.php:1526
+#: woocommerce/inc/variations.php:1342
+#: woocommerce/inc/variations.php:1535
 msgid "Please update all the WP Sheet Editor plugins. This feature requires the latest version of all our plugins."
 msgstr ""
 
-#: woocommerce/inc/variations.php:1361
+#: woocommerce/inc/variations.php:1357
 msgid "The source product doesn't have variations."
 msgstr ""
 
-#: woocommerce/inc/variations.php:1522
-#: woocommerce/inc/variations.php:1551
+#: woocommerce/inc/variations.php:1531
+#: woocommerce/inc/variations.php:1562
 #: wp-sheet-editor/dev/inc/ajax.php:208
 #: wp-sheet-editor/dev/inc/ajax.php:229
 msgid "Request not allowed. Try again later."
 msgstr ""
 
-#: woocommerce/inc/variations.php:1533
+#: woocommerce/inc/variations.php:1543
 msgid "We don't have variations to copy."
 msgstr ""
 
-#: woocommerce/inc/variations.php:1539
+#: woocommerce/inc/variations.php:1549
 msgid "{total_created} of {total} variations created."
 msgstr ""
 
-#: woocommerce/inc/variations.php:1644
-#: woocommerce/inc/variations.php:1751
+#: woocommerce/inc/variations.php:1655
+#: woocommerce/inc/variations.php:1762
 msgid "%s variations created."
 msgstr ""
 
-#: woocommerce/inc/variations.php:1657
+#: woocommerce/inc/variations.php:1668
 msgid "Target products not found."
 msgstr ""
 
-#: woocommerce/inc/variations.php:1768
+#: woocommerce/inc/variations.php:1779
 msgid "The option to create variations for every combination of attributes requires WooCommerce 3.0 or higher. Please update WooCommerce."
 msgstr ""
 
-#: woocommerce/inc/variations.php:1772
+#: woocommerce/inc/variations.php:1783
 msgid "User not allowed"
 msgstr ""
 
-#: woocommerce/inc/variations.php:1776
+#: woocommerce/inc/variations.php:1787
 msgid "Data missing, try again later."
 msgstr ""
 
-#: woocommerce/inc/variations.php:1793
+#: woocommerce/inc/variations.php:1804
 msgid "Wrong product type. Make sure it is a variable product."
 msgstr ""
 
-#: woocommerce/inc/variations.php:1929
+#: woocommerce/inc/variations.php:1940
 msgid "Please select a source product."
 msgstr ""
 
-#: woocommerce/inc/variations.php:2136
+#: woocommerce/inc/variations.php:2147
 msgid "Error on row ID: %1$d - %2$s"
 msgstr ""
 
-#: woocommerce/inc/variations.php:2143
+#: woocommerce/inc/variations.php:2154
 msgid "Please correct the error and save again."
 msgstr ""
 
@@ -3453,8 +3445,8 @@ msgid "Enable reviews"
 msgstr ""
 
 #: woocommerce/woocommerce.php:670
-#: wp-sheet-editor/dev/inc/api/helpers.php:538
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:978
+#: wp-sheet-editor/dev/inc/api/helpers.php:535
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:891
 msgid "..."
 msgstr ""
 
@@ -3462,141 +3454,141 @@ msgstr ""
 msgid "Vendor"
 msgstr ""
 
-#: woocommerce/woocommerce.php:741
+#: woocommerce/woocommerce.php:735
 msgid "Product gallery"
 msgstr ""
 
-#: woocommerce/woocommerce.php:756
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:511
+#: woocommerce/woocommerce.php:745
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:509
 msgid "SKU"
 msgstr ""
 
-#: woocommerce/woocommerce.php:769
+#: woocommerce/woocommerce.php:758
 #: wp-sheet-editor/dev/inc/teasers/post-types.php:112
 msgid "Regular price"
 msgstr ""
 
-#: woocommerce/woocommerce.php:784
+#: woocommerce/woocommerce.php:773
 #: wp-sheet-editor/dev/inc/teasers/post-types.php:111
 msgid "Sale price"
 msgstr ""
 
-#: woocommerce/woocommerce.php:797
+#: woocommerce/woocommerce.php:786
 msgid "Sale start date"
 msgstr ""
 
-#: woocommerce/woocommerce.php:824
+#: woocommerce/woocommerce.php:813
 msgid "Sale end date"
 msgstr ""
 
-#: woocommerce/woocommerce.php:850
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:596
+#: woocommerce/woocommerce.php:839
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:580
 msgid "Manage stock"
 msgstr ""
 
-#: woocommerce/woocommerce.php:870
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:614
+#: woocommerce/woocommerce.php:859
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:596
 msgid "Stock status"
 msgstr ""
 
-#: woocommerce/woocommerce.php:887
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:632
+#: woocommerce/woocommerce.php:876
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:612
 msgid "Stock"
 msgstr ""
 
-#: woocommerce/woocommerce.php:900
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:549
+#: woocommerce/woocommerce.php:889
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:541
 msgid "Weight"
+msgstr ""
+
+#: woocommerce/woocommerce.php:900
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:551
+msgid "Width"
 msgstr ""
 
 #: woocommerce/woocommerce.php:911
 #: wp-sheet-editor/dev/inc/teasers/woocommerce.php:561
-msgid "Width"
-msgstr ""
-
-#: woocommerce/woocommerce.php:922
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:573
 msgid "Height"
 msgstr ""
 
-#: woocommerce/woocommerce.php:933
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:585
+#: woocommerce/woocommerce.php:922
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:571
 msgid "Length"
 msgstr ""
 
-#: woocommerce/woocommerce.php:943
+#: woocommerce/woocommerce.php:932
 msgid "Cross-sells"
 msgstr ""
 
-#: woocommerce/woocommerce.php:950
-#: woocommerce/woocommerce.php:967
+#: woocommerce/woocommerce.php:939
+#: woocommerce/woocommerce.php:956
 msgid "Enter multiple SKUs or IDs separated by commas"
 msgstr ""
 
-#: woocommerce/woocommerce.php:960
+#: woocommerce/woocommerce.php:949
 msgid "Upsells"
 msgstr ""
 
-#: woocommerce/woocommerce.php:979
+#: woocommerce/woocommerce.php:968
 #: wp-sheet-editor/dev/inc/teasers/post-types.php:116
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:644
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:622
 msgid "Visibility"
 msgstr ""
 
-#: woocommerce/woocommerce.php:995
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:686
+#: woocommerce/woocommerce.php:984
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:660
 msgid "Virtual"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1014
+#: woocommerce/woocommerce.php:1003
 #: wp-sheet-editor/dev/inc/teasers/post-types.php:119
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:726
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:697
 msgid "Sold individually"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1031
+#: woocommerce/woocommerce.php:1020
 msgid "Is featured?"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1049
+#: woocommerce/woocommerce.php:1038
 msgid "Backorders allowed?"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1055
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:764
+#: woocommerce/woocommerce.php:1044
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:733
 msgid "Do not allow"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1056
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:765
+#: woocommerce/woocommerce.php:1045
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:734
 msgid "Allow, but notify customer"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1057
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:766
+#: woocommerce/woocommerce.php:1046
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:735
 msgid "Allow"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1070
+#: woocommerce/woocommerce.php:1059
 #: wp-sheet-editor/dev/inc/teasers/post-types.php:120
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:778
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:746
 msgid "Purchase note"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1082
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:791
+#: woocommerce/woocommerce.php:1071
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:757
 msgid "Shipping class"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1097
+#: woocommerce/woocommerce.php:1086
 msgid "Average rating"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1107
+#: woocommerce/woocommerce.php:1096
 msgid "Review count"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1117
+#: woocommerce/woocommerce.php:1106
 msgid "Total sales"
 msgstr ""
 
@@ -3657,26 +3649,21 @@ msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/bootstrap.php:235
 #: wp-sheet-editor/dev/views/whats-new.php:45
-#: wp-sheet-editor/dev/wp-sheet-editor.php:1165
+#: wp-sheet-editor/dev/wp-sheet-editor.php:1170
 msgid "Extensions"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:250
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:249
 #: wp-sheet-editor/dev/views/editor-page.php:163
 msgid "Global sort"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:262
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:261
 msgid "We'll reload the spreadsheet when you change this option."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:264
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:263
 msgid "Sort"
-msgstr ""
-
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:290
-#: wp-sheet-editor/dev/inc/api/editor.php:372
-msgid "You can create new items here"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/bootstrap.php:302
@@ -3724,473 +3711,485 @@ msgstr ""
 msgid "Some changes are not saved yet."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:532
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:558
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:517
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:540
 msgid "Content"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:543
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:525
 msgid "Use this editor to edit the content only, other fields like tags and categories should be edited on the spreadsheet."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:583
-#: wp-sheet-editor/dev/inc/api/editor.php:399
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:557
+#: wp-sheet-editor/dev/inc/api/editor.php:403
 msgid "WP Editor"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:607
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:570
 msgid "View"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:657
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:609
 msgid "Modified Date"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:696
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:639
 msgid "Excerpt"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:709
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:649
 msgid "Delete completely"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:788
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:716
 msgid "Order"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:851
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:771
 msgid "Enter multiple terms separated by %s"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:880
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:796
 msgid "Post type"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/bootstrap.php:904
+#: wp-sheet-editor/dev/inc/api/bootstrap.php:816
 msgid "Password"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:228
+#: wp-sheet-editor/dev/inc/api/editor.php:229
 msgid ""
 "\n"
 "(You can remove these help messages in the advanced settings)"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:247
+#: wp-sheet-editor/dev/inc/api/editor.php:248
 msgid "Pro"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:248
+#: wp-sheet-editor/dev/inc/api/editor.php:249
 msgid "Enable"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:304
+#: wp-sheet-editor/dev/inc/api/editor.php:306
 msgid "Please select some rows with the checkboxes."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:305
+#: wp-sheet-editor/dev/inc/api/editor.php:307
 msgid "Some variation rows are missing a parent product. Please add a value to the \"Parent\" column in the row IDs: {variation_ids}"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:306
+#: wp-sheet-editor/dev/inc/api/editor.php:308
 msgid "These product IDs don't have variations to display: {ids}"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:307
+#: wp-sheet-editor/dev/inc/api/editor.php:309
 msgid "Displayed variations for {parentProductsWithVariationsCount} product(s), {parentProductsWithoutVariationsCount} product(s) don't have variations to display"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:308
+#: wp-sheet-editor/dev/inc/api/editor.php:310
 msgid "Displayed variations for {parentProductsWithVariationsCount} product(s)"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:311
+#: wp-sheet-editor/dev/inc/api/editor.php:313
 msgid "The column will appear in the spreadsheet and exports if the user has a role with the required capability."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:312
+#: wp-sheet-editor/dev/inc/api/editor.php:314
 msgid "The column will be read only if the user doesn't have a role with the required capability."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:313
+#: wp-sheet-editor/dev/inc/api/editor.php:315
 msgid "Read-only columns will display a lock and it won't be possible to edit them anywhere in the spreadsheet. This is not a security feature because people still can edit in the regular WP screens."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:314
+#: wp-sheet-editor/dev/inc/api/editor.php:316
 msgid "Enabling this column requires a page reload"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:316
+#: wp-sheet-editor/dev/inc/api/editor.php:318
 msgid "Please select at least one column to import"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:317
+#: wp-sheet-editor/dev/inc/api/editor.php:319
 msgid "Show column key"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:318
+#: wp-sheet-editor/dev/inc/api/editor.php:320
 msgid "This is the dynamic tag for this column. You can copy this and use it in the bulk edit tool"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:319
+#: wp-sheet-editor/dev/inc/api/editor.php:321
 msgid "Click here to show all columns again"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:320
+#: wp-sheet-editor/dev/inc/api/editor.php:322
 msgid "The last import batch failed due to a server error, it's more likely that the server got overloaded.<br>1- You can try <a href=\"%1$s\" target=\"_blank\">importing fewer rows</a> per batch (i.e. import 2 rows every few seconds).<br>2- You can start a new import, sometimes trying again works (use the \"advanced settings\" in the step 1 of the import to start from a specific row).<br>3- You can increase the php memory <a href=\"%2$s\" target=\"_blank\">following this tutorial</a><br>4- If the problem happens after trying with 1 row per batch, you can <a href=\"%3$s\" target=\"_blank\">contact us</a> and we will make it work for you"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:321
+#: wp-sheet-editor/dev/inc/api/editor.php:323
 msgid "Your server was not able to process this batch. Do you want to try again? You can retry 3 times, If 3 attempts fail we will stop the import completely."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:322
+#: wp-sheet-editor/dev/inc/api/editor.php:324
 msgid "Please correct the error in the file and start a new import. You can use the \"Advanced options\" in the step 1 of the import to start from this specific row."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:323
+#: wp-sheet-editor/dev/inc/api/editor.php:325
 msgid "<p>The import has finished</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:324
+#: wp-sheet-editor/dev/inc/api/editor.php:326
 msgid "Name of this export"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:325
+#: wp-sheet-editor/dev/inc/api/editor.php:327
 msgid "Are you sure you want to delete this columns view?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:327
+#: wp-sheet-editor/dev/inc/api/editor.php:329
 msgid "<p>The process has finished</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:328
+#: wp-sheet-editor/dev/inc/api/editor.php:330
 msgid "The selected product does not have variations"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:329
+#: wp-sheet-editor/dev/inc/api/editor.php:331
 msgid "empty"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:330
+#: wp-sheet-editor/dev/inc/api/editor.php:332
 msgid "This will save you {clicks_count} clicks :)"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:331
+#: wp-sheet-editor/dev/inc/api/editor.php:333
 msgid "We found similar columns. Do you want to apply the same action to them? {columns}"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:332
+#: wp-sheet-editor/dev/inc/api/editor.php:334
 msgid "This column is only for variation rows, parent products don't use this field"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:333
+#: wp-sheet-editor/dev/inc/api/editor.php:335
 msgid "<b>Editing the field: {field_label}</b>"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:334
+#: wp-sheet-editor/dev/inc/api/editor.php:336
 msgid "Column not found. Try with another search criteria."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:335
+#: wp-sheet-editor/dev/inc/api/editor.php:337
 msgid "This column is for parent products only, variations don't use this field"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:336
+#: wp-sheet-editor/dev/inc/api/editor.php:338
 msgid "Paste using keyboard: Ctrl+V"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:337
+#: wp-sheet-editor/dev/inc/api/editor.php:339
 msgid "Realign cells"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:338
+#: wp-sheet-editor/dev/inc/api/editor.php:340
 msgid "Remove all filters"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:339
+#: wp-sheet-editor/dev/inc/api/editor.php:341
 msgid "Resize columns based on the values"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:340
+#: wp-sheet-editor/dev/inc/api/editor.php:342
 msgid "Delete row"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:341
+#: wp-sheet-editor/dev/inc/api/editor.php:343
 msgid "Do you want to delete {rows_number} rows from the database completely? If you want to restore them later, you should make a backup before."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:342
+#: wp-sheet-editor/dev/inc/api/editor.php:344
 msgid "Duplicate row"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:343
+#: wp-sheet-editor/dev/inc/api/editor.php:345
 msgid "Hide column"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:344
+#: wp-sheet-editor/dev/inc/api/editor.php:346
 msgid "Bulk edit column"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:346
+#: wp-sheet-editor/dev/inc/api/editor.php:348
 msgid "Copy variations from this product"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:348
+#: wp-sheet-editor/dev/inc/api/editor.php:350
 msgid "Delete field"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:349
+#: wp-sheet-editor/dev/inc/api/editor.php:351
 msgid "We will delete this meta field from the database and you will lose the values saved in this field on all the rows. You should make a backup to be able to restore in the future. Do you want to continue with the deletion?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:350
+#: wp-sheet-editor/dev/inc/api/editor.php:352
 msgid "Delete serialized field"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:351
+#: wp-sheet-editor/dev/inc/api/editor.php:353
 msgid "We will delete this serialized field, which includes all its subfields, from the database and you will lose the values saved in this field on all the rows. You should make a backup to be able to restore in the future. Do you want to continue with the deletion?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:352
+#: wp-sheet-editor/dev/inc/api/editor.php:354
 msgid "Edit meta key"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:353
+#: wp-sheet-editor/dev/inc/api/editor.php:355
 msgid "Error: The new value is empty or is equal to the old value"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:354
+#: wp-sheet-editor/dev/inc/api/editor.php:356
 msgid "Showing rows from your last session."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:355
+#: wp-sheet-editor/dev/inc/api/editor.php:357
 msgid "Export column"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:356
+#: wp-sheet-editor/dev/inc/api/editor.php:358
 msgid "<p>The bulk edit was not applied completely. The process was canceled due to an error.</p><p>You can close this window.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:357
+#: wp-sheet-editor/dev/inc/api/editor.php:359
 msgid "<p>The process did not finish. The process was canceled due to an error.</p><p>You can close this window.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:358
+#: wp-sheet-editor/dev/inc/api/editor.php:360
 msgid "Your server was not able to process this batch. Do you want to try again?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:359
+#: wp-sheet-editor/dev/inc/api/editor.php:361
 msgid "The bulk edit was executed successfully. You can close this window"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:361
+#: wp-sheet-editor/dev/inc/api/editor.php:363
 msgid "ENABLE COLUMNS. These columns require a page reload: {columns}. Do you want to reload now? We will reload automatically"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:362
+#: wp-sheet-editor/dev/inc/api/editor.php:364
 msgid "Column removed. Go to \"settings > hide/display columns\" to enable it again"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:363
+#: wp-sheet-editor/dev/inc/api/editor.php:365
 msgid "You have modified rows. Please save the changes because we will refresh the spreadsheet."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:364
+#: wp-sheet-editor/dev/inc/api/editor.php:366
 msgid "You have modified rows. Please save the changes before removing columns from the spreadsheet."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:365
+#: wp-sheet-editor/dev/inc/api/editor.php:367
 msgid "You have modified rows. Please save the changes because we will refresh the spreadsheet. Do you want to refresh now?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:366
+#: wp-sheet-editor/dev/inc/api/editor.php:368
 msgid "Some rows were modified in the background. Please save the changes and reload the spreadsheet to see the changes"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:367
+#: wp-sheet-editor/dev/inc/api/editor.php:369
 msgid "Some rows were modified in the spreadsheet. Please save the changes before using this feature."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:368
+#: wp-sheet-editor/dev/inc/api/editor.php:370
 msgid "We didn't find rows to update from the search query. Please try another search query."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:369
+#: wp-sheet-editor/dev/inc/api/editor.php:371
 msgid "We didn't find rows for the export. Please try another search query."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:370
+#: wp-sheet-editor/dev/inc/api/editor.php:372
 msgid "You can find all the settings here, like columns visibility, etc."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:371
+#: wp-sheet-editor/dev/inc/api/editor.php:373
 msgid "Oops, nothing found"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:373
-msgid "Upload image"
-msgstr ""
-
 #: wp-sheet-editor/dev/inc/api/editor.php:374
-msgid "View Gallery"
+msgid "You can create new items here"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:375
-msgid "No options available"
+msgid "Upload image"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:376
-#: wp-sheet-editor/dev/inc/api/helpers.php:1381
-msgid "Items loaded in the spreadsheet"
+msgid "View Gallery"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:377
-msgid "New rows added"
+msgid "No options available"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:378
-msgid "The bulk edit has been executed. Do you want to reload the page to see the changes?"
+#: wp-sheet-editor/dev/inc/api/helpers.php:1440
+msgid "Items loaded in the spreadsheet"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:379
-msgid "<p>The changes were not saved completely. The process was canceled due to an error .</p><p>You can close this popup.</p>"
+msgid "New rows added"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:380
-msgid "<p>The automatic saving failed. Your changes were not saved completely due to an error. You can try again later, if the error persists contact our support team and keep this tab opened</p>"
+msgid "The bulk edit has been executed. Do you want to reload the page to see the changes?"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:381
-msgid "{updated} attributes have been merged."
+msgid "<p>The changes were not saved completely. The process was canceled due to an error .</p><p>You can close this popup.</p>"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:382
-msgid "{updated} items saved of {total} items that need saving."
+msgid "<p>The automatic saving failed. Your changes were not saved completely due to an error. You can try again later, if the error persists contact our support team and keep this tab opened</p>"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:383
-msgid "Scanning variations to be created. {updated} products of {total} products have been processed."
+msgid "{updated} attributes have been merged."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:384
-msgid "{deleted} duplicates have been removed."
+msgid "{updated} items saved of {total} items that need saving."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:385
-msgid "All items have been saved."
+msgid "{created} items created successfully, {failed} items failed because the AI returned invalid data."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:386
-msgid "Please check if you have unsaved changes. If you have, please save them or they will be dismissed."
+msgid "{created} items created successfully"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:387
-msgid "Everything is already saved."
+msgid "Scanning variations to be created. {updated} products of {total} products have been processed."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:388
-msgid "The server did not accept our request. Bad request, please try refresh the page and try again."
+msgid "{deleted} duplicates have been removed."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:389
-msgid "The server didn't accept our request. You don't have permission to do this action. Please log in again."
+msgid "All items have been saved."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:390
-msgid "The server is not available or overloaded. Please try again later."
+msgid "Please check if you have unsaved changes. If you have, please save them or they will be dismissed."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:391
-msgid "The server is not available or overloaded. Do you want to try again?"
+msgid "Everything is already saved."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:392
-msgid "The auto saving failed: the server is not available or overloaded. Do you want to try again?"
+msgid "The server did not accept our request. Bad request, please try refresh the page and try again."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:393
-msgid "The server wasn't able to process our request. Server error. Please try again later."
+msgid "The server didn't accept our request. You don't have permission to do this action. Please log in again."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:394
-msgid "The server has exceeded its allocated resources and is not able to process our request."
+msgid "The server is not available or overloaded. Please try again later."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:395
-msgid "The server is busy and took too long to respond to our request. Please try again later."
+msgid "The server is not available or overloaded. Do you want to try again?"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:396
-msgid "The server could not process our request. Please try again later."
+msgid "The auto saving failed: the server is not available or overloaded. Do you want to try again?"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:397
-msgid "Change background color"
+msgid "The server wasn't able to process our request. Server error. Please try again later."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:398
+msgid "The server has exceeded its allocated resources and is not able to process our request."
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/api/editor.php:399
+msgid "The server is busy and took too long to respond to our request. Please try again later."
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/api/editor.php:400
+msgid "The server could not process our request. Please try again later."
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/api/editor.php:401
+msgid "Change background color"
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/api/editor.php:402
 msgid "<h3>Missing column?</h3><button class=\"button show-column-missing-tips\"  data-remodal-target=\"modal-columns-visibility\">Open columns manager</button> or <button class=\"button\">Close this</button>"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:404
+#: wp-sheet-editor/dev/inc/api/editor.php:408
 msgid "<span class=\"review-tip\">Do we deserve a 5-star review? <a href=\"%s\" target=\"_blank\" class=\"dismiss-review-tip\">Yes, you deserve it</a> . - . <a href=\"\"  class=\"dismiss-review-tip\">No</a></span>"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/helpers.php:442
+#: wp-sheet-editor/dev/inc/api/helpers.php:439
 #: wp-sheet-editor/dev/inc/teasers/terms.php:54
 msgid "(Pro extension)"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/helpers.php:446
+#: wp-sheet-editor/dev/inc/api/helpers.php:443
 #: wp-sheet-editor/dev/inc/teasers/coupons.php:35
 #: wp-sheet-editor/dev/inc/teasers/terms.php:54
 #: wp-sheet-editor/dev/inc/teasers/users.php:34
 msgid "(Install free extension)"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/helpers.php:549
+#: wp-sheet-editor/dev/inc/api/helpers.php:546
 msgid "The item could not be saved. Please try again in other moment."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/helpers.php:1037
+#: wp-sheet-editor/dev/inc/api/helpers.php:1096
 msgid "User not allowed to edit rows"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/helpers.php:1347
+#: wp-sheet-editor/dev/inc/api/helpers.php:1406
 msgid "No more posts available."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/helpers.php:1349
+#: wp-sheet-editor/dev/inc/api/helpers.php:1408
 msgid "No posts found matching your search parameters. You can remove the active filters or try with a different search."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/helpers.php:1351
+#: wp-sheet-editor/dev/inc/api/helpers.php:1410
 msgid "No posts available for the current page."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/logger.php:47
+#: wp-sheet-editor/dev/inc/api/logger.php:44
 msgid "The log file does not exist."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/logger.php:173
-#: wp-sheet-editor/dev/inc/api/logger.php:210
+#: wp-sheet-editor/dev/inc/api/logger.php:170
+#: wp-sheet-editor/dev/inc/api/logger.php:207
 msgid "Error log"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/logger.php:212
+#: wp-sheet-editor/dev/inc/api/logger.php:209
 msgid "We haven't detected any fatal errors yet."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/logger.php:214
+#: wp-sheet-editor/dev/inc/api/logger.php:211
 msgid "Here you can see the fatal errors related to WP Sheet Editor. If you experience any error while using WP Sheet Editor, you can see if any entry appears below with a related date and time, and send the full error message to the WP Sheet Editor support team. This log is reset every %d days."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/logger.php:231
+#: wp-sheet-editor/dev/inc/api/logger.php:228
 msgid "%1$s in %2$s on line %3$s"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/integrations/elementor.php:60
+#: wp-sheet-editor/dev/inc/integrations/elementor.php:56
 msgid "Elementor"
 msgstr ""
 
@@ -4202,68 +4201,68 @@ msgstr ""
 msgid "We show a popup asking you to install free extensions when we detect that you are using a third-party plugin that requires special compatibility, which helps us prevent errors."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:201
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:204
 msgid "Integrations"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:241
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:244
 msgid "Important extensions"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:242
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:245
 msgid "Some of your plugins require special compatibility, and we have created these extensions that you can download for free if you purchased our plugin."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:243
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:246
 msgid "It's important that you install them to prevent errors, but you can do it later if you want. Find this popup in the toolbar > extensions > Integrations."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:244
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:247
 msgid "If you click on the \"download\" button, we will download the file from the official website: wpsheeteditor.com."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:245
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:248
 msgid "If you don't want to install these extensinos, you can go to our advanced settings and enable the option \"Disable the popup that asks you to install important extensions?\"."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:252
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:275
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:255
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:278
 msgid "Extension name"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:253
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:276
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:256
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:279
 #: wp-sheet-editor/dev/inc/teasers/post-types.php:96
 msgid "Description"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:254
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:277
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:257
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:280
 msgid "Action"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:262
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:285
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:265
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:288
 msgid "Already downloaded"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:262
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:265
 msgid "Download"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:271
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:274
 msgid "Extensions that require update"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:285
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:288
 msgid "Download update"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:291
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:294
 msgid "When you finish downloading the plugins, you need to go to wp-admin > plugins > add new and install them."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/integrations/notifier.php:292
+#: wp-sheet-editor/dev/inc/integrations/notifier.php:295
 msgid "Do you need help?."
 msgstr ""
 
@@ -4604,258 +4603,258 @@ msgid "User roles that can use the spreadsheet editor"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/options-init.php:342
-msgid "The plugin will not initialize for the user roles not selected here."
-msgstr ""
-
-#: wp-sheet-editor/dev/inc/options-init.php:350
-msgid "Enable the fancy taxonomy terms selector"
+msgid "The plugin will not initialize for the user roles not selected here. Leave empty and the editor will initialize for any role that has permission to edit this data source."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/options-init.php:351
+msgid "Enable the fancy taxonomy terms selector"
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/options-init.php:352
 msgid "Backwards compatibility. This setting will be removed in future updates."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:357
+#: wp-sheet-editor/dev/inc/options-init.php:358
 msgid "What cell format to use for the taxonomy columns?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:359
+#: wp-sheet-editor/dev/inc/options-init.php:360
 msgid "New multi select dropdown (Default)"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:360
+#: wp-sheet-editor/dev/inc/options-init.php:361
 msgid "Old single select autocomplete"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:366
+#: wp-sheet-editor/dev/inc/options-init.php:367
 msgid "Show all the custom post statuses?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:367
+#: wp-sheet-editor/dev/inc/options-init.php:368
 msgid "By default we show the CORE statuses: published, draft, private, scheduled, trash. However, some plugins register custom statuses: job managers, woocommerce. Enable this option to show all the custom statuses in the \"status\" column. CAREFUL. We will show all the statuses from all the post types in the dropdown because it is impossible to know the post type of each status to we can not separate them. Do this only if you are a developer."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:373
+#: wp-sheet-editor/dev/inc/options-init.php:374
 msgid "Remove help messages from the cells?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:374
+#: wp-sheet-editor/dev/inc/options-init.php:375
 msgid "By default we show comments in some columns indicating the value format or why they are locked. for example, the category column shows a tip indicating to separate terms with a comma and how to add child categories, variation columns have a tip indicating why they are locked for parent products. You can activate this option to disable those tips."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:380
+#: wp-sheet-editor/dev/inc/options-init.php:381
 msgid "Manage taxonomy column values as term ids?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:381
+#: wp-sheet-editor/dev/inc/options-init.php:382
 msgid "By default we show the categories as names separated by commas. Activate this option to display and save term ids separated by commas."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:387
+#: wp-sheet-editor/dev/inc/options-init.php:388
 msgid "Manage taxonomy column values as term slugs?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:388
+#: wp-sheet-editor/dev/inc/options-init.php:389
 msgid "By default we show the categories as names separated by commas. Activate this option to display and save term slugs separated by commas."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:394
+#: wp-sheet-editor/dev/inc/options-init.php:395
 msgid "Do you want to deactivate columns for new fields found?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:395
+#: wp-sheet-editor/dev/inc/options-init.php:396
 msgid "By default we automatically show columns for all the new fields found, so everytime we detect new fields you can see them and edit right away. But this might \"break\" your column sorting or annoy you if you have enabled specific columns. Enable this option to generate those columns but leave them deactivated so you can enable them later."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:402
+#: wp-sheet-editor/dev/inc/options-init.php:403
 msgid "Math formula roundup decimals"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:403
+#: wp-sheet-editor/dev/inc/options-init.php:404
 msgid "We automatically round up to 2 decimals. You can enter any number here, for example, 1 to round to 1 decimal, 0 to round to the nearest whole number (without decimals). Default: 2 decimals"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:409
+#: wp-sheet-editor/dev/inc/options-init.php:410
 msgid "Display raw value on select cells?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:410
+#: wp-sheet-editor/dev/inc/options-init.php:411
 msgid "By default, we show the label in the cell instead of the raw value. But you can enable this option to display the raw value in the cells."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:416
+#: wp-sheet-editor/dev/inc/options-init.php:417
 msgid "Disable the addition of file ID to the image URLs?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:417
+#: wp-sheet-editor/dev/inc/options-init.php:418
 msgid "By default, when you export the featured image column or gallery columns, we add the file ID to each image url so we can import them later faster. You can activate this option to not add the file id and the import will work fine later but it wont be as fast"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:423
+#: wp-sheet-editor/dev/inc/options-init.php:424
 msgid "Disable the display of file names in the image columns?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:424
+#: wp-sheet-editor/dev/inc/options-init.php:425
 msgid "By default, we show the file name as a preview next to the thumbnail, you can activate this to show the thumbnail and upload buttons only"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:430
+#: wp-sheet-editor/dev/inc/options-init.php:431
 msgid "Add html classes to the \"post status\" cells based on their values?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:431
+#: wp-sheet-editor/dev/inc/options-init.php:432
 msgid "You can activate this option if you want to add html classes, and use those html classes to change the cell colors for each status using custom CSS"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:438
+#: wp-sheet-editor/dev/inc/options-init.php:439
 msgid "Maximum number of characters displayed in the preview of the values of tinymce columns?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:439
+#: wp-sheet-editor/dev/inc/options-init.php:440
 msgid "By default, we only display 30 characters. You can increase the number here to view larger previews."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:445
+#: wp-sheet-editor/dev/inc/options-init.php:446
 msgid "Manage the post parent column using IDs?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:446
+#: wp-sheet-editor/dev/inc/options-init.php:447
 msgid "By default, the \"parent\" column displays titles and saves using titles. If you activate this option, the column will display IDs and save IDs. This is useful if you have duplicate titles and you need to save the exact parent by ID."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:451
+#: wp-sheet-editor/dev/inc/options-init.php:452
 msgid "Enable the dark mode?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:455
+#: wp-sheet-editor/dev/inc/options-init.php:456
 msgid "Auto (Default)"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:456
+#: wp-sheet-editor/dev/inc/options-init.php:457
 msgid "Light mode"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:457
+#: wp-sheet-editor/dev/inc/options-init.php:458
 msgid "Dark mode"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:462
+#: wp-sheet-editor/dev/inc/options-init.php:463
 msgid "Disable the automatic update of the \"modified date\" of the posts?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:464
+#: wp-sheet-editor/dev/inc/options-init.php:465
 msgid "By default, the \"modified date\" of each post is updated every time you edit a post in our spreadsheet editor. WordPress automatically updates the \"modified date\" when you a edit a post in the regular editor, so we do this to keep a consistent experience in our sheet editor as the regular editor. You can enable this option to stop this behavior but this behavior will stop only when you edit taxonomies or meta fields, WordPress will still update the modified date when you post titles, content, excerpt, and other fields stored in the wp_posts table in the database."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:471
+#: wp-sheet-editor/dev/inc/options-init.php:472
 msgid "General settings"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:476
+#: wp-sheet-editor/dev/inc/options-init.php:477
 msgid "In this page you can quickly set up the spreadsheet editor. This all you need to use the editor. The settings on the other tabs are completely optional and allow you to tweak the performance of the editor among other things."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:488
+#: wp-sheet-editor/dev/inc/options-init.php:489
 msgid "Misc"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:494
+#: wp-sheet-editor/dev/inc/options-init.php:495
 msgid "Image preview width inside the cell"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:501
+#: wp-sheet-editor/dev/inc/options-init.php:502
 msgid "Image preview height inside the cell"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:508
+#: wp-sheet-editor/dev/inc/options-init.php:509
 msgid "Initial rows offset"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:509
+#: wp-sheet-editor/dev/inc/options-init.php:510
 msgid "When you have 1000 posts , you might want to open the spreadsheet and start editing from post 200. This option lets you skip a lot of rows. IMPORTANT. We use the pagination, so we will display the page closest to that number. For example. If you load 10 rows per page and enter 1205 as offset, the sheet will start from page 120 (index 1200) because it is the page closest to the defined offset."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:515
+#: wp-sheet-editor/dev/inc/options-init.php:516
 msgid "Delete the attached images when deleting a post?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:516
+#: wp-sheet-editor/dev/inc/options-init.php:517
 msgid "For example, when deleting a post completely (not moving to the trash), delete the featured image and product gallery images from the media library. CAREFUL.If you use the same images on multiple posts, it will break the images on other posts"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:524
-msgid "Spreadsheets enabled for these post types"
+#: wp-sheet-editor/dev/inc/options-init.php:525
+msgid "Enabled spreadsheets"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:529
+#: wp-sheet-editor/dev/inc/options-init.php:531
 msgid "Disable the help toolbar?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:530
+#: wp-sheet-editor/dev/inc/options-init.php:532
 msgid "This will hide the \"help\" option in the top toolbar"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:537
+#: wp-sheet-editor/dev/inc/options-init.php:539
 msgid "Maximum visible characters in locked cells"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:538
+#: wp-sheet-editor/dev/inc/options-init.php:540
 msgid "Locked cells only show a preview of the value. The default character length is %d"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:544
+#: wp-sheet-editor/dev/inc/options-init.php:546
 msgid "Don't show read-only columns in the advanced search?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:550
+#: wp-sheet-editor/dev/inc/options-init.php:552
 msgid "Allow to remove duplicate rows by these meta fields"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:551
+#: wp-sheet-editor/dev/inc/options-init.php:553
 msgid "By default, our bulk edit allows you to remove duplicate posts by title+content, or by product SKU. You can add multiple meta keys separated with a comma here to allow to remove duplicate posts by a meta field. We don't allow this for any column because this should be used on meta fields that are supposed to contain unique values"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:557
+#: wp-sheet-editor/dev/inc/options-init.php:559
 msgid "Thumbnail size for the image cell previews"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:558
+#: wp-sheet-editor/dev/inc/options-init.php:560
 msgid "By default, we show a thumbnail with medium size in the cell values and preview on the Image columns, and we export images in full size when you use our export tool. If you want to see smaller or bigger images in the cell values or previews, select a different size here"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:563
+#: wp-sheet-editor/dev/inc/options-init.php:565
 msgid "Disable the \"add new row\" option from the toolbar?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:565
+#: wp-sheet-editor/dev/inc/options-init.php:567
 msgid "Enable this option if you don't want people to create rows in our live sheet. This can be useful if you want them to create items using the regular editor to have all the fields filled in with default values."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:573
+#: wp-sheet-editor/dev/inc/options-init.php:575
 msgid "Disable extension offerings?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:579
+#: wp-sheet-editor/dev/inc/options-init.php:581
 msgid "Don't display the disabled columns in the modules?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:580
+#: wp-sheet-editor/dev/inc/options-init.php:582
 msgid "By default, we show all the columns in the app modules (advanced search, bulk edit, export, import, etc), even if they're disabled in the columns manager. Activate this option to only display enabled columns."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:586
+#: wp-sheet-editor/dev/inc/options-init.php:588
 msgid "Allow users with the capability unfiltered_html to save any html in the post content column?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:587
+#: wp-sheet-editor/dev/inc/options-init.php:589
 msgid "By default, we remove any unsafe html from all the spreadsheet columns before saving the values. You can activate this option if you want to allow the WordPress super admins or administrators to add iframes, ad codes, etc to the post content. Use it at your own risk."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:594
+#: wp-sheet-editor/dev/inc/options-init.php:596
 msgid "Generate serialized fields columns based on these posts"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:595
+#: wp-sheet-editor/dev/inc/options-init.php:597
 msgid "This option allows you to indicate what posts to use as templates for specific serialized fields. Enter the field key and post ID separated with a colon. For example: serialized_key1:89, serializedkey2:90"
 msgstr ""
 
@@ -5048,7 +5047,7 @@ msgid "Featured image"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/teasers/post-types.php:115
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:657
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:634
 msgid "Gallery"
 msgstr ""
 
@@ -5100,31 +5099,31 @@ msgstr ""
 msgid "<b>Tip from WP Sheet Editor:</b> You can view and edit Product Variations in a spreadsheet, bulk edit, make advanced searches, edit hundreds of variations at once, copy variations to multiple products, etc. <a href=\"%s\" class=\"\" target=\"_blank\">Download Plugin</a>"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:523
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:519
 msgid "Regular Price"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:537
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:531
 msgid "Sale Price"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:703
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:676
 msgid "Sales price date from"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:715
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:687
 msgid "Sales price date to"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:742
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:712
 msgid "is featured?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:758
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:727
 msgid "Allow backorders"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:933
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:847
 msgid "Note: Separate values with the character %s<br/>The product must be variable and have existing variations for this to work, otherwise the default attributes won't be saved."
 msgstr ""
 
@@ -5478,272 +5477,272 @@ msgstr ""
 msgid "Thank you for updating to the new version of the plugin."
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:181
+#: wp-sheet-editor/dev/wp-sheet-editor.php:186
 msgid "Edit User Profiles in Spreadsheet - Basic"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:184
+#: wp-sheet-editor/dev/wp-sheet-editor.php:189
 msgid "<p >Edit WordPress users in spreadsheet, edit only basic profiles and make basic searches.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:192
+#: wp-sheet-editor/dev/wp-sheet-editor.php:197
 msgid "Edit User Profiles in Spreadsheet - FULL"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:195
+#: wp-sheet-editor/dev/wp-sheet-editor.php:200
 msgid "<p >Edit WordPress users in spreadsheet. Edit FULL user profiles, including custom fields. Add new columns to the spreadsheet, Good for ecommerce stores, membership sites, events directories, business directories, user directories</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:202
+#: wp-sheet-editor/dev/wp-sheet-editor.php:207
 msgid "WooCommerce Customers Spreadsheet"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:205
+#: wp-sheet-editor/dev/wp-sheet-editor.php:210
 msgid "<p >View all your Customers in a Spreadsheet. View full profile, Edit Profiles Quickly, View Billing and Shipping information, Make advanced customer searches, Export Customers to Excel or Google Sheets, Import Customers from External Applications</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:212
+#: wp-sheet-editor/dev/wp-sheet-editor.php:217
 msgid "Media Library Spreadsheet"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:215
+#: wp-sheet-editor/dev/wp-sheet-editor.php:220
 msgid "<p >View the image, videos, and all the files from the WP Media library in a spreadsheet. Edit all the file fields, including alt text, image captions, file descriptions, Advanced Search by any field , Auto generate alt text, captions, etc. using the parent post title or categorías, Update thousands of files at once, and more.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:217
-#: wp-sheet-editor/dev/wp-sheet-editor.php:231
-#: wp-sheet-editor/dev/wp-sheet-editor.php:263
-#: wp-sheet-editor/dev/wp-sheet-editor.php:277
-#: wp-sheet-editor/dev/wp-sheet-editor.php:291
-#: wp-sheet-editor/dev/wp-sheet-editor.php:305
-#: wp-sheet-editor/dev/wp-sheet-editor.php:320
-#: wp-sheet-editor/dev/wp-sheet-editor.php:334
-#: wp-sheet-editor/dev/wp-sheet-editor.php:348
-#: wp-sheet-editor/dev/wp-sheet-editor.php:362
+#: wp-sheet-editor/dev/wp-sheet-editor.php:222
+#: wp-sheet-editor/dev/wp-sheet-editor.php:236
+#: wp-sheet-editor/dev/wp-sheet-editor.php:268
+#: wp-sheet-editor/dev/wp-sheet-editor.php:282
+#: wp-sheet-editor/dev/wp-sheet-editor.php:296
+#: wp-sheet-editor/dev/wp-sheet-editor.php:310
+#: wp-sheet-editor/dev/wp-sheet-editor.php:325
+#: wp-sheet-editor/dev/wp-sheet-editor.php:339
+#: wp-sheet-editor/dev/wp-sheet-editor.php:353
+#: wp-sheet-editor/dev/wp-sheet-editor.php:367
 msgid "Buy"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:226
+#: wp-sheet-editor/dev/wp-sheet-editor.php:231
 msgid "Edit categories, tags, attributes in a spreadsheet"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:229
+#: wp-sheet-editor/dev/wp-sheet-editor.php:234
 msgid "<p >One spreadsheet for categories, tags, product attributes, event categories, portfolio categories, real state tags, etc. View and edit all the items in one place, copy paste, upload category images quickly, add descriptions, edit SEO, etc.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:258
+#: wp-sheet-editor/dev/wp-sheet-editor.php:263
 msgid "WooCommerce Coupons Spreadsheet"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:261
+#: wp-sheet-editor/dev/wp-sheet-editor.php:266
 msgid "<p >View WooCommerce Coupons in a spreadsheet. Edit all coupon fields, Advanced Search by any field , Auto generate hundreds of coupons, Update hundreds of coupons at once, and more.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:272
+#: wp-sheet-editor/dev/wp-sheet-editor.php:277
 msgid "WooCommerce Orders Spreadsheet"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:275
+#: wp-sheet-editor/dev/wp-sheet-editor.php:280
 msgid "<p >View and dispatch all the Orders quickly. Advanced Search by any field (shipping method, taxes, VAT, payment methods, customers, products, etc), Export orders and customers information including guest customers; edit thousands of orders quickly, and more.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:286
+#: wp-sheet-editor/dev/wp-sheet-editor.php:291
 msgid "Comments, Reviews, and Order Notes Spreadsheet"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:289
+#: wp-sheet-editor/dev/wp-sheet-editor.php:294
 msgid "<p >It is the best way to manage your comments, WooCommerce customer reviews, event reviews, testimonials, and order notes in a spreadsheet. You can make advanced searches by any field (keyword, order note, status, find comments by post type, and all the fields). You can bulk edit them, delete all at once, export them to excel or external systems, import comments and reviews from other systems, and more.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:300
+#: wp-sheet-editor/dev/wp-sheet-editor.php:305
 msgid "Custom Database Tables Spreadsheet"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:303
+#: wp-sheet-editor/dev/wp-sheet-editor.php:308
 msgid "<p >One Spreadsheet for Every Custom Database Table added by other plugins. Live edit in the cells, Bulk Edit, Make advanced searches by any field, export and import, bulk delete, move information between sites, edit thousands of items, and more.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:315
+#: wp-sheet-editor/dev/wp-sheet-editor.php:320
 msgid "Easy Digital Downloads Spreadsheet"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:318
+#: wp-sheet-editor/dev/wp-sheet-editor.php:323
 msgid "<p >View all the EDD products in a spreadsheet, create downloads and files in bulk, edit hundreds of products at once using formulas, Advanced searches using multiple fields, etc.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:329
+#: wp-sheet-editor/dev/wp-sheet-editor.php:334
 msgid "Events Spreadsheet"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:332
+#: wp-sheet-editor/dev/wp-sheet-editor.php:337
 msgid "<p >View all the events in a spreadsheet, create events in bulk, edit hundreds of events at once using formulas, Advanced searches using multiple event fields, etc.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:343
+#: wp-sheet-editor/dev/wp-sheet-editor.php:348
 msgid "Give Spreadsheet"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:346
+#: wp-sheet-editor/dev/wp-sheet-editor.php:351
 msgid "<p>This includes spreadsheets to manage Donation Forms, Donations, and Donors. You can bulk edit, export, import, and quickly manage your donations website created with GiveWP</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:357
+#: wp-sheet-editor/dev/wp-sheet-editor.php:362
 msgid "Display the spreadsheet editor in the frontend"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:360
+#: wp-sheet-editor/dev/wp-sheet-editor.php:365
 msgid "<p >Create new spreadsheets with custom columns and Share the Spreadsheets with your Users or Employees on the Frontend. Useful for marketplaces where vendors should edit products in the spreadsheet, allow post or event submissions on the Frontend, events directories, Web Apps, Custom Dashboards, etc.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:370
+#: wp-sheet-editor/dev/wp-sheet-editor.php:375
 msgid "WooCommerce - Products Integration"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:373
+#: wp-sheet-editor/dev/wp-sheet-editor.php:378
 msgid "<p >Edit WooCommerce products in the spreadsheet. It supports all kinds of products, including Variable Products, Downloadable Products, External Products, Simple Products. You can edit all product fields in the spreadsheet, including attributes, images, etc.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:382
+#: wp-sheet-editor/dev/wp-sheet-editor.php:387
 msgid "Custom post types"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:385
+#: wp-sheet-editor/dev/wp-sheet-editor.php:390
 msgid "<p >Edit restaurant menus, courses, projects, portfolios, and all custom post types.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:392
+#: wp-sheet-editor/dev/wp-sheet-editor.php:397
 msgid "Columns renaming"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:395
+#: wp-sheet-editor/dev/wp-sheet-editor.php:400
 msgid "<p >You can rename the columns of the spreadsheet.<br>Example. Instead of showing “Post author” on the spreadsheet, you can change it to “Uploaded by”.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:396
-#: wp-sheet-editor/dev/wp-sheet-editor.php:408
-#: wp-sheet-editor/dev/wp-sheet-editor.php:501
-#: wp-sheet-editor/dev/wp-sheet-editor.php:529
+#: wp-sheet-editor/dev/wp-sheet-editor.php:401
+#: wp-sheet-editor/dev/wp-sheet-editor.php:413
+#: wp-sheet-editor/dev/wp-sheet-editor.php:506
+#: wp-sheet-editor/dev/wp-sheet-editor.php:534
 msgid "Install for Free"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:404
+#: wp-sheet-editor/dev/wp-sheet-editor.php:409
 msgid "YOAST SEO"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:407
+#: wp-sheet-editor/dev/wp-sheet-editor.php:412
 msgid "<p >Edit SEO title, description, keyword, and SEO score in spreadsheet</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:416
+#: wp-sheet-editor/dev/wp-sheet-editor.php:421
 msgid "Advanced Search"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:419
+#: wp-sheet-editor/dev/wp-sheet-editor.php:424
 msgid "<p >Find posts by keyword, taxonomies, author, date, status, or custom fields.</p><p>Search in multiple fields with advanced operators: =, !=, &lt;, &gt;, LIKE, NOT LIKE</p><p>Examples: Find products from category Audio with stock < 20, or products from category Apple without featured image, or products containing the keyword \"Google\" without image gallery.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:426
+#: wp-sheet-editor/dev/wp-sheet-editor.php:431
 msgid "Formulas"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:429
+#: wp-sheet-editor/dev/wp-sheet-editor.php:434
 msgid "<p >Edit Hundreds of Posts at Once with just a few clicks. Search and replace, Replace urls and phrases, save values to fields in bulk, copy values between fields, merge fields, etc..</p><p>Examples: Copy regular price to sale price, update product attributes names, etc.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:436
+#: wp-sheet-editor/dev/wp-sheet-editor.php:441
 msgid "Math Formulas"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:439
+#: wp-sheet-editor/dev/wp-sheet-editor.php:444
 msgid "<p >Edit Hundreds of Posts at Once. Update numeric fields using advanced math formulas. Example, increase prices by 10% , manage inventory , etc. Run any math formula.</p><p>You can use multiple fields in the formula, for example, \"Regular price x Inventory / Sales price</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:446
+#: wp-sheet-editor/dev/wp-sheet-editor.php:451
 msgid "Advanced Custom Fields"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:449
+#: wp-sheet-editor/dev/wp-sheet-editor.php:454
 msgid "<p >Advanced Custom Fields metaboxes appear in the Spreadsheet Automatically. So you can edit custom fields easily.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:456
+#: wp-sheet-editor/dev/wp-sheet-editor.php:461
 msgid "Edit Custom Fields in Spreadsheet"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:459
+#: wp-sheet-editor/dev/wp-sheet-editor.php:464
 msgid "<p >You can create columns for custom fields. <br>Edit page settings added by your theme, event details, products information, etc.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:466
+#: wp-sheet-editor/dev/wp-sheet-editor.php:471
 msgid "Edit Posts and Pages in Spreadsheet"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:469
+#: wp-sheet-editor/dev/wp-sheet-editor.php:474
 msgid "<p >Edit default post fields in spreadsheet.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:477
+#: wp-sheet-editor/dev/wp-sheet-editor.php:482
 msgid "WooCommerce - BASIC integration"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:480
+#: wp-sheet-editor/dev/wp-sheet-editor.php:485
 msgid "<p>You can edit simple products only. Available columns: title, url, description, date, SKU, regular price, sale price, stock status, manage stock, stock quantity.</p><p>More columns and product types available as premium extension.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:488
+#: wp-sheet-editor/dev/wp-sheet-editor.php:493
 msgid "Columns visibility"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:491
+#: wp-sheet-editor/dev/wp-sheet-editor.php:496
 msgid "<p >You can show, hide, and sort columns in the spreadsheet.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:497
+#: wp-sheet-editor/dev/wp-sheet-editor.php:502
 msgid "Autofill cells"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:500
+#: wp-sheet-editor/dev/wp-sheet-editor.php:505
 msgid "<p >You can auto fill cells (copy) by dragging the cell corner into other cells, as you can do in excel.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:508
+#: wp-sheet-editor/dev/wp-sheet-editor.php:513
 msgid "Basic search"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:510
+#: wp-sheet-editor/dev/wp-sheet-editor.php:515
 msgid "<p >Search in the spreadsheet. Find posts by keyword, status, and author.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:518
+#: wp-sheet-editor/dev/wp-sheet-editor.php:523
 msgid "Columns resizing"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:520
+#: wp-sheet-editor/dev/wp-sheet-editor.php:525
 msgid "<p >Resize columns in the spreadsheet and save it for future sessions.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:526
+#: wp-sheet-editor/dev/wp-sheet-editor.php:531
 msgid "Duplicate (Tool)"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:528
+#: wp-sheet-editor/dev/wp-sheet-editor.php:533
 msgid "<p >Add a \"duplicate\" tool to the spreadsheet. You can select one row (post, product, coupon, etc.) and create a lot of copies.</p><p>Example. Create 100 products with the same tags, dimensions, attributes, and variations. And only change a couple of fields manually.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:542
+#: wp-sheet-editor/dev/wp-sheet-editor.php:547
 msgid "Everything you need for All Posts Types and Products"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:549
-#: wp-sheet-editor/dev/wp-sheet-editor.php:562
+#: wp-sheet-editor/dev/wp-sheet-editor.php:554
+#: wp-sheet-editor/dev/wp-sheet-editor.php:567
 msgid "Buy bundle"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:555
+#: wp-sheet-editor/dev/wp-sheet-editor.php:560
 msgid "Everything you need for Users and Customers"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:687
+#: wp-sheet-editor/dev/wp-sheet-editor.php:692
 msgid ""
 "<h1>WP Sheet Editor</h1>\r\n"
 "                <p>Do you want to install the premium plugin that you purchased? Follow these steps:</p>\r\n"
@@ -5759,144 +5758,144 @@ msgid ""
 "                <p>If you need help, you can <a href=\"%2$s\" target=\"_blank\">contact us</a></p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:1063
+#: wp-sheet-editor/dev/wp-sheet-editor.php:1068
 msgid "Quick Answers"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:1064
+#: wp-sheet-editor/dev/wp-sheet-editor.php:1069
 msgid "You can read our FAQ with a list of hundreds of questions"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:1068
+#: wp-sheet-editor/dev/wp-sheet-editor.php:1073
 msgid "Guides and Tutorials"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:1069
+#: wp-sheet-editor/dev/wp-sheet-editor.php:1074
 msgid "We have +200 tutorials and guides on our blog"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:1074
+#: wp-sheet-editor/dev/wp-sheet-editor.php:1079
 msgid "Get instant help in the live chat + email support during business hours"
 msgstr ""
 
-#: wp-sheet-editor/dev/wp-sheet-editor.php:1111
+#: wp-sheet-editor/dev/wp-sheet-editor.php:1116
 msgid "WP Sheet Editor Usage"
 msgstr ""
 
-#: wpml/inc/post.php:48
+#: wpml/inc/post.php:47
 msgid "WPML - Use IDs in the column \"Translation of\" instead of Titles?"
 msgstr ""
 
-#: wpml/inc/post.php:49
+#: wpml/inc/post.php:48
 msgid "By default, we use post titles to connect translations with the default language, but it can cause issues if you have duplicate titles, so you can enable this option to display IDs and save using IDs. This applies to all the spreadsheets related to a post type."
 msgstr ""
 
-#: wpml/inc/post.php:221
-#: wpml/inc/term.php:74
+#: wpml/inc/post.php:220
+#: wpml/inc/term.php:73
 msgid "WPML - Missing translations in these languages"
 msgstr ""
 
-#: wpml/inc/post.php:221
+#: wpml/inc/post.php:220
 msgid "For example, select \"Spanish\" and \"German\" here and we'll find products that don't have spanish translations or german translations."
 msgstr ""
 
-#: wpml/inc/post.php:463
-#: wpml/inc/term.php:208
+#: wpml/inc/post.php:465
+#: wpml/inc/term.php:203
 msgid "WPML - Duplicate"
 msgstr ""
 
-#: wpml/inc/post.php:471
-#: wpml/inc/term.php:216
+#: wpml/inc/post.php:470
+#: wpml/inc/term.php:208
 msgid "Enter multiple language codes separated by commas and we will create copies of the main language. For example: en, es. Existing languages will be skipped."
 msgstr ""
 
-#: wpml/inc/post.php:483
-#: wpml/inc/term.php:189
+#: wpml/inc/post.php:482
+#: wpml/inc/term.php:187
 msgid "WPML - Translation of"
 msgstr ""
 
-#: wpml/inc/post.php:502
+#: wpml/inc/post.php:498
 msgid "WPML - Relationship"
 msgstr ""
 
-#: wpml/inc/post.php:513
+#: wpml/inc/post.php:506
 msgid "Duplicate from the main language"
 msgstr ""
 
-#: wpml/inc/post.php:514
+#: wpml/inc/post.php:507
 msgid "Translate separately"
 msgstr ""
 
-#: wpml/inc/post.php:529
-#: wpml/inc/term.php:228
+#: wpml/inc/post.php:522
+#: wpml/inc/term.php:220
 msgid "WPML - Language"
 msgstr ""
 
-#: wpml/inc/post.php:540
-#: wpml/inc/term.php:242
+#: wpml/inc/post.php:530
+#: wpml/inc/term.php:231
 msgid "You can change the language of this post. If the translation for the new language exists, this change will not be applied."
 msgstr ""
 
-#: wpml/inc/post.php:552
+#: wpml/inc/post.php:542
 msgid "WPML - Translation priority"
 msgstr ""
 
-#: wpml/inc/term.php:74
+#: wpml/inc/term.php:73
 msgid "For example, select \"Spanish\" and \"German\" here and we'll find terms that don't have spanish translations or german translations."
 msgstr ""
 
-#: yoast-seo/yoast-seo.php:27
+#: yoast-seo/yoast-seo.php:26
 msgid "Please update the WP Sheet Editor plugin and all its extensions to the latest version. The features of the plugin \""
 msgstr ""
 
-#: yoast-seo/yoast-seo.php:241
+#: yoast-seo/yoast-seo.php:239
 msgid "SEO Title"
 msgstr ""
 
-#: yoast-seo/yoast-seo.php:263
+#: yoast-seo/yoast-seo.php:253
 msgid "SEO Description"
 msgstr ""
 
-#: yoast-seo/yoast-seo.php:281
+#: yoast-seo/yoast-seo.php:266
 msgid "SEO Keyword"
 msgstr ""
 
-#: yoast-seo/yoast-seo.php:302
+#: yoast-seo/yoast-seo.php:280
 msgid "SEO FB title"
 msgstr ""
 
-#: yoast-seo/yoast-seo.php:318
+#: yoast-seo/yoast-seo.php:293
 msgid "SEO FB description"
 msgstr ""
 
-#: yoast-seo/yoast-seo.php:334
+#: yoast-seo/yoast-seo.php:306
 msgid "SEO FB image"
 msgstr ""
 
-#: yoast-seo/yoast-seo.php:352
+#: yoast-seo/yoast-seo.php:322
 msgid "SEO TW title"
 msgstr ""
 
-#: yoast-seo/yoast-seo.php:368
+#: yoast-seo/yoast-seo.php:335
 msgid "SEO TW description"
 msgstr ""
 
-#: yoast-seo/yoast-seo.php:384
+#: yoast-seo/yoast-seo.php:348
 msgid "SEO TW image"
 msgstr ""
 
-#: yoast-seo/yoast-seo.php:402
+#: yoast-seo/yoast-seo.php:364
 msgid "SEO Canonical URL"
 msgstr ""
 
-#: yoast-seo/yoast-seo.php:424
+#: yoast-seo/yoast-seo.php:382
 msgid "SEO No Index"
 msgstr ""
 
-#: yoast-seo/yoast-seo.php:452
+#: yoast-seo/yoast-seo.php:401
 msgid "SEO"
 msgstr ""
 
-#: yoast-seo/yoast-seo.php:477
+#: yoast-seo/yoast-seo.php:418
 msgid "SEO Primary %s"
 msgstr ""

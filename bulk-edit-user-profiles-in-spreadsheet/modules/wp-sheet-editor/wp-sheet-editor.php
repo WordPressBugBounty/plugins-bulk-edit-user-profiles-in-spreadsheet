@@ -32,7 +32,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 	class WP_Sheet_Editor {
 
 		private $post_type;
-		public $version     = '2.25.14';
+		public $version     = '2.25.15';
 		public $textname    = 'vg_sheet_editor';
 		public $options_key = 'vg_sheet_editor';
 		public $plugin_url  = null;
@@ -112,6 +112,11 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 			// Exit if frontend and it\'s not allowed
 			if ( ! self::allow_to_initialize() ) {
 				return;
+			}
+
+			// This key is used for the file names created by our plugin for extra security
+			if ( ! get_option( 'vgse_secret_key' ) ) {
+				update_option( 'vgse_secret_key', md5( wp_generate_uuid4() ), false );
 			}
 
 			// Disable WC's marketplace ads
@@ -1441,7 +1446,6 @@ if ( ! function_exists( 'VGSE' ) ) {
 
 
 // If the locale is RTL, force the locale to en_US because we don't support RTL
-$wp_locale = get_option( 'WPLANG' );
 // if ( ! function_exists( 'vgse_force_editor_in_english' ) && preg_match( '/^(ar|he|fa|ku|ur)/', $wp_locale ) ) {
 	// function vgse_force_editor_in_english() {
 	// 	if ( ! is_admin() ) {
@@ -1479,7 +1483,7 @@ $wp_locale = get_option( 'WPLANG' );
 	// vgse_force_editor_in_english();
 // }
 
-if ( ! function_exists( 'vgse_force_editor_to_ltr' ) && preg_match( '/^(ar|he|fa|ku|ur)/', $wp_locale ) ) {
+if ( ! function_exists( 'vgse_force_editor_to_ltr' ) ) {
 	// Experimental way to change RTL to LTR without changing the language to English
 	function vgse_force_editor_to_ltr() {
 		$is_editor_page           = isset( $_GET['page'] ) && strpos( $_GET['page'], 'vgse-bulk-edit-' ) !== false;
@@ -1490,4 +1494,6 @@ if ( ! function_exists( 'vgse_force_editor_to_ltr' ) && preg_match( '/^(ar|he|fa
 		}
 	}
 	vgse_force_editor_to_ltr();
+	add_action( 'init', 'vgse_force_editor_to_ltr' );
+	add_action( 'setup_theme', 'vgse_force_editor_to_ltr' );
 }
