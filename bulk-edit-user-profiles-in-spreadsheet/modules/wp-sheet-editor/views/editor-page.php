@@ -307,6 +307,7 @@ if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
 
 		<div class="modal-content">
 			<h3 class="post-title-modal"><?php esc_html_e( 'Editing:', 'vg_sheet_editor' ); ?> <span class="post-title"></span></h3>
+			<?php do_action( 'vg_sheet_editor/editor_page/tinymce/before_editor', $current_post_type ); ?>
 			<?php
 			wp_enqueue_editor();
 

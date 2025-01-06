@@ -517,6 +517,9 @@ ORDER BY user_login ASC",
 					$term            = ( is_array( $term_exists_raw ) && ! empty( $term_exists_raw ) ) ? current( $term_exists_raw ) : null;
 
 					if ( $term ) {
+						// WPML should always return the term in the current language through get_terms. But there is a very rare bug where it would return terms in all languages after saving multiple rows. So we have to run this filter to ensure we get the value in the correct lang
+						$term = apply_filters( 'wpml_object_id', $term, $taxonomy, false );
+						
 						$term_id = (int) $term;
 						// Don't allow users without capabilities to create new product categories or tags
 					} elseif ( in_array( $taxonomy, $woocommerce_taxonomies ) && ! WP_Sheet_Editor_Helpers::current_user_can( 'manage_product_terms' ) || ! $auto_create ) {

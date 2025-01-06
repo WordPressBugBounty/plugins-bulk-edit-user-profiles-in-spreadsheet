@@ -16,7 +16,6 @@ class VGSE_Provider_Post extends VGSE_Provider_Abstract {
 	static $data_store       = array();
 
 	private function __construct() {
-
 	}
 
 	function _get_allowed_ids_for_edit( $row_ids, $post_type ) {
@@ -127,7 +126,6 @@ AND pm.meta_key = %s",
 	}
 
 	function init() {
-
 	}
 
 	/**
@@ -674,6 +672,14 @@ ORDER BY t.name ASC",
 					$values['post_author'] = $wpdb->get_var( $wpdb->prepare( "SELECT post_author FROM $wpdb->posts WHERE ID = %d", $post_id ) );
 				}
 				$out = wp_update_post( $values, $wp_error );
+				if ( isset( $values['guid'] ) ) {
+					// Update the GUID in the $wpdb->posts table. We use $wpdb because wp_update_post does not update the GUID.
+					$wpdb->update(
+						$wpdb->posts,
+						array( 'guid' => esc_url_raw( $values['guid'] ) ),
+						array( 'ID' => intval( $post_id ) )
+					);
+				}
 
 				if ( ! empty( $post_tags ) || ! empty( $categories ) ) {
 					$this->set_object_terms( $post_id, VGSE()->data_helpers->prepare_post_terms_for_saving( $post_tags, 'product_tag' ), 'product_tag' );
@@ -792,5 +798,4 @@ ORDER BY t.name ASC",
 		$meta_keys             = $wpdb->get_col( $meta_keys_sql );
 		return apply_filters( 'vg_sheet_editor/provider/post/all_meta_fields', $meta_keys, $post_type );
 	}
-
 }

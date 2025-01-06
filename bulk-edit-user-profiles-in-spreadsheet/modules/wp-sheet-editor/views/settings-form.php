@@ -46,7 +46,7 @@
 						</label>
 
 						<?php if ( $field['type'] === 'text' ) { ?>
-							<input  class="<?php echo sanitize_html_class( $field['class_name'] ); ?>" id="<?php echo esc_attr( $field['id'] ); ?>" name="settings[<?php echo esc_attr( $field['id'] ); ?>]" value="<?php echo esc_attr( $value ); ?>" type="<?php echo esc_attr( $input_type ); ?>" />
+							<input  class="<?php echo sanitize_html_class( $field['class_name'] ); ?>" id="<?php echo esc_attr( $field['id'] ); ?>" name="settings[<?php echo esc_attr( $field['id'] ); ?>]" value="<?php echo esc_attr( $value ); ?>" type="<?php echo esc_attr( $input_type ); ?>" <?php if( ! empty($field['min'])) echo ' min="' . (int) $field['min'] . '" '; ?> />
 						<?php } ?>
 						<?php if ( $field['type'] === 'textarea' ) { ?>
 							<textarea class="<?php echo sanitize_html_class( $field['class_name'] ); ?>" id="<?php echo esc_attr( $field['id'] ); ?>" name="settings[<?php echo esc_attr( $field['id'] ); ?>]"><?php echo esc_attr( $value ); ?></textarea>

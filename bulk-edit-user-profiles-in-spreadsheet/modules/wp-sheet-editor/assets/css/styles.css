@@ -107,8 +107,8 @@ textarea {
     width: 100%;
 }
 
-.unstyled-list>li>input,
-.unstyled-list>li>textarea,
+.unstyled-list>li>input:not([type="checkbox"]),
+.unstyled-list>li textarea,
 .select2-container,
 #vgse-wrapper .chosen-container {
     min-width: 315px;
@@ -3296,7 +3296,7 @@ html.wpse-loading-tinymce iframe#editpost_ifr {
     overflow: hidden;
 }
 
-.remodal-error-log pre {
+.remodal pre {
     white-space: pre-wrap;
     /* Since CSS 2.1 */
     white-space: -moz-pre-wrap;
@@ -3383,6 +3383,33 @@ html.wpse-loading-tinymce iframe#editpost_ifr {
         -webkit-transform: rotate(360deg);
                 transform: rotate(360deg);
     }
+}
+
+.modal-ai p {
+    text-align: left;
+}
+
+.modal-ai {
+    max-width: 880px !important;
+}
+
+.remodal-add-new-ai .img-preview {
+    display: inline-block;
+    position: relative;
+}
+
+.remodal-add-new-ai .img-preview .button {
+    position: absolute;
+    line-height: 15px;
+}
+
+.vgse-ai-tinymce-wrapper textarea {
+    width: 100%;
+    height: 40px;
+}
+
+.select2-container {
+    max-width: 100%;
 }
 .be-loading-anim {
     position: relative;

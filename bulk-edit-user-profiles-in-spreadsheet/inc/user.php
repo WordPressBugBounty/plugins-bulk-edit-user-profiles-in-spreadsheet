@@ -265,6 +265,10 @@ if ( ! class_exists( 'VGSE_Provider_User' ) ) {
 				}
 				$allow_safe_html = isset( $spreadsheet_columns[ $key ] ) && ! empty( $spreadsheet_columns[ $key ]['formatted'] ) && ! empty( $spreadsheet_columns[ $key ]['formatted']['renderer'] ) && $spreadsheet_columns[ $key ]['formatted']['renderer'] === 'html';
 
+				if ( isset( $spreadsheet_columns[ $key ] ) && ! empty( $spreadsheet_columns[ $key ]['columns_manager_settings'] ) && $spreadsheet_columns[ $key ]['columns_manager_settings']['field_type'] === 'raw_html' ) {
+					$allow_safe_html = true;
+				}
+
 				if ( ! $allow_safe_html ) {
 					if ( method_exists( VGSE()->helpers, 'deep_sanitization' ) ) {
 						$value = VGSE()->helpers->deep_sanitization( $value, 'wp_strip_all_tags' );

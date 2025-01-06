@@ -5,7 +5,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 	class WP_Sheet_Editor_Helpers {
 
 		public $post_type;
-		private static $instance        = false;
+		private static $instance        = null;
 		public $urls_to_file_ids_cache  = array();
 		public $meta_keys_refreshed     = array();
 		private static $current_user_id = 0;
@@ -111,7 +111,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 
 		public function set_with_dot_notation( &$array, $key, $value ) {
 			if ( is_null( $key ) ) {
-				return $array = $value;
+				$array = $value;
+				return $array;
 			}
 
 			$keys = explode( '.', $key );
@@ -131,15 +132,15 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 			return $array;
 		}
 
-		public function array_to_dot( $myArray ) {
-			$ritit  = new RecursiveIteratorIterator( new RecursiveArrayIterator( $myArray ) );
+		public function array_to_dot( $my_array ) {
+			$ritit  = new RecursiveIteratorIterator( new RecursiveArrayIterator( $my_array ) );
 			$result = array();
-			foreach ( $ritit as $leafValue ) {
+			foreach ( $ritit as $leaf_value ) {
 				$keys = array();
 				foreach ( range( 0, $ritit->getDepth() ) as $depth ) {
 					$keys[] = $ritit->getSubIterator( $depth )->key();
 				}
-				$result[ join( '.', $keys ) ] = $leafValue;
+				$result[ join( '.', $keys ) ] = $leaf_value;
 			}
 			return $result;
 		}
@@ -629,6 +630,9 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 				return null;
 			}
 			$out = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->posts WHERE post_title = %s AND post_type = %s", $title, $post_type ), OBJECT );
+			if ( $out ) {
+				$out->ID = (int) $out->ID;
+			}
 			return $out;
 		}
 		public function verify_sheet_permissions_from_request( $type, $request_key = 'post_type' ) {
@@ -750,8 +754,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 						unset( $item['wpse_set_post_status'] );
 						$item = array(
 							'post_status' => 'trash',
-							'ID' => $post_id,
-							'post_type' => $item['post_type'],
+							'ID'          => $post_id,
+							'post_type'   => $item['post_type'],
 						);
 					}
 
@@ -769,9 +773,9 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 					if ( empty( $item ) ) {
 						continue;
 					}
-					
+
 					// If the item had a temporary ID (PHP_INT_MAX) and the item id changed through the hook vg_sheet_editor/save_rows/row_data_before_save, update the $post_id to use the new ID when saving the other columns below
-					if ( $post_id === PHP_INT_MAX && is_int( $item['ID'] ) && $item['ID'] !== PHP_INT_MAX ){
+					if ( $post_id === PHP_INT_MAX && is_int( $item['ID'] ) && $item['ID'] !== PHP_INT_MAX ) {
 						$post_id = $item['ID'];
 					}
 
@@ -840,7 +844,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 
 							$final_key = $key;
 							if ( VGSE()->helpers->get_current_provider()->is_post_type ) {
-								if ( $key !== 'ID' && ! in_array( $key, array( 'comment_status', 'menu_order', 'comment_count' ) ) && strpos( $key, 'post_' ) === false ) {
+								if ( $key !== 'ID' && ! in_array( $key, array( 'comment_status', 'menu_order', 'comment_count', 'guid', 'pinged', 'to_ping', 'ping_status' ) ) && strpos( $key, 'post_' ) === false ) {
 									$final_key = 'post_' . $key;
 								}
 							}
@@ -974,7 +978,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 				return false;
 			}
 
-			$provider      = VGSE()->helpers->get_data_provider( $sheet_key );
+			$provider = VGSE()->helpers->get_data_provider( $sheet_key );
 			return $provider && ( $provider->is_post_type || $provider->key === 'user' );
 		}
 
@@ -1756,30 +1760,30 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 				return false;
 			}
 
-			$attachmentId = media_handle_sideload( $file, $post_id );
+			$attachment_id = media_handle_sideload( $file, $post_id );
 
 			// If error storing permanently, unlink
-			if ( is_wp_error( $attachmentId ) ) {
+			if ( is_wp_error( $attachment_id ) ) {
 				unlink( $file['tmp_name'] );
 				return false;
 			}
 
 			// create the thumbnails
-			$attach_data = wp_generate_attachment_metadata( $attachmentId, get_attached_file( $attachmentId ) );
+			$attach_data = wp_generate_attachment_metadata( $attachment_id, get_attached_file( $attachment_id ) );
 
-			wp_update_attachment_metadata( $attachmentId, $attach_data );
+			wp_update_attachment_metadata( $attachment_id, $attach_data );
 			if ( ! empty( $original_url ) ) {
-				update_post_meta( $attachmentId, 'wpse_external_file_url', esc_url( $original_url ) );
+				update_post_meta( $attachment_id, 'wpse_external_file_url', esc_url( $original_url ) );
 			}
-			return $attachmentId;
+			return $attachment_id;
 		}
 
 		/**
 		 * Add file to gallery from url
 		 * Download a file from an external url and add it to
 		 * the WordPress gallery.
-		 * @param str $url External file url
-		 * @param str $save_as New file name
+		 * @param string $url External file url
+		 * @param string $save_as New file name
 		 * @param int $post_id Append to the post ID
 		 * @return mixed Attachment ID on success, false on failure
 		 */
@@ -1961,7 +1965,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 
 					$final_key = $cell_key;
 					if ( VGSE()->helpers->get_current_provider()->is_post_type ) {
-						if ( ! in_array( $cell_key, array( 'comment_status', 'menu_order', 'comment_count', 'ID' ) ) && strpos( $cell_key, 'post_' ) === false ) {
+						if ( ! in_array( $cell_key, array( 'comment_status', 'menu_order', 'comment_count', 'guid', 'pinged', 'to_ping', 'ping_status', 'ID' ) ) && strpos( $cell_key, 'post_' ) === false ) {
 							$final_key = 'post_' . $cell_key;
 						}
 					}
@@ -1984,7 +1988,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 		/**
 		 * Get column textual value.
 		 *
-		 * @param str $column_key
+		 * @param string $column_key
 		 * @param int $post_id
 		 * @return boolean|string
 		 */
@@ -2062,8 +2066,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 		/**
 		 * Get column settings
 		 *
-		 * @param str $column_key
-		 * @param str $post_type
+		 * @param string $column_key
+		 * @param string $post_type
 		 * @return boolean|array
 		 */
 		public function get_column_settings( $column_key, $post_type = null ) {
@@ -2229,8 +2233,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 
 		/**
 		 * Make a rest request internally
-		 * @param str $method Request method.
-		 * @param str $route Rest endpoint route
+		 * @param string $method Request method.
+		 * @param string $route Rest endpoint route
 		 * @param array $data Request arguments.
 		 * @return WP_REST_Response
 		 */
@@ -2253,7 +2257,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 
 		/**
 		 * Remove array item by value
-		 * @param str $value
+		 * @param string $value
 		 * @param array $array
 		 * @return array
 		 */
@@ -2478,6 +2482,9 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 			$this->post_type = ( ! empty( $post_type ) ) ? $post_type : $this->get_provider_from_query_string();
 		}
 
+		/**
+		 * @return WP_Sheet_Editor_Helpers
+		 */
 		static function get_instance() {
 			if ( null == self::$instance ) {
 				self::$instance = new WP_Sheet_Editor_Helpers();
@@ -2506,9 +2513,9 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 		 *
 		 * It accepts auto-generated thumbnails URLs.
 		 *
-		 * @global type $wpdb
-		 * @param type $attachment_url
-		 * @return type
+		 * @global object $wpdb
+		 * @param string $attachment_url
+		 * @return int|null
 		 */
 		public function get_attachment_id_from_url( $attachment_url = '' ) {
 			global $wpdb;
@@ -2526,7 +2533,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 				// Remove the upload path base directory from the attachment URL
 				$attachment_url = urldecode( str_replace( $upload_dir_paths['baseurl'] . '/', '', $attachment_url ) );
 				// Finally, run a custom database query to get the attachment ID from the modified attachment URL
-				$sql           = $wpdb->prepare( "SELECT wposts.ID FROM $wpdb->posts wposts, $wpdb->postmeta wpostmeta WHERE wposts.ID = wpostmeta.post_id AND wpostmeta.meta_key = '_wp_attached_file' AND wpostmeta.meta_value = '%s' AND wposts.post_type = 'attachment'", $attachment_url );
+				$sql           = $wpdb->prepare( "SELECT wposts.ID FROM $wpdb->posts wposts, $wpdb->postmeta wpostmeta WHERE wposts.ID = wpostmeta.post_id AND wpostmeta.meta_key = '_wp_attached_file' AND wpostmeta.meta_value = %s AND wposts.post_type = 'attachment'", $attachment_url );
 				$attachment_id = $wpdb->get_var( $sql );
 			}
 			return $attachment_id;

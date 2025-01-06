@@ -1,8 +1,8 @@
 {
     "name": "wp-sheet-editor-users",
-    "version": "1.5.37",
+    "version": "1.5.38",
     "vgDistName": "bulk-edit-user-profiles-in-spreadsheet",
-    "vgPreviousVersion": "1.5.37-beta.1",
+    "vgPreviousVersion": "1.5.38-beta.1",
     "sheetEditorModules": {
         "free": [
             "autofill-cells",

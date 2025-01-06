@@ -5,12 +5,11 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 	class WP_Sheet_Editor_Columns {
 
 		private static $registered_items = array();
-		private $rejected_items   = array();
-		private $prepared_items   = array();
-		public static $skip_cache = false;
+		private $rejected_items          = array();
+		private $prepared_items          = array();
+		public static $skip_cache        = false;
 
 		function __construct() {
-
 		}
 
 		function has_item( $key, $provider = null ) {
@@ -22,10 +21,10 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 
 		/**
 		 * Converts php DateTime format to Javascript Moment format.
-		 * @param string $phpFormat
+		 * @param string $php_format
 		 * @return string
 		 */
-		public function convert_php_to_js_format( $phpFormat ) {
+		public function convert_php_to_js_format( $php_format ) {
 			$replacements = array(
 				'A' => 'A', // for the sake of escaping below
 				'a' => 'a', // for the sake of escaping below
@@ -72,7 +71,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 				$replacements[ '\\' . $from ] = '[' . $from . ']';
 			}
 
-			return strtr( $phpFormat, $replacements );
+			return strtr( $php_format, $replacements );
 		}
 
 		function get_blacklisted_column_keywords( $provider ) {
@@ -207,72 +206,73 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 
 		function _register_item( $key, $args = array() ) {
 			$defaults = array(
-				'data_type'                         => 'post_data', // (post_data|meta_data|post_terms)
-				'column_width'                      => null,
-				'title'                             => trim( ucwords( str_replace( array( '-', '_' ), ' ', $key ) ) ),
-				'type'                              => '', // String boton_gallery|boton_gallery_multiple|view_post|handsontable|metabox|(empty)
-				'unformatted'                       => array(), // column args allowed by handsontable
-				'formatted'                         => array(), // column args allowed by handsontable
-				'export_key'                        => $key,
-				'default_value'                     => '',
+				'data_type'                                => 'post_data', // (post_data|meta_data|post_terms)
+				'column_width'                             => null,
+				'title'                                    => trim( ucwords( str_replace( array( '-', '_' ), ' ', $key ) ) ),
+				'type'                                     => '', // String boton_gallery|boton_gallery_multiple|view_post|handsontable|metabox|(empty)
+				'unformatted'                              => array(), // column args allowed by handsontable
+				'formatted'                                => array(), // column args allowed by handsontable
+				'export_key'                               => $key,
+				'default_value'                            => '',
 				// Visibility
-				'allow_to_hide'                     => true,
-				'skip_blacklist'                    => false,
-				'skip_columns_limit'                => false,
+				'allow_to_hide'                            => true,
+				'skip_blacklist'                           => false,
+				'skip_columns_limit'                       => false,
 				// Enable features
-				'allow_to_rename'                   => true,
-				'allow_to_save'                     => true,
-				'allow_to_save_sanitization'        => true,
-				'allow_plain_text'                  => true,
-				'allow_to_import'                   => true,
-				'allow_direct_search'               => true, // We use this to mark fields that can't be searched with the advanced filters
-				'allow_search_during_import'        => true, // useful to exclude serialized fields from the import > wp fields dropdown in the step 3
-				'is_locked'                         => false, // We'll add a lock icon before the cell value and disable editing
-				'lock_template_key'                 => false, // We'll add a lock icon before the cell value and disable editing
-				'forced_allow_to_save'              => null,
-				'forced_supports_formulas'          => null,
-				'allow_custom_format'               => false,
+				'allow_to_rename'                          => true,
+				'allow_to_save'                            => true,
+				'allow_to_save_sanitization'               => true,
+				'allow_plain_text'                         => true,
+				'allow_to_import'                          => true,
+				'allow_direct_search'                      => true, // We use this to mark fields that can't be searched with the advanced filters
+				'allow_search_during_import'               => true, // useful to exclude serialized fields from the import > wp fields dropdown in the step 3
+				'is_locked'                                => false, // We'll add a lock icon before the cell value and disable editing
+				'lock_template_key'                        => false, // We'll add a lock icon before the cell value and disable editing
+				'forced_allow_to_save'                     => null,
+				'forced_supports_formulas'                 => null,
+				'allow_custom_format'                      => false,
 				// Formulas
-				'supports_formulas'                 => false,
-				'supports_sql_formulas'             => true,
-				'key_for_formulas'                  => $key,
-				'supported_formula_types'           => array(),
+				'supports_formulas'                        => false,
+				'supports_sql_formulas'                    => true,
+				'key_for_formulas'                         => $key,
+				'supported_formula_types'                  => array(),
 				// Callbacks
-				'get_value_callback'                => '', // Callable. We'll use this to get the cell value during all contexts,
-				'save_value_callback'               => '', // Callable. We'll use this to get the cell value during all contexts,
-				'prepare_value_for_database'        => '', // Callable. Modify the cell value before it's saved using the normal saving process
-				'prepare_value_for_display'         => '', // Callable. Modify the cell value before it's displayed using the normal display process
+				'get_value_callback'                       => '', // Callable. We'll use this to get the cell value during all contexts,
+				'save_value_callback'                      => '', // Callable. We'll use this to get the cell value during all contexts,
+				'prepare_value_for_database'               => '', // Callable. Modify the cell value before it's saved using the normal saving process
+				'prepare_value_for_display'                => '', // Callable. Modify the cell value before it's displayed using the normal display process
 				// Metabox and handsontable type
-				'edit_button_label'                 => null,
-				'edit_modal_id'                     => null,
-				'edit_modal_title'                  => null,
-				'edit_modal_description'            => null,
-				'edit_modal_local_cache'            => true,
-				'edit_modal_save_action'            => null, // js_function_name:<function name>, <wp ajax action>
-				'edit_modal_cancel_action'          => null,
+				'edit_button_label'                        => null,
+				'edit_modal_id'                            => null,
+				'edit_modal_title'                         => null,
+				'edit_modal_description'                   => null,
+				'edit_modal_local_cache'                   => true,
+				'edit_modal_save_action'                   => null, // js_function_name:<function name>, <wp ajax action>
+				'edit_modal_cancel_action'                 => null,
 				// Metabox type
-				'metabox_show_selector'             => null,
-				'metabox_value_selector'            => null,
+				'metabox_show_selector'                    => null,
+				'metabox_value_selector'                   => null,
 				// Handsontable type
-				'handsontable_columns'              => array(), // array( 'product' => array( array( 'data' => 'name' ), ) ),
-				'handsontable_column_names'         => array(), // array('product' => array('Column name'),),
-				'handsontable_column_widths'        => array(), // array('product' => array(160),),
+				'handsontable_columns'                     => array(), // array( 'product' => array( array( 'data' => 'name' ), ) ),
+				'handsontable_column_names'                => array(), // array('product' => array('Column name'),),
+				'handsontable_column_widths'               => array(), // array('product' => array(160),),
 				// Tmp. We use the new handsontable renderer only for _default_attributes for now
 				// we will use it for all in the future
-				'use_new_handsontable_renderer'     => false,
+				'use_new_handsontable_renderer'            => false,
 				// This parameter is used to indicate the separator character that should be
 				// used when generating the append, prepend formulas
-				'list_separation_character'         => false,
-				'custom_sanitization_before_saving' => null, // Default sanitization is wp_kses_post.
-				'user_capabilities_can_read'        => null,
-				'user_capabilities_can_edit'        => null,
-				'allow_to_prefetch_value'           => true,
-				'external_button_template'          => '',
-				'gallery_cell_html_template_readonly'        => null, 
-				'gallery_cell_html_template_editable'        => null, 
-				'allow_for_global_sort' => true,
+				'list_separation_character'                => false,
+				'custom_sanitization_before_saving'        => null, // Default sanitization is wp_kses_post.
+				'user_capabilities_can_read'               => null,
+				'user_capabilities_can_edit'               => null,
+				'allow_to_prefetch_value'                  => true,
+				'external_button_template'                 => '',
+				'gallery_cell_html_template_readonly'      => null,
+				'gallery_cell_html_template_editable'      => null,
+				'allow_for_global_sort'                    => true,
 				'allow_role_restrictions_in_columns_manager' => true,
 				'allow_readonly_option_in_columns_manager' => true,
+				'value_type'                               => '', // text, number, email, date, post_terms, boton_gallery, boton_gallery_multiple, view_post, handsontable, metabox
 			);
 
 			$args = wp_parse_args( $args, $defaults );
@@ -290,13 +290,20 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 			if ( in_array( $args['type'], array( 'boton_gallery_multiple' ) ) ) {
 				$args['wp_media_multiple'] = true;
 			}
+			// Disable allow_search_during_import for checkbox and selects
+			if ( ( ! empty( $args['formatted']['type'] ) && $args['formatted']['type'] === 'checkbox' ) || ! empty( $args['formatted']['selectOptions'] ) ) {
+				$args['allow_search_during_import'] = false;
+			}
+
 			if ( in_array( $args['type'], array( 'boton_gallery_multiple', 'boton_gallery' ) ) ) {
 				unset( $args['unformatted'] );
-				$args['column_width'] = 200;
-				$args['formatted']    = array(
-					'data'     => $args['key'],
-					'renderer' => 'wp_media_gallery',
+				$args['column_width']               = 200;
+				$args['formatted']                  = array(
+					'data'              => $args['key'],
+					'renderer'          => 'wp_media_gallery',
+					'wp_media_multiple' => $args['type'] === 'boton_gallery_multiple',
 				);
+				$args['allow_search_during_import'] = false;
 			}
 			if ( in_array( $args['type'], array( 'boton_tiny' ) ) ) {
 				$args['type'] = '';
@@ -308,9 +315,10 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 				$args['allow_to_save'] = true;
 			}
 			if ( in_array( $args['type'], array( 'metabox', 'handsontable' ) ) ) {
-				$args['supports_formulas'] = false;
-				$args['allow_plain_text']  = false;
-				$args['allow_to_save']     = false;
+				$args['supports_formulas']          = false;
+				$args['allow_plain_text']           = false;
+				$args['allow_to_save']              = false;
+				$args['allow_search_during_import'] = false;
 			}
 			if ( in_array( $args['type'], array( 'metabox', 'handsontable' ) ) ) {
 				if ( empty( $args['edit_modal_title'] ) ) {
@@ -362,6 +370,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 					$args['value_type'] = $args['type'];
 				} elseif ( $args['data_type'] === 'post_terms' ) {
 					$args['value_type'] = 'post_terms';
+				} elseif ( ! empty( $args['formatted'] ) && ! empty( $args['formatted']['type'] ) && $args['formatted']['type'] === 'checkbox' ) {
+					$args['value_type'] = 'checkbox';
 				} else {
 					$args['value_type'] = 'text';
 				}
@@ -383,11 +393,12 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 				$args['unformatted']['readOnly'] = true;
 			}
 			if ( in_array( $args['type'], array( 'external_button' ) ) ) {
-				$args['formatted']['renderer']   = 'wp_external_button';
-				$args['formatted']['readOnly']   = true;
-				$args['unformatted']['renderer'] = 'wp_external_button';
-				$args['unformatted']['readOnly'] = true;
-				$args['data_type']               = null;
+				$args['allow_search_during_import'] = false;
+				$args['formatted']['renderer']      = 'wp_external_button';
+				$args['formatted']['readOnly']      = true;
+				$args['unformatted']['renderer']    = 'wp_external_button';
+				$args['unformatted']['readOnly']    = true;
+				$args['data_type']                  = null;
 			}
 			if ( $args['is_locked'] ) {
 				$args = self::_make_column_read_only( $args, false );
@@ -407,6 +418,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 			if ( ! empty( $args['formatted']['selectOptions'] ) && ! is_callable( $args['formatted']['selectOptions'] ) ) {
 				$args['formatted']['selectOptions'] = array_map( 'wp_filter_nohtml_kses', $args['formatted']['selectOptions'] );
 			}
+
 			return $args;
 		}
 
@@ -485,7 +497,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 						continue;
 					}
 					$column_title = strtolower( $column['title'] );
-					$post_type_titles[ $column_title ]++;
+					++$post_type_titles[ $column_title ];
 					if ( $post_type_titles[ $column_title ] > 1 ) {
 						$spreadsheet_columns[ $post_type ][ $key ]['title'] .= ' ' . $post_type_titles[ $column_title ];
 					}
@@ -659,7 +671,6 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 		function __get( $name ) {
 			return $this->$name;
 		}
-
 	}
 
 }

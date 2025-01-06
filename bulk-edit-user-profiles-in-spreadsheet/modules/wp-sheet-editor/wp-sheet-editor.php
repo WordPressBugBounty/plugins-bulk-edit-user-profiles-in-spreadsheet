@@ -32,7 +32,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 	class WP_Sheet_Editor {
 
 		private $post_type;
-		public $version     = '2.25.15';
+		public $version     = '2.25.16';
 		public $textname    = 'vg_sheet_editor';
 		public $options_key = 'vg_sheet_editor';
 		public $plugin_url  = null;
@@ -93,7 +93,6 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 		}
 
 		private function __construct() {
-
 		}
 
 		public static function allow_to_initialize() {
@@ -1252,7 +1251,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 				$localize_handle = 'bep_global';
 			} else {
 
-				$min_extension = ( ! empty( $_GET['wpse_debug'] ) || ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ) ? '' : '.min';
+				$min_extension = ( ! empty( $_GET['wpse_debug'] ) ) ? '' : '.min';
 				wp_enqueue_script( 'bep_libraries_js', $this->plugin_url . 'assets/vendor/js/libraries' . $min_extension . '.js', array(), $this->version, false );
 				wp_enqueue_script( 'bep_init_js', $this->plugin_url . 'assets/js/scripts' . $min_extension . '.js', array( 'bep_libraries_js' ), $this->version, false );
 				$localize_handle = 'bep_init_js';

@@ -303,6 +303,11 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 			}
 
 			$texts = array(
+				'formula_preview_button'                  => __( 'Show preview', 'vg_sheet_editor' ),
+				'formula_preview_sample_row_id'           => __( 'Sample row ID', 'vg_sheet_editor' ),
+				'formula_preview_old_value'               => __( 'Old value', 'vg_sheet_editor' ),
+				'formula_preview_new_value'               => __( 'New value', 'vg_sheet_editor' ),
+				'formula_preview_failed'                  => __( 'We couldn\'t generate a preview. Please try again with different parameters or try again later.', 'vg_sheet_editor' ),
 				'please_select_rows_with_checkboxes'      => __( 'Please select some rows with the checkboxes.', 'vg_sheet_editor' ),
 				'variation_rows_missing_parent'           => __( 'Some variation rows are missing a parent product. Please add a value to the "Parent" column in the row IDs: {variation_ids}', 'vg_sheet_editor' ),
 				'variations_not_found_for_selected_products' => __( 'These product IDs don\'t have variations to display: {ids}', 'vg_sheet_editor' ),
@@ -382,8 +387,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 				'auto_saving_stop_error'                  => __( '<p>The automatic saving failed. Your changes were not saved completely due to an error. You can try again later, if the error persists contact our support team and keep this tab opened</p>', 'vg_sheet_editor' ),
 				'merged_attributes_message'               => __( '{updated} attributes have been merged.', 'vg_sheet_editor' ),
 				'paged_batch_saved'                       => __( '{updated} items saved of {total} items that need saving.', 'vg_sheet_editor' ),
-				'ai_add_new_progress_text'                       => __( '{created} items created successfully, {failed} items failed because the AI returned invalid data.', 'vg_sheet_editor' ),
-				'ai_add_new_progress_text_successful'                       => __( '{created} items created successfully', 'vg_sheet_editor' ),
+				'ai_add_new_progress_text'                => __( '{created} items created successfully, {failed} items failed because the AI returned invalid data.', 'vg_sheet_editor' ),
+				'ai_add_new_progress_text_successful'     => __( '{created} items created successfully', 'vg_sheet_editor' ),
 				'paged_copy_variations_preparation'       => __( 'Scanning variations to be created. {updated} products of {total} products have been processed.', 'vg_sheet_editor' ),
 				'duplicates_removed_text'                 => __( '{deleted} duplicates have been removed.', 'vg_sheet_editor' ),
 				'everything_saved'                        => __( 'All items have been saved.', 'vg_sheet_editor' ),

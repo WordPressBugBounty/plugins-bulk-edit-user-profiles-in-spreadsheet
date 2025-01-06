@@ -192,7 +192,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 					'cell_locator',
 					array(
 						'type'         => 'html',
-						'help_tooltip' => __( 'To search among all posts use the Search tool. Use this to locate and highlight one value in the loaded rows in the spreadsheet. I.e. highlight a SKU or email or title.', 'vg_sheet_editor' ),
+						'help_tooltip' => __( 'Use the Search tool to search among all items. Use this to locate and highlight one value in the loaded rows in the spreadsheet. I.e. highlight a SKU or email or title.', 'vg_sheet_editor' ),
 						'content'      => '<input type="search" id="cell-locator-input" placeholder="' . __( 'Locate cell', 'vg_sheet_editor' ) . '"/>',
 						'label'        => __( 'Locate cell.', 'vg_sheet_editor' ),
 					),
@@ -600,6 +600,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 
 		/**
 		 * Creates or returns an instance of this class.
+		 * @return WP_Sheet_Editor_Filters
 		 */
 		static function get_instance() {
 			if ( ! self::$instance ) {

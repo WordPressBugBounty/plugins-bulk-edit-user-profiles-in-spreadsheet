@@ -44,7 +44,7 @@ if ( ! class_exists( 'VG_Freemium_Plugin_SDK' ) ) {
 					'logo'                     => '',
 					'logo_width'               => '',
 					'buy_link'                 => '',
-					'buy_link_text'            => __( 'Buy extension now', $this->textname ),
+					'buy_link_text'            => '',
 					'plugin_name'              => '',
 					'plugin_prefix'            => $this->_generate_random_string( 5 ),
 					'settings_page_url'        => '',
@@ -67,10 +67,18 @@ if ( ! class_exists( 'VG_Freemium_Plugin_SDK' ) ) {
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 			register_activation_hook( $this->settings['main_plugin_file'], array( $this, 'enable_welcome_page' ) );
 
+			add_action( 'init', array( $this, 'load_translations' ) );
+		}
+
+		function load_translations() {
 			$lang_path = wp_normalize_path( __DIR__ . '/lang/' );
-			$base_path = wp_normalize_path( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ) . '/';
+			$base_path = wp_normalize_path( dirname( __DIR__, 3 ) ) . '/';
 			$lang_path = str_replace( $base_path, '', $lang_path );
 			load_plugin_textdomain( $this->textname, false, $lang_path );
+
+			if ( empty( $this->settings['buy_link_text'] ) ) {
+				$this->settings['buy_link_text'] = __( 'Buy extension now', $this->textname );
+			}
 		}
 
 		function admin_enqueue_scripts( $hook ) {
@@ -266,7 +274,6 @@ if ( ! class_exists( 'VG_Freemium_Plugin_SDK' ) ) {
 		function __get( $name ) {
 			return $this->$name;
 		}
-
 	}
 
 }

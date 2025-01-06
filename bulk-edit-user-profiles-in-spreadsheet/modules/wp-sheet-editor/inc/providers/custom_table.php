@@ -429,10 +429,6 @@ class VGSE_Provider_Custom_table extends VGSE_Provider_Abstract {
 		$reserved_keys = array_keys( $defaults );
 		$args          = wp_parse_args( $args, $defaults );
 
-		// Don't order the rows when we just need the count
-		if ( $args['query_select'] === 'COUNT(*)' ) {
-			$args['order_by'] = '';
-		}
 		// Sort array by key to normalize the cache
 		ksort( $args );
 
@@ -597,7 +593,8 @@ class VGSE_Provider_Custom_table extends VGSE_Provider_Abstract {
 		}
 
 		if ( ! empty( $order_by ) && ! empty( $order ) ) {
-			$sql .= ' ORDER BY t.' . esc_sql( $order_by ) . ' ' . esc_sql( strtoupper( $order ) );
+			$orderby_sql = ' ORDER BY t.' . esc_sql( $order_by ) . ' ' . esc_sql( strtoupper( $order ) );
+			$sql        .= $orderby_sql;
 		}
 
 		if ( $paginated && ! empty( $paged ) && ! empty( $posts_per_page ) ) {
@@ -614,6 +611,11 @@ class VGSE_Provider_Custom_table extends VGSE_Provider_Abstract {
 			$prepared_sql = $sql;
 		} else {
 			$prepared_sql = $wpdb->prepare( $sql, $prepared_data );
+		}
+
+		// Don't order the rows when we just need the count
+		if ( $args['query_select'] === 'COUNT(*)' && ! empty( $orderby_sql ) ) {
+			$prepared_sql = str_replace( $orderby_sql, '', $prepared_sql );
 		}
 		$results = ( $method === 'get_results' ) ? $wpdb->get_results( $prepared_sql, OBJECT ) : $wpdb->get_var( $prepared_sql );
 		// This regex removes the 64-characters that WP adds as placeholders for %

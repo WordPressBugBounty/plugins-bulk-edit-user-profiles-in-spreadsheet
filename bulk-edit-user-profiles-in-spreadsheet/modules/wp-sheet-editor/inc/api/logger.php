@@ -224,7 +224,7 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 		 */
 		public function log_errors() {
 			$error = error_get_last();
-			if ( $error && in_array( $error['type'], array( E_ERROR, E_PARSE, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR ), true ) && preg_match( '/(sheet-editor|bulk-edit-events|bulk-edit-posts-on-frontend|bulk-edit-categories-tags|bulk-edit-user-profiles-in-spreadsheet|woo-coupons-bulk-editor|woo-bulk-edit-products|woo-products-bulk-editor)/', $error['message'] ) ) {
+			if ( $error && in_array( $error['type'], array( E_ERROR, E_PARSE, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR ), true ) && preg_match( '/(Fatal|Uncaught Error|sheet-editor|bulk-edit-events|bulk-edit-posts-on-frontend|bulk-edit-categories-tags|bulk-edit-user-profiles-in-spreadsheet|woo-coupons-bulk-editor|woo-bulk-edit-products|woo-products-bulk-editor)/', $error['message'] ) ) {
 				$this->entry( sprintf( __( '%1$s in %2$s on line %3$s', 'vg_sheet_editor' ), $error['message'], $error['file'], $error['line'] ), 'error_log' );
 			}
 		}
