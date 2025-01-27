@@ -32,7 +32,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 	class WP_Sheet_Editor {
 
 		private $post_type;
-		public $version     = '2.25.16';
+		public $version     = '2.25.17';
 		public $textname    = 'vg_sheet_editor';
 		public $options_key = 'vg_sheet_editor';
 		public $plugin_url  = null;
@@ -131,7 +131,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 			$this->buy_link = ( function_exists( 'vgse_freemius' ) ) ? vgse_freemius()->checkout_url() : 'https://wpsheeteditor.com';
 
 			if ( defined( 'WPSE_PROFILE_WHATISSOSLOW' ) && class_exists( 'WPSE_WhatIsSoSlow' ) ) {
-				WPSE_WhatIsSoSlow();
+				new WPSE_WhatIsSoSlow();
 			}
 
 			if ( ! empty( $_GET['wpse_hard_reset'] ) && ! empty( $_GET['wpse_nonce'] ) && VGSE()->helpers->user_can_manage_options() && wp_verify_nonce( $_GET['wpse_nonce'], 'wpse' ) ) {
@@ -1253,19 +1253,56 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 
 				$min_extension = ( ! empty( $_GET['wpse_debug'] ) ) ? '' : '.min';
 				wp_enqueue_script( 'bep_libraries_js', $this->plugin_url . 'assets/vendor/js/libraries' . $min_extension . '.js', array(), $this->version, false );
-				wp_enqueue_script( 'bep_init_js', $this->plugin_url . 'assets/js/scripts' . $min_extension . '.js', array( 'bep_libraries_js' ), $this->version, false );
+				wp_enqueue_script( 'bep_init_js', $this->plugin_url . 'assets/js/scripts' . $min_extension . '.js', array( 'bep_libraries_js', 'wp-hooks' ), $this->version, false );
 				$localize_handle = 'bep_init_js';
 			}
+
+			$delayed_js      = glob( __DIR__ . '/assets/delayed-js/*.js' );
+			$delayed_js_urls = array();
+			foreach ( $delayed_js as $file_path ) {
+				$delayed_js_urls[] = $this->plugin_url . 'assets/delayed-js/' . basename( $file_path );
+			}
+
 			wp_localize_script(
 				$localize_handle,
 				'vgse_global_data',
 				apply_filters(
 					'vg_sheet_editor/global_js_data',
 					array(
-						'ajax_url' => admin_url( 'admin-ajax.php' ),
+						'ajax_url'        => admin_url( 'admin-ajax.php' ),
+						'delayed_js_urls' => $delayed_js_urls,
 					)
 				)
 			);
+			if ( ! empty( $delayed_js_urls ) ) {
+				ob_start();
+				?>
+			<script>
+				// Function to insert the script tag with a delayed execution. We need this because if we enqueue the Alpine framework with wp_enqueue_script, it throws errors because the DOM is not ready yet when Alpine initializes. So we need Alpine to init after the DOM is ready.
+				function vgseInsertScriptTag(url) {
+					const script = document.createElement('script');
+					script.src = url;
+					script.defer = true;
+					script.setAttribute("data-wp-strategy", "defer");		
+					document.body.appendChild(script);
+				}
+			
+				// Insert the script tag after some milliseconds
+				if(vgse_global_data.delayed_js_urls && vgse_global_data.delayed_js_urls.length){
+					vgse_global_data.delayed_js_urls.forEach((url) => {
+						setTimeout(() => {
+							vgseInsertScriptTag(url);
+						}, 500);
+					});
+				}
+			</script>
+				<?php
+				$js = ob_get_clean();
+				$js = str_replace( array( '<script>', '</script>' ), '', $js );
+				wp_register_script( 'wpse-delayed-js', '',);
+				wp_enqueue_script( 'wpse-delayed-js' );
+				wp_add_inline_script( 'wpse-delayed-js', $js );
+			}
 			do_action( 'vg_sheet_editor/after_enqueue_assets' );
 		}
 

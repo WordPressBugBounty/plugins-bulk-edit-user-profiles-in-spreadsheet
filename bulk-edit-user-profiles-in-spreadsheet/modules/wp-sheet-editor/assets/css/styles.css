@@ -3411,6 +3411,15 @@ html.wpse-loading-tinymce iframe#editpost_ifr {
 .select2-container {
     max-width: 100%;
 }
+/* Move the x button in the selected terms in chosen to the left side to improve UX  */
+.handsontableInputHolder .chosen-container-multi .chosen-choices li.search-choice .search-choice-close {
+    left: 3px;
+}
+
+.handsontableInputHolder .chosen-container-multi .chosen-choices li.search-choice {
+    padding-left: 20px;
+    padding-right: 5px;
+}
 .be-loading-anim {
     position: relative;
     width: 50px;

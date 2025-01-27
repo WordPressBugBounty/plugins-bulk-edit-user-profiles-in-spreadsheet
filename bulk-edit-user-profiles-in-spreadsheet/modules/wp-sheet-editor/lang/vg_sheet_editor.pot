@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-01-06T14:43:15+00:00\n"
+"POT-Creation-Date: 2025-01-27T22:00:42+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 
@@ -52,7 +52,7 @@ msgstr ""
 #: columns-manager/inc/column-groups.php:281
 #: columns-resizing/columns-resizing.php:59
 #: columns-visibility/columns-visibility.php:213
-#: formulas/formulas.php:592
+#: formulas/formulas.php:602
 #: spreadsheet-setup/spreadsheet-setup.php:285
 #: universal-sheet/universal-sheet.php:144
 #: woocommerce/inc/attributes.php:802
@@ -317,7 +317,7 @@ msgid "Please select the background color"
 msgstr ""
 
 #: columns-manager/columns-manager.php:104
-#: formulas/inc/ui.php:624
+#: formulas/inc/ui.php:530
 msgid "Clear value"
 msgstr ""
 
@@ -330,7 +330,7 @@ msgid "Save"
 msgstr ""
 
 #: columns-manager/columns-manager.php:107
-#: formulas/inc/ui.php:132
+#: formulas/views/modal.php:175
 #: universal-sheet/views/export-modal.php:14
 #: universal-sheet/views/export-modal.php:84
 #: universal-sheet/views/import-modal.php:15
@@ -394,7 +394,7 @@ msgid "File ID"
 msgstr ""
 
 #: columns-manager/columns-manager.php:1173
-#: formulas/inc/ui.php:1013
+#: formulas/inc/ui.php:919
 #: universal-sheet/views/import-modal.php:43
 msgid "File URL"
 msgstr ""
@@ -404,13 +404,13 @@ msgid "Use default"
 msgstr ""
 
 #: columns-manager/columns-manager.php:1177
-#: formulas/inc/ui.php:556
+#: formulas/inc/ui.php:462
 #: woocommerce/inc/attributes.php:280
 msgid "Yes"
 msgstr ""
 
 #: columns-manager/columns-manager.php:1178
-#: formulas/inc/ui.php:556
+#: formulas/inc/ui.php:462
 #: woocommerce/inc/attributes.php:280
 msgid "No"
 msgstr ""
@@ -532,8 +532,8 @@ msgid "URL"
 msgstr ""
 
 #: columns-manager/columns-manager.php:1227
-#: formulas/inc/ui.php:336
-#: formulas/inc/ui.php:364
+#: formulas/inc/ui.php:246
+#: formulas/inc/ui.php:272
 msgid "Number"
 msgstr ""
 
@@ -741,7 +741,7 @@ msgid "We will save this group of columns as a spreadsheet view and you can swit
 msgstr ""
 
 #: columns-renaming/columns-renaming.php:46
-#: wp-sheet-editor/dev/inc/api/editor.php:354
+#: wp-sheet-editor/dev/inc/api/editor.php:355
 msgid "Rename column"
 msgstr ""
 
@@ -826,19 +826,19 @@ msgstr ""
 
 #: columns-visibility/views/form.php:59
 #: columns-visibility/views/form.php:109
-#: wp-sheet-editor/dev/inc/api/editor.php:322
+#: wp-sheet-editor/dev/inc/api/editor.php:323
 msgid "Remove column completely. If you want to use it later you can disable it by dragging and dropping to the right column"
 msgstr ""
 
 #: columns-visibility/views/form.php:61
 #: columns-visibility/views/form.php:111
-#: wp-sheet-editor/dev/inc/api/editor.php:316
+#: wp-sheet-editor/dev/inc/api/editor.php:317
 msgid "Disable column. You can enable it later."
 msgstr ""
 
 #: columns-visibility/views/form.php:62
 #: columns-visibility/views/form.php:112
-#: wp-sheet-editor/dev/inc/api/editor.php:317
+#: wp-sheet-editor/dev/inc/api/editor.php:318
 msgid "Enable column"
 msgstr ""
 
@@ -906,7 +906,7 @@ msgstr ""
 
 #: columns-visibility/views/form.php:166
 #: filters/filters.php:590
-#: formulas/inc/ui.php:153
+#: formulas/views/modal.php:221
 #: posts-templates/posts-templates.php:108
 #: universal-sheet/views/import-modal.php:231
 #: woocommerce/views/spreadsheet-create-variations-modal.php:112
@@ -1131,13 +1131,13 @@ msgid "Column width (pixels)"
 msgstr ""
 
 #: custom-columns/views/settings-page.php:141
-#: formulas/inc/ui.php:195
+#: formulas/inc/ui.php:101
 msgid "Delete"
 msgstr ""
 
 #: custom-columns/views/settings-page.php:148
 #: spreadsheet-setup/views/page.php:45
-#: wp-sheet-editor/dev/inc/api/editor.php:367
+#: wp-sheet-editor/dev/inc/api/editor.php:368
 msgid "Add new column"
 msgstr ""
 
@@ -1154,7 +1154,7 @@ msgid "There are some post types in WordPress that are private, they don't appea
 msgstr ""
 
 #: factory.php:238
-#: wp-sheet-editor/dev/wp-sheet-editor.php:1377
+#: wp-sheet-editor/dev/wp-sheet-editor.php:1414
 msgid "My license"
 msgstr ""
 
@@ -1243,663 +1243,685 @@ msgstr ""
 msgid "The random values could not be read."
 msgstr ""
 
-#: formulas/formulas.php:317
+#: formulas/formulas.php:327
 msgid "The math formula can't be applied. We found some existing data is not numeric. Data found: %1$s, ID: %2$d"
 msgstr ""
 
-#: formulas/formulas.php:332
+#: formulas/formulas.php:342
 msgid "Error. The math engine could not execute the math operation: %1$s, ID: %2$d"
 msgstr ""
 
-#: formulas/formulas.php:448
+#: formulas/formulas.php:458
 msgid "The search parameter must contain $current_value$ only"
 msgstr ""
 
-#: formulas/formulas.php:456
+#: formulas/formulas.php:466
 msgid "Value in the replace section is not valid"
 msgstr ""
 
-#: formulas/formulas.php:846
+#: formulas/formulas.php:856
 msgid "You do not have permission to delete posts."
 msgstr ""
 
-#: formulas/formulas.php:851
+#: formulas/formulas.php:861
 msgid "Missing number and time unit."
 msgstr ""
 
-#: formulas/formulas.php:855
+#: formulas/formulas.php:865
 msgid "Invalid time unit."
 msgstr ""
 
-#: formulas/formulas.php:861
+#: formulas/formulas.php:871
 msgid "Please indicate which terms you want to remove."
 msgstr ""
 
-#: formulas/formulas.php:866
+#: formulas/formulas.php:876
 msgid "Only administrators are allowed to send emails to users."
 msgstr ""
 
-#: formulas/formulas.php:870
+#: formulas/formulas.php:880
 msgid "Please enter the email subject and email message."
 msgstr ""
 
-#: formulas/formulas.php:874
+#: formulas/formulas.php:884
 msgid "The column selected is not valid."
 msgstr ""
 
-#: formulas/formulas.php:878
+#: formulas/formulas.php:888
 msgid "Error. The status column must be enabled in the spreadsheet before we can remove duplicates."
 msgstr ""
 
-#: formulas/formulas.php:882
+#: formulas/formulas.php:892
 msgid "The preview mode does not support this action."
 msgstr ""
 
-#: formulas/formulas.php:1078
+#: formulas/formulas.php:1088
 msgid "Bulk edit not executed. No items found matching the criteria."
 msgstr ""
 
-#: formulas/formulas.php:1088
+#: formulas/formulas.php:1098
 msgid "<p>Complete</p>."
 msgstr ""
 
-#: formulas/formulas.php:1209
+#: formulas/formulas.php:1219
 #: wp-sheet-editor/dev/inc/ajax.php:294
 #: wp-sheet-editor/dev/inc/api/helpers.php:930
 msgid "Error: %s"
 msgstr ""
 
-#: formulas/formulas.php:1251
+#: formulas/formulas.php:1261
 msgid "<p class=\"success-message\" data-column-key=\"%s\"><b>Editing the field: {column_label}</b>. Items to process: {total}, Progress: {progress_percentage}%%, We have updated {edited} items.</p>"
 msgstr ""
 
-#: formulas/inc/ui.php:70
-#: formulas/inc/ui.php:176
+#: formulas/inc/ui.php:82
+#: formulas/views/modal.php:5
 msgid "Bulk Edit"
 msgstr ""
 
-#: formulas/inc/ui.php:73
+#: formulas/inc/ui.php:93
+msgid "Edit"
+msgstr ""
+
+#: formulas/inc/ui.php:113
+msgid "Remove duplicates by title (delete the latest)"
+msgstr ""
+
+#: formulas/inc/ui.php:122
+msgid "Remove duplicates by title (delete the oldest)"
+msgstr ""
+
+#: formulas/inc/ui.php:131
+msgid "Remove duplicates with same title and content (delete the latest)"
+msgstr ""
+
+#: formulas/inc/ui.php:140
+msgid "Remove duplicates with same title and content (delete the oldest)"
+msgstr ""
+
+#: formulas/inc/ui.php:152
+msgid "More options"
+msgstr ""
+
+#: formulas/inc/ui.php:202
+msgid "The bulk edit is missing important information, please fill the form."
+msgstr ""
+
+#: formulas/inc/ui.php:203
+#: formulas/views/modal.php:52
+msgid "Select type of edit"
+msgstr ""
+
+#: formulas/inc/ui.php:204
+#: formulas/views/modal.php:54
+msgid "- -"
+msgstr ""
+
+#: formulas/inc/ui.php:205
+msgid "You entered an invalid formula. Please double check or contact us."
+msgstr ""
+
+#: formulas/inc/ui.php:210
+msgid "Remove terms from posts"
+msgstr ""
+
+#: formulas/inc/ui.php:211
+msgid "Enter one or multiple term names separated with %s or new lines. Enter the full hierarchy like \"Parent > Child\" to remove subcategories"
+msgstr ""
+
+#: formulas/inc/ui.php:233
+msgid "Add time to existing dates"
+msgstr ""
+
+#: formulas/inc/ui.php:234
+msgid "Add hours, days, weeks, months, or years to the existing dates.<br>If the existing date is empty, we will use the current date as a base."
+msgstr ""
+
+#: formulas/inc/ui.php:252
+#: formulas/inc/ui.php:278
+msgid "Minutes"
+msgstr ""
+
+#: formulas/inc/ui.php:252
+#: formulas/inc/ui.php:278
+msgid "Days"
+msgstr ""
+
+#: formulas/inc/ui.php:252
+#: formulas/inc/ui.php:278
+msgid "Weeks"
+msgstr ""
+
+#: formulas/inc/ui.php:252
+#: formulas/inc/ui.php:278
+msgid "Months"
+msgstr ""
+
+#: formulas/inc/ui.php:252
+#: formulas/inc/ui.php:278
+msgid "Years"
+msgstr ""
+
+#: formulas/inc/ui.php:253
+#: formulas/inc/ui.php:279
+msgid "Time unit"
+msgstr ""
+
+#: formulas/inc/ui.php:259
+msgid "Deduct time from existing dates"
+msgstr ""
+
+#: formulas/inc/ui.php:260
+msgid "Deduct a number of hours, days, weeks, months, or years to the existing dates.<br>If the existing date is empty, we will use the current date as a base."
+msgstr ""
+
+#: formulas/inc/ui.php:285
+msgid "Math operation"
+msgstr ""
+
+#: formulas/inc/ui.php:286
+msgid "Update existing value with the result of a math operation.<br>The result is rounded to the 2 nearest decimals. I.e. 3.845602 becomes 3.85"
+msgstr ""
+
+#: formulas/inc/ui.php:298
+msgid "Math formula"
+msgstr ""
+
+#: formulas/inc/ui.php:299
+msgid "Example 1: $current_value$ + 2 * 5. <br/>Example 2: $_regular_price$ * 0.7 (Set regular price - 30%)"
+msgstr ""
+
+#: formulas/inc/ui.php:306
+#: woocommerce/woocommerce.php:242
+msgid "Decrease by percentage"
+msgstr ""
+
+#: formulas/inc/ui.php:307
+msgid "Decrease the existing value by a percentage.<br>The result is rounded to the 2 nearest decimals. I.e. 3.845602 becomes 3.85"
+msgstr ""
+
+#: formulas/inc/ui.php:320
+#: formulas/inc/ui.php:341
+#: woocommerce/woocommerce.php:225
+msgid "Decrease by"
+msgstr ""
+
+#: formulas/inc/ui.php:321
+#: formulas/inc/ui.php:363
+msgid "Enter the percentage number."
+msgstr ""
+
+#: formulas/inc/ui.php:327
+msgid "Decrease by number"
+msgstr ""
+
+#: formulas/inc/ui.php:328
+msgid "Decrease the existing value by a number.<br>The result is rounded to the 2 nearest decimals. I.e. 3.845602 becomes 3.85"
+msgstr ""
+
+#: formulas/inc/ui.php:342
+#: formulas/inc/ui.php:384
+#: formulas/inc/ui.php:504
+msgid "Enter the number."
+msgstr ""
+
+#: formulas/inc/ui.php:348
+msgid "Increase by percentage"
+msgstr ""
+
+#: formulas/inc/ui.php:349
+msgid "Increase the existing value by a percentage.<br>The result is rounded to the 2 nearest decimals. I.e. 3.845602 becomes 3.85"
+msgstr ""
+
+#: formulas/inc/ui.php:362
+#: formulas/inc/ui.php:383
+msgid "Increase by"
+msgstr ""
+
+#: formulas/inc/ui.php:369
+msgid "Increase by number"
+msgstr ""
+
+#: formulas/inc/ui.php:370
+msgid "Increase the existing value by a number.<br>The result is rounded to the 2 nearest decimals. I.e. 3.845602 becomes 3.85"
+msgstr ""
+
+#: formulas/inc/ui.php:390
+msgid "Set value"
+msgstr ""
+
+#: formulas/inc/ui.php:391
+msgid "Replace existing value with this value. <a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more</a>"
+msgstr ""
+
+#: formulas/inc/ui.php:406
+msgid "Set random value"
+msgstr ""
+
+#: formulas/inc/ui.php:407
+msgid "Replace existing value with a random value from this list. Enter the values separated with | if you want to select from a predefined list, or enter 2 dates separated with > if you want to select any date from that range"
+msgstr ""
+
+#: formulas/inc/ui.php:426
+msgid "Remove everything after some text"
+msgstr ""
+
+#: formulas/inc/ui.php:427
+msgid "I.e. A value like \"My great title (234343)\" can become \"My great title\" by removing everything after \" (\""
+msgstr ""
+
+#: formulas/inc/ui.php:436
+msgid "Remove everything after this text"
+msgstr ""
+
+#: formulas/inc/ui.php:439
+msgid "Remove the text too?"
+msgstr ""
+
+#: formulas/inc/ui.php:441
+msgid "Yes, remove everything after the text, including the text"
+msgstr ""
+
+#: formulas/inc/ui.php:441
+msgid "No, remove everything after the text, without including the text"
+msgstr ""
+
+#: formulas/inc/ui.php:447
+msgid "Remove everything before some text"
+msgstr ""
+
+#: formulas/inc/ui.php:448
+msgid "I.e. A value like \"(234343) My great title\" can become \"My great title\" by removing everything before \") \""
+msgstr ""
+
+#: formulas/inc/ui.php:457
+msgid "Remove everything before this"
+msgstr ""
+
+#: formulas/inc/ui.php:460
+msgid "Remove the text from above too?"
+msgstr ""
+
+#: formulas/inc/ui.php:468
+#: formulas/inc/ui.php:926
+msgid "Replace"
+msgstr ""
+
+#: formulas/inc/ui.php:469
+msgid "Replace a word, phrase, or number with a new value. <a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more</a>"
+msgstr ""
+
+#: formulas/inc/ui.php:478
+#: formulas/inc/ui.php:1000
+msgid "Replace this"
+msgstr ""
+
+#: formulas/inc/ui.php:482
+#: formulas/inc/ui.php:1012
+msgid "With this"
+msgstr ""
+
+#: formulas/inc/ui.php:488
+msgid "Generate excerpt"
+msgstr ""
+
+#: formulas/inc/ui.php:489
+msgid "If the column has a very long text, we will remove the html and shorten it to a number of words."
+msgstr ""
+
+#: formulas/inc/ui.php:503
+msgid "Maximum number of words"
+msgstr ""
+
+#: formulas/inc/ui.php:510
+msgid "Capitalize words"
+msgstr ""
+
+#: formulas/inc/ui.php:511
+msgid "Capitalize the first letter of every word in the field. I.e. convert \"my title\" into \"My Title\"."
+msgstr ""
+
+#: formulas/inc/ui.php:531
+msgid "Remove the existing value and leave the field empty. <a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more</a>"
+msgstr ""
+
+#: formulas/inc/ui.php:551
+msgid "Remove duplicates"
+msgstr ""
+
+#: formulas/inc/ui.php:552
+#: formulas/inc/ui.php:570
+msgid "<a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more</a>"
+msgstr ""
+
+#: formulas/inc/ui.php:561
+#: formulas/inc/ui.php:579
+msgid "Which duplicates do you want to delete?"
+msgstr ""
+
+#: formulas/inc/ui.php:563
+#: formulas/inc/ui.php:581
+msgid "Delete the newest items and keep the oldest item"
+msgstr ""
+
+#: formulas/inc/ui.php:563
+#: formulas/inc/ui.php:581
+msgid "Delete the old items and keep the newest item"
+msgstr ""
+
+#: formulas/inc/ui.php:569
+msgid "Remove duplicates with same title and content"
+msgstr ""
+
+#: formulas/inc/ui.php:587
+msgid "Append"
+msgstr ""
+
+#: formulas/inc/ui.php:596
+msgid "Enter the value to append to the existing value."
+msgstr ""
+
+#: formulas/inc/ui.php:602
+msgid "Prepend"
+msgstr ""
+
+#: formulas/inc/ui.php:614
+msgid "Enter the value to prepend to the existing value."
+msgstr ""
+
+#: formulas/inc/ui.php:620
+msgid "Custom formula"
+msgstr ""
+
+#: formulas/inc/ui.php:632
+msgid "Only for advanced users. <a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more.</a>"
+msgstr ""
+
+#: formulas/inc/ui.php:638
+msgid "Send email"
+msgstr ""
+
+#: formulas/inc/ui.php:639
+msgid "<p>Send email notifications to users in bulk, and create advanced segments using the advanced search.</p><p>For example, you can filter a spreadsheet of customers/users/forum users/affiliates/blog commenters by country, city, state, orders count, etc and send them important emails.</p><p>We recommend that you use a SMTP plugin to improve the email deliverability and take into account the users consent and privacy laws.</p>"
+msgstr ""
+
+#: formulas/inc/ui.php:652
+msgid "Email subject"
+msgstr ""
+
+#: formulas/inc/ui.php:653
+msgid "You can use variables to insert the value of any column."
+msgstr ""
+
+#: formulas/inc/ui.php:661
+msgid "Email message"
+msgstr ""
+
+#: formulas/inc/ui.php:662
+msgid "We recommend that you create a message that looks like it was written personally, you should add your logo, message, and email signature. You can use variables to insert the value of any column."
+msgstr ""
+
+#: formulas/inc/ui.php:669
+msgid "Reply to"
+msgstr ""
+
+#: formulas/inc/ui.php:670
+msgid "People will reply to this email address"
+msgstr ""
+
+#: formulas/inc/ui.php:673
+msgid "Only send one email per email address?"
+msgstr ""
+
+#: formulas/inc/ui.php:674
+msgid "One email per user means that if 3 rows have the same email address, only one row will trigger an email and the others will be skipped. One email per row means that if 3 rows have the same email address, we'll send 3 emails to the same address (one per row)."
+msgstr ""
+
+#: formulas/inc/ui.php:676
+msgid "Send one email per user"
+msgstr ""
+
+#: formulas/inc/ui.php:676
+msgid "Send one email per row"
+msgstr ""
+
+#: formulas/inc/ui.php:682
+msgid "PHP Function"
+msgstr ""
+
+#: formulas/inc/ui.php:695
+msgid "For advanced users. Enter the name of your PHP function and we will pass 2 parameters: $current_data (string with current value of the column) and $row_id, the function must accept the 2 parameters and return the modified value as a string. We will automatically save it if the value changed. <a class=\"formulas-action-tip-link\" href=\"%s#php-functions\" target=\"_blank\">Read more.</a>"
+msgstr ""
+
+#: formulas/inc/ui.php:701
+msgid "Copy from other columns"
+msgstr ""
+
+#: formulas/inc/ui.php:706
+msgid "Copy the value of other fields into this field.<br/>Example, copy \"sale price\" into the \"regular price\" field."
+msgstr ""
+
+#: formulas/inc/ui.php:716
+msgid "Copy from this column"
+msgstr ""
+
+#: formulas/inc/ui.php:791
+msgid "We will replace the existing media file(s) with these file(s)."
+msgstr ""
+
+#: formulas/inc/ui.php:803
+#: formulas/inc/ui.php:829
+#: formulas/inc/ui.php:855
+msgid "Upload the files"
+msgstr ""
+
+#: formulas/inc/ui.php:810
+#: formulas/inc/ui.php:836
+#: formulas/inc/ui.php:862
+msgid "File URLs"
+msgstr ""
+
+#: formulas/inc/ui.php:811
+#: formulas/inc/ui.php:837
+#: formulas/inc/ui.php:863
+msgid "Enter the URLs separated by commas. They can be from your own site."
+msgstr ""
+
+#: formulas/inc/ui.php:817
+msgid "We will prepend the new file(s) to the existing media file(s)."
+msgstr ""
+
+#: formulas/inc/ui.php:843
+msgid "We will append the new file(s) to the existing media file(s)."
+msgstr ""
+
+#: formulas/inc/ui.php:869
+#: formulas/inc/ui.php:927
+msgid "Replace a media file with other file"
+msgstr ""
+
+#: formulas/inc/ui.php:879
+msgid "Replace these files"
+msgstr ""
+
+#: formulas/inc/ui.php:880
+#: formulas/inc/ui.php:888
+msgid "Enter the URLs separated by commas. They must be from your own site."
+msgstr ""
+
+#: formulas/inc/ui.php:887
+msgid "With these files"
+msgstr ""
+
+#: formulas/inc/ui.php:900
+msgid "We will replace the existing media file with this file."
+msgstr ""
+
+#: formulas/inc/ui.php:912
+msgid "Upload the file"
+msgstr ""
+
+#: formulas/inc/ui.php:920
+msgid "Enter the URL. It can be an URL from your own site (Example http://site.com/wp-content/uploads/2016/01/file.jpg) or an external URL."
+msgstr ""
+
+#: formulas/inc/ui.php:937
+msgid "Replace this file"
+msgstr ""
+
+#: formulas/inc/ui.php:938
+#: formulas/inc/ui.php:946
+msgid "Enter the URL. It must be an URL from your own site. Example: http://site.com/wp-content/uploads/2016/01/file.jpg"
+msgstr ""
+
+#: formulas/inc/ui.php:945
+msgid "With this file"
+msgstr ""
+
+#: formulas/inc/ui.php:984
+msgid "We will replace the existing terms with these terms."
+msgstr ""
+
+#: formulas/inc/ui.php:989
+msgid "Enter the new terms separated by %s . You can add hierarchy like parent > child > child"
+msgstr ""
+
+#: formulas/inc/ui.php:995
+msgid "Replace some term(s) with new term(s). <a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more</a>"
+msgstr ""
+
+#: formulas/inc/ui.php:1001
+#: formulas/inc/ui.php:1013
+msgid "You must enter the full hierarchy like parent > child"
+msgstr ""
+
+#: formulas/inc/ui.php:1031
+msgid "Terms"
+msgstr ""
+
+#: formulas/inc/ui.php:1032
+msgid "Enter the full hierarchy like parent > child"
+msgstr ""
+
+#: formulas/views/modal.php:7
 msgid "Using this tool you can update thousands of rows at once"
 msgstr ""
 
-#: formulas/inc/ui.php:74
+#: formulas/views/modal.php:10
 msgid "Need help? Check our tutorials"
 msgstr ""
 
-#: formulas/inc/ui.php:79
+#: formulas/views/modal.php:17
 msgid "Select the rows that you want to update."
 msgstr ""
 
-#: formulas/inc/ui.php:82
+#: formulas/views/modal.php:22
 msgid "Edit all the rows from my current search (including non-visible rows)."
 msgstr ""
 
-#: formulas/inc/ui.php:83
+#: formulas/views/modal.php:25
 msgid "I want to search rows to update and edit all the search results"
 msgstr ""
 
-#: formulas/inc/ui.php:84
+#: formulas/views/modal.php:28
 msgid "Edit the rows that I selected manually in the spreadsheet."
 msgstr ""
 
-#: formulas/inc/ui.php:85
+#: formulas/views/modal.php:31
 msgid "Edit the same rows that I manually selected previously"
 msgstr ""
 
-#: formulas/inc/ui.php:87
+#: formulas/views/modal.php:35
 msgid "Make another search"
 msgstr ""
 
-#: formulas/inc/ui.php:95
+#: formulas/views/modal.php:40
 msgid "What field do you want to edit?"
 msgstr ""
 
-#: formulas/inc/ui.php:96
-#: formulas/inc/ui.php:101
+#: formulas/views/modal.php:42
 #: universal-sheet/views/export-modal.php:26
 msgid "Select column..."
 msgstr ""
 
-#: formulas/inc/ui.php:98
+#: formulas/views/modal.php:46
 msgid "A column is missing? <a href=\"#\" data-remodal-target=\"modal-columns-visibility\">Enable it</a>"
 msgstr ""
 
-#: formulas/inc/ui.php:110
+#: formulas/views/modal.php:121
+#: wp-sheet-editor/dev/inc/api/editor.php:307
+msgid "Show preview"
+msgstr ""
+
+#: formulas/views/modal.php:127
+#: wp-sheet-editor/dev/inc/api/editor.php:308
+msgid "Sample row ID"
+msgstr ""
+
+#: formulas/views/modal.php:129
+#: wp-sheet-editor/dev/inc/api/editor.php:309
+msgid "Old value"
+msgstr ""
+
+#: formulas/views/modal.php:131
+#: woocommerce/inc/attributes.php:278
+#: wp-sheet-editor/dev/inc/api/editor.php:310
+msgid "New value"
+msgstr ""
+
+#: formulas/views/modal.php:149
 msgid "Use slower execution method?"
 msgstr ""
 
-#: formulas/inc/ui.php:110
+#: formulas/views/modal.php:151
 msgid "The default way uses a faster execution method, but it might not work in all the cases. Use this option when the default way doesn't work or doesn't update all the posts."
 msgstr ""
 
-#: formulas/inc/ui.php:115
+#: formulas/views/modal.php:158
 msgid "%s rows will be edited."
 msgstr ""
 
-#: formulas/inc/ui.php:115
+#: formulas/views/modal.php:160
 msgid "You can select the rows for the edit in the first option of this form."
 msgstr ""
 
-#: formulas/inc/ui.php:126
+#: formulas/views/modal.php:168
 msgid "I have a database backup, Execute Now"
 msgstr ""
 
-#: formulas/inc/ui.php:128
+#: formulas/views/modal.php:170
 msgid "Execute Now"
 msgstr ""
 
-#: formulas/inc/ui.php:135
+#: formulas/views/modal.php:179
 msgid "<p>1- Please backup your database before executing, the changes are not reversible.</p><p>2- Make sure the bulk edit settings are correct before executing.</p>"
 msgstr ""
 
-#: formulas/inc/ui.php:137
+#: formulas/views/modal.php:183
 msgid "Careful. The changes are not reversible. Please double check proceeding."
 msgstr ""
 
-#: formulas/inc/ui.php:144
+#: formulas/views/modal.php:191
 msgid "The bulk edit is running. Please dont close this window until the process has finished."
 msgstr ""
 
-#: formulas/inc/ui.php:146
+#: formulas/views/modal.php:195
 msgid "<b>Tip:</b> The formula execution is too slow? <a href=\"%1$s\" target=\"_blank\">Save <b>more posts</b> per batch</a><br/>Are you getting errors when executing the formula? <a href=\"%2$s\" target=\"_blank\">Save <b>less posts</b> per batch</a>"
 msgstr ""
 
-#: formulas/inc/ui.php:149
+#: formulas/views/modal.php:202
 #: universal-sheet/views/export-modal.php:78
 #: universal-sheet/views/import-modal.php:230
 msgid "Pause"
 msgstr ""
 
-#: formulas/inc/ui.php:149
+#: formulas/views/modal.php:206
+msgid "Resume"
+msgstr ""
+
+#: formulas/views/modal.php:210
 #: wp-sheet-editor/dev/views/quick-setup.php:78
 #: wp-sheet-editor/dev/views/quick-setup.php:102
 msgid "Go back"
-msgstr ""
-
-#: formulas/inc/ui.php:151
-msgid "Processing..."
-msgstr ""
-
-#: formulas/inc/ui.php:187
-msgid "Edit"
-msgstr ""
-
-#: formulas/inc/ui.php:206
-msgid "Remove duplicates by title (delete the latest)"
-msgstr ""
-
-#: formulas/inc/ui.php:214
-msgid "Remove duplicates by title (delete the oldest)"
-msgstr ""
-
-#: formulas/inc/ui.php:222
-msgid "Remove duplicates with same title and content (delete the latest)"
-msgstr ""
-
-#: formulas/inc/ui.php:230
-msgid "Remove duplicates with same title and content (delete the oldest)"
-msgstr ""
-
-#: formulas/inc/ui.php:241
-msgid "More options"
-msgstr ""
-
-#: formulas/inc/ui.php:291
-msgid "The bulk edit is missing important information, please fill the form."
-msgstr ""
-
-#: formulas/inc/ui.php:292
-msgid "Select type of edit"
-msgstr ""
-
-#: formulas/inc/ui.php:293
-msgid "- -"
-msgstr ""
-
-#: formulas/inc/ui.php:294
-msgid "You entered an invalid formula. Please double check or contact us."
-msgstr ""
-
-#: formulas/inc/ui.php:299
-msgid "Remove terms from posts"
-msgstr ""
-
-#: formulas/inc/ui.php:300
-msgid "Enter one or multiple term names separated with %s or new lines. Enter the full hierarchy like \"Parent > Child\" to remove subcategories"
-msgstr ""
-
-#: formulas/inc/ui.php:323
-msgid "Add time to existing dates"
-msgstr ""
-
-#: formulas/inc/ui.php:324
-msgid "Add hours, days, weeks, months, or years to the existing dates.<br>If the existing date is empty, we will use the current date as a base."
-msgstr ""
-
-#: formulas/inc/ui.php:344
-#: formulas/inc/ui.php:372
-msgid "Minutes"
-msgstr ""
-
-#: formulas/inc/ui.php:344
-#: formulas/inc/ui.php:372
-msgid "Days"
-msgstr ""
-
-#: formulas/inc/ui.php:344
-#: formulas/inc/ui.php:372
-msgid "Weeks"
-msgstr ""
-
-#: formulas/inc/ui.php:344
-#: formulas/inc/ui.php:372
-msgid "Months"
-msgstr ""
-
-#: formulas/inc/ui.php:344
-#: formulas/inc/ui.php:372
-msgid "Years"
-msgstr ""
-
-#: formulas/inc/ui.php:345
-#: formulas/inc/ui.php:373
-msgid "Time unit"
-msgstr ""
-
-#: formulas/inc/ui.php:351
-msgid "Deduct time from existing dates"
-msgstr ""
-
-#: formulas/inc/ui.php:352
-msgid "Deduct a number of hours, days, weeks, months, or years to the existing dates.<br>If the existing date is empty, we will use the current date as a base."
-msgstr ""
-
-#: formulas/inc/ui.php:379
-msgid "Math operation"
-msgstr ""
-
-#: formulas/inc/ui.php:380
-msgid "Update existing value with the result of a math operation.<br>The result is rounded to the 2 nearest decimals. I.e. 3.845602 becomes 3.85"
-msgstr ""
-
-#: formulas/inc/ui.php:392
-msgid "Math formula"
-msgstr ""
-
-#: formulas/inc/ui.php:393
-msgid "Example 1: $current_value$ + 2 * 5. <br/>Example 2: $_regular_price$ * 0.7 (Set regular price - 30%)"
-msgstr ""
-
-#: formulas/inc/ui.php:400
-#: woocommerce/woocommerce.php:242
-msgid "Decrease by percentage"
-msgstr ""
-
-#: formulas/inc/ui.php:401
-msgid "Decrease the existing value by a percentage.<br>The result is rounded to the 2 nearest decimals. I.e. 3.845602 becomes 3.85"
-msgstr ""
-
-#: formulas/inc/ui.php:414
-#: formulas/inc/ui.php:435
-#: woocommerce/woocommerce.php:225
-msgid "Decrease by"
-msgstr ""
-
-#: formulas/inc/ui.php:415
-#: formulas/inc/ui.php:457
-msgid "Enter the percentage number."
-msgstr ""
-
-#: formulas/inc/ui.php:421
-msgid "Decrease by number"
-msgstr ""
-
-#: formulas/inc/ui.php:422
-msgid "Decrease the existing value by a number.<br>The result is rounded to the 2 nearest decimals. I.e. 3.845602 becomes 3.85"
-msgstr ""
-
-#: formulas/inc/ui.php:436
-#: formulas/inc/ui.php:478
-#: formulas/inc/ui.php:598
-msgid "Enter the number."
-msgstr ""
-
-#: formulas/inc/ui.php:442
-msgid "Increase by percentage"
-msgstr ""
-
-#: formulas/inc/ui.php:443
-msgid "Increase the existing value by a percentage.<br>The result is rounded to the 2 nearest decimals. I.e. 3.845602 becomes 3.85"
-msgstr ""
-
-#: formulas/inc/ui.php:456
-#: formulas/inc/ui.php:477
-msgid "Increase by"
-msgstr ""
-
-#: formulas/inc/ui.php:463
-msgid "Increase by number"
-msgstr ""
-
-#: formulas/inc/ui.php:464
-msgid "Increase the existing value by a number.<br>The result is rounded to the 2 nearest decimals. I.e. 3.845602 becomes 3.85"
-msgstr ""
-
-#: formulas/inc/ui.php:484
-msgid "Set value"
-msgstr ""
-
-#: formulas/inc/ui.php:485
-msgid "Replace existing value with this value. <a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more</a>"
-msgstr ""
-
-#: formulas/inc/ui.php:500
-msgid "Set random value"
-msgstr ""
-
-#: formulas/inc/ui.php:501
-msgid "Replace existing value with a random value from this list. Enter the values separated with | if you want to select from a predefined list, or enter 2 dates separated with > if you want to select any date from that range"
-msgstr ""
-
-#: formulas/inc/ui.php:520
-msgid "Remove everything after some text"
-msgstr ""
-
-#: formulas/inc/ui.php:521
-msgid "I.e. A value like \"My great title (234343)\" can become \"My great title\" by removing everything after \" (\""
-msgstr ""
-
-#: formulas/inc/ui.php:530
-msgid "Remove everything after this text"
-msgstr ""
-
-#: formulas/inc/ui.php:533
-msgid "Remove the text too?"
-msgstr ""
-
-#: formulas/inc/ui.php:535
-msgid "Yes, remove everything after the text, including the text"
-msgstr ""
-
-#: formulas/inc/ui.php:535
-msgid "No, remove everything after the text, without including the text"
-msgstr ""
-
-#: formulas/inc/ui.php:541
-msgid "Remove everything before some text"
-msgstr ""
-
-#: formulas/inc/ui.php:542
-msgid "I.e. A value like \"(234343) My great title\" can become \"My great title\" by removing everything before \") \""
-msgstr ""
-
-#: formulas/inc/ui.php:551
-msgid "Remove everything before this"
-msgstr ""
-
-#: formulas/inc/ui.php:554
-msgid "Remove the text from above too?"
-msgstr ""
-
-#: formulas/inc/ui.php:562
-#: formulas/inc/ui.php:1020
-msgid "Replace"
-msgstr ""
-
-#: formulas/inc/ui.php:563
-msgid "Replace a word, phrase, or number with a new value. <a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more</a>"
-msgstr ""
-
-#: formulas/inc/ui.php:572
-#: formulas/inc/ui.php:1094
-msgid "Replace this"
-msgstr ""
-
-#: formulas/inc/ui.php:576
-#: formulas/inc/ui.php:1107
-msgid "With this"
-msgstr ""
-
-#: formulas/inc/ui.php:582
-msgid "Generate excerpt"
-msgstr ""
-
-#: formulas/inc/ui.php:583
-msgid "If the column has a very long text, we will remove the html and shorten it to a number of words."
-msgstr ""
-
-#: formulas/inc/ui.php:597
-msgid "Maximum number of words"
-msgstr ""
-
-#: formulas/inc/ui.php:604
-msgid "Capitalize words"
-msgstr ""
-
-#: formulas/inc/ui.php:605
-msgid "Capitalize the first letter of every word in the field. I.e. convert \"my title\" into \"My Title\"."
-msgstr ""
-
-#: formulas/inc/ui.php:625
-msgid "Remove the existing value and leave the field empty. <a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more</a>"
-msgstr ""
-
-#: formulas/inc/ui.php:645
-msgid "Remove duplicates"
-msgstr ""
-
-#: formulas/inc/ui.php:646
-#: formulas/inc/ui.php:664
-msgid "<a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more</a>"
-msgstr ""
-
-#: formulas/inc/ui.php:655
-#: formulas/inc/ui.php:673
-msgid "Which duplicates do you want to delete?"
-msgstr ""
-
-#: formulas/inc/ui.php:657
-#: formulas/inc/ui.php:675
-msgid "Delete the newest items and keep the oldest item"
-msgstr ""
-
-#: formulas/inc/ui.php:657
-#: formulas/inc/ui.php:675
-msgid "Delete the old items and keep the newest item"
-msgstr ""
-
-#: formulas/inc/ui.php:663
-msgid "Remove duplicates with same title and content"
-msgstr ""
-
-#: formulas/inc/ui.php:681
-msgid "Append"
-msgstr ""
-
-#: formulas/inc/ui.php:690
-msgid "Enter the value to append to the existing value."
-msgstr ""
-
-#: formulas/inc/ui.php:696
-msgid "Prepend"
-msgstr ""
-
-#: formulas/inc/ui.php:708
-msgid "Enter the value to prepend to the existing value."
-msgstr ""
-
-#: formulas/inc/ui.php:714
-msgid "Custom formula"
-msgstr ""
-
-#: formulas/inc/ui.php:726
-msgid "Only for advanced users. <a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more.</a>"
-msgstr ""
-
-#: formulas/inc/ui.php:732
-msgid "Send email"
-msgstr ""
-
-#: formulas/inc/ui.php:733
-msgid "<p>Send email notifications to users in bulk, and create advanced segments using the advanced search.</p><p>For example, you can filter a spreadsheet of customers/users/forum users/affiliates/blog commenters by country, city, state, orders count, etc and send them important emails.</p><p>We recommend that you use a SMTP plugin to improve the email deliverability and take into account the users consent and privacy laws.</p>"
-msgstr ""
-
-#: formulas/inc/ui.php:746
-msgid "Email subject"
-msgstr ""
-
-#: formulas/inc/ui.php:747
-msgid "You can use variables to insert the value of any column."
-msgstr ""
-
-#: formulas/inc/ui.php:754
-msgid "Email message"
-msgstr ""
-
-#: formulas/inc/ui.php:755
-msgid "We recommend that you create a message that looks like it was written personally, you should add your logo, message, and email signature. You can use variables to insert the value of any column."
-msgstr ""
-
-#: formulas/inc/ui.php:762
-msgid "Reply to"
-msgstr ""
-
-#: formulas/inc/ui.php:763
-msgid "People will reply to this email address"
-msgstr ""
-
-#: formulas/inc/ui.php:766
-msgid "Only send one email per email address?"
-msgstr ""
-
-#: formulas/inc/ui.php:767
-msgid "One email per user means that if 3 rows have the same email address, only one row will trigger an email and the others will be skipped. One email per row means that if 3 rows have the same email address, we'll send 3 emails to the same address (one per row)."
-msgstr ""
-
-#: formulas/inc/ui.php:769
-msgid "Send one email per user"
-msgstr ""
-
-#: formulas/inc/ui.php:769
-msgid "Send one email per row"
-msgstr ""
-
-#: formulas/inc/ui.php:775
-msgid "PHP Function"
-msgstr ""
-
-#: formulas/inc/ui.php:788
-msgid "For advanced users. Enter the name of your PHP function and we will pass 2 parameters: $current_data (string with current value of the column) and $row_id, the function must accept the 2 parameters and return the modified value as a string. We will automatically save it if the value changed. <a class=\"formulas-action-tip-link\" href=\"%s#php-functions\" target=\"_blank\">Read more.</a>"
-msgstr ""
-
-#: formulas/inc/ui.php:794
-msgid "Copy from other columns"
-msgstr ""
-
-#: formulas/inc/ui.php:799
-msgid "Copy the value of other fields into this field.<br/>Example, copy \"sale price\" into the \"regular price\" field."
-msgstr ""
-
-#: formulas/inc/ui.php:810
-msgid "Copy from this column"
-msgstr ""
-
-#: formulas/inc/ui.php:885
-msgid "We will replace the existing media file(s) with these file(s)."
-msgstr ""
-
-#: formulas/inc/ui.php:897
-#: formulas/inc/ui.php:923
-#: formulas/inc/ui.php:949
-msgid "Upload the files"
-msgstr ""
-
-#: formulas/inc/ui.php:904
-#: formulas/inc/ui.php:930
-#: formulas/inc/ui.php:956
-msgid "File URLs"
-msgstr ""
-
-#: formulas/inc/ui.php:905
-#: formulas/inc/ui.php:931
-#: formulas/inc/ui.php:957
-msgid "Enter the URLs separated by commas. They can be from your own site."
-msgstr ""
-
-#: formulas/inc/ui.php:911
-msgid "We will prepend the new file(s) to the existing media file(s)."
-msgstr ""
-
-#: formulas/inc/ui.php:937
-msgid "We will append the new file(s) to the existing media file(s)."
-msgstr ""
-
-#: formulas/inc/ui.php:963
-#: formulas/inc/ui.php:1021
-msgid "Replace a media file with other file"
-msgstr ""
-
-#: formulas/inc/ui.php:973
-msgid "Replace these files"
-msgstr ""
-
-#: formulas/inc/ui.php:974
-#: formulas/inc/ui.php:982
-msgid "Enter the URLs separated by commas. They must be from your own site."
-msgstr ""
-
-#: formulas/inc/ui.php:981
-msgid "With these files"
-msgstr ""
-
-#: formulas/inc/ui.php:994
-msgid "We will replace the existing media file with this file."
-msgstr ""
-
-#: formulas/inc/ui.php:1006
-msgid "Upload the file"
-msgstr ""
-
-#: formulas/inc/ui.php:1014
-msgid "Enter the URL. It can be an URL from your own site (Example http://site.com/wp-content/uploads/2016/01/file.jpg) or an external URL."
-msgstr ""
-
-#: formulas/inc/ui.php:1031
-msgid "Replace this file"
-msgstr ""
-
-#: formulas/inc/ui.php:1032
-#: formulas/inc/ui.php:1040
-msgid "Enter the URL. It must be an URL from your own site. Example: http://site.com/wp-content/uploads/2016/01/file.jpg"
-msgstr ""
-
-#: formulas/inc/ui.php:1039
-msgid "With this file"
-msgstr ""
-
-#: formulas/inc/ui.php:1078
-msgid "We will replace the existing terms with these terms."
-msgstr ""
-
-#: formulas/inc/ui.php:1083
-msgid "Enter the new terms separated by %s . You can add hierarchy like parent > child > child"
-msgstr ""
-
-#: formulas/inc/ui.php:1089
-msgid "Replace some term(s) with new term(s). <a class=\"formulas-action-tip-link\" href=\"%s\" target=\"_blank\">Read more</a>"
-msgstr ""
-
-#: formulas/inc/ui.php:1095
-#: formulas/inc/ui.php:1108
-msgid "You must enter the full hierarchy like parent > child"
-msgstr ""
-
-#: formulas/inc/ui.php:1126
-msgid "Terms"
-msgstr ""
-
-#: formulas/inc/ui.php:1127
-msgid "Enter the full hierarchy like parent > child"
 msgstr ""
 
 #: frontend-sheet/frontend-sheet.php:74
@@ -2484,7 +2506,7 @@ msgid "What app will you use to edit this file? (optional)"
 msgstr ""
 
 #: universal-sheet/views/export-modal.php:66
-#: wp-sheet-editor/dev/inc/api/editor.php:333
+#: wp-sheet-editor/dev/inc/api/editor.php:334
 msgid "Name of this export (optional)"
 msgstr ""
 
@@ -2736,11 +2758,6 @@ msgstr ""
 
 #: woocommerce/inc/attributes.php:275
 msgid "Used for Variations?"
-msgstr ""
-
-#: woocommerce/inc/attributes.php:278
-#: wp-sheet-editor/dev/inc/api/editor.php:309
-msgid "New value"
 msgstr ""
 
 #: woocommerce/inc/attributes.php:283
@@ -3010,7 +3027,7 @@ msgstr ""
 #: woocommerce/inc/variations.php:36
 #: woocommerce/views/spreadsheet-create-variations-modal.php:10
 #: woocommerce/views/spreadsheet-create-variations-modal.php:75
-#: wp-sheet-editor/dev/inc/api/editor.php:352
+#: wp-sheet-editor/dev/inc/api/editor.php:353
 msgid "Create variations"
 msgstr ""
 
@@ -3738,7 +3755,7 @@ msgid "Use this editor to edit the content only, other fields like tags and cate
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/bootstrap.php:557
-#: wp-sheet-editor/dev/inc/api/editor.php:408
+#: wp-sheet-editor/dev/inc/api/editor.php:409
 msgid "WP Editor"
 msgstr ""
 
@@ -3789,383 +3806,375 @@ msgid "Enable"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:306
-msgid "Show preview"
-msgstr ""
-
-#: wp-sheet-editor/dev/inc/api/editor.php:307
-msgid "Sample row ID"
-msgstr ""
-
-#: wp-sheet-editor/dev/inc/api/editor.php:308
-msgid "Old value"
-msgstr ""
-
-#: wp-sheet-editor/dev/inc/api/editor.php:310
-msgid "We couldn't generate a preview. Please try again with different parameters or try again later."
+msgid "Paused"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:311
-msgid "Please select some rows with the checkboxes."
+msgid "We couldn't generate a preview. Please try again with different parameters or try again later."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:312
-msgid "Some variation rows are missing a parent product. Please add a value to the \"Parent\" column in the row IDs: {variation_ids}"
+msgid "Please select some rows with the checkboxes."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:313
-msgid "These product IDs don't have variations to display: {ids}"
+msgid "Some variation rows are missing a parent product. Please add a value to the \"Parent\" column in the row IDs: {variation_ids}"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:314
-msgid "Displayed variations for {parentProductsWithVariationsCount} product(s), {parentProductsWithoutVariationsCount} product(s) don't have variations to display"
+msgid "These product IDs don't have variations to display: {ids}"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/editor.php:315
+msgid "Displayed variations for {parentProductsWithVariationsCount} product(s), {parentProductsWithoutVariationsCount} product(s) don't have variations to display"
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/api/editor.php:316
 msgid "Displayed variations for {parentProductsWithVariationsCount} product(s)"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:318
+#: wp-sheet-editor/dev/inc/api/editor.php:319
 msgid "The column will appear in the spreadsheet and exports if the user has a role with the required capability."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:319
+#: wp-sheet-editor/dev/inc/api/editor.php:320
 msgid "The column will be read only if the user doesn't have a role with the required capability."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:320
+#: wp-sheet-editor/dev/inc/api/editor.php:321
 msgid "Read-only columns will display a lock and it won't be possible to edit them anywhere in the spreadsheet. This is not a security feature because people still can edit in the regular WP screens."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:321
+#: wp-sheet-editor/dev/inc/api/editor.php:322
 msgid "Enabling this column requires a page reload"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:323
+#: wp-sheet-editor/dev/inc/api/editor.php:324
 msgid "Please select at least one column to import"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:324
+#: wp-sheet-editor/dev/inc/api/editor.php:325
 msgid "Show column key"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:325
+#: wp-sheet-editor/dev/inc/api/editor.php:326
 msgid "This is the dynamic tag for this column. You can copy this and use it in the bulk edit tool"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:326
+#: wp-sheet-editor/dev/inc/api/editor.php:327
 msgid "Click here to show all columns again"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:327
+#: wp-sheet-editor/dev/inc/api/editor.php:328
 msgid "The last import batch failed due to a server error, it's more likely that the server got overloaded.<br>1- You can try <a href=\"%1$s\" target=\"_blank\">importing fewer rows</a> per batch (i.e. import 2 rows every few seconds).<br>2- You can start a new import, sometimes trying again works (use the \"advanced settings\" in the step 1 of the import to start from a specific row).<br>3- You can increase the php memory <a href=\"%2$s\" target=\"_blank\">following this tutorial</a><br>4- If the problem happens after trying with 1 row per batch, you can <a href=\"%3$s\" target=\"_blank\">contact us</a> and we will make it work for you"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:328
+#: wp-sheet-editor/dev/inc/api/editor.php:329
 msgid "Your server was not able to process this batch. Do you want to try again? You can retry 3 times, If 3 attempts fail we will stop the import completely."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:329
+#: wp-sheet-editor/dev/inc/api/editor.php:330
 msgid "Please correct the error in the file and start a new import. You can use the \"Advanced options\" in the step 1 of the import to start from this specific row."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:330
+#: wp-sheet-editor/dev/inc/api/editor.php:331
 msgid "<p>The import has finished</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:331
+#: wp-sheet-editor/dev/inc/api/editor.php:332
 msgid "Name of this export"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:332
+#: wp-sheet-editor/dev/inc/api/editor.php:333
 msgid "Are you sure you want to delete this columns view?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:334
+#: wp-sheet-editor/dev/inc/api/editor.php:335
 msgid "<p>The process has finished</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:335
+#: wp-sheet-editor/dev/inc/api/editor.php:336
 msgid "The selected product does not have variations"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:336
+#: wp-sheet-editor/dev/inc/api/editor.php:337
 msgid "empty"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:337
+#: wp-sheet-editor/dev/inc/api/editor.php:338
 msgid "This will save you {clicks_count} clicks :)"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:338
+#: wp-sheet-editor/dev/inc/api/editor.php:339
 msgid "We found similar columns. Do you want to apply the same action to them? {columns}"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:339
+#: wp-sheet-editor/dev/inc/api/editor.php:340
 msgid "This column is only for variation rows, parent products don't use this field"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:340
+#: wp-sheet-editor/dev/inc/api/editor.php:341
 msgid "<b>Editing the field: {field_label}</b>"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:341
+#: wp-sheet-editor/dev/inc/api/editor.php:342
 msgid "Column not found. Try with another search criteria."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:342
+#: wp-sheet-editor/dev/inc/api/editor.php:343
 msgid "This column is for parent products only, variations don't use this field"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:343
+#: wp-sheet-editor/dev/inc/api/editor.php:344
 msgid "Paste using keyboard: Ctrl+V"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:344
+#: wp-sheet-editor/dev/inc/api/editor.php:345
 msgid "Realign cells"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:345
+#: wp-sheet-editor/dev/inc/api/editor.php:346
 msgid "Remove all filters"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:346
+#: wp-sheet-editor/dev/inc/api/editor.php:347
 msgid "Resize columns based on the values"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:347
+#: wp-sheet-editor/dev/inc/api/editor.php:348
 msgid "Delete row"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:348
+#: wp-sheet-editor/dev/inc/api/editor.php:349
 msgid "Do you want to delete {rows_number} rows from the database completely? If you want to restore them later, you should make a backup before."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:349
+#: wp-sheet-editor/dev/inc/api/editor.php:350
 msgid "Duplicate row"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:350
+#: wp-sheet-editor/dev/inc/api/editor.php:351
 msgid "Hide column"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:351
+#: wp-sheet-editor/dev/inc/api/editor.php:352
 msgid "Bulk edit column"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:353
+#: wp-sheet-editor/dev/inc/api/editor.php:354
 msgid "Copy variations from this product"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:355
+#: wp-sheet-editor/dev/inc/api/editor.php:356
 msgid "Delete field"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:356
+#: wp-sheet-editor/dev/inc/api/editor.php:357
 msgid "We will delete this meta field from the database and you will lose the values saved in this field on all the rows. You should make a backup to be able to restore in the future. Do you want to continue with the deletion?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:357
+#: wp-sheet-editor/dev/inc/api/editor.php:358
 msgid "Delete serialized field"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:358
+#: wp-sheet-editor/dev/inc/api/editor.php:359
 msgid "We will delete this serialized field, which includes all its subfields, from the database and you will lose the values saved in this field on all the rows. You should make a backup to be able to restore in the future. Do you want to continue with the deletion?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:359
+#: wp-sheet-editor/dev/inc/api/editor.php:360
 msgid "Edit meta key"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:360
+#: wp-sheet-editor/dev/inc/api/editor.php:361
 msgid "Error: The new value is empty or is equal to the old value"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:361
+#: wp-sheet-editor/dev/inc/api/editor.php:362
 msgid "Showing rows from your last session."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:362
+#: wp-sheet-editor/dev/inc/api/editor.php:363
 msgid "Export column"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:363
+#: wp-sheet-editor/dev/inc/api/editor.php:364
 msgid "<p>The bulk edit was not applied completely. The process was canceled due to an error.</p><p>You can close this window.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:364
+#: wp-sheet-editor/dev/inc/api/editor.php:365
 msgid "<p>The process did not finish. The process was canceled due to an error.</p><p>You can close this window.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:365
+#: wp-sheet-editor/dev/inc/api/editor.php:366
 msgid "Your server was not able to process this batch. Do you want to try again?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:366
+#: wp-sheet-editor/dev/inc/api/editor.php:367
 msgid "The bulk edit was executed successfully. You can close this window"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:368
+#: wp-sheet-editor/dev/inc/api/editor.php:369
 msgid "ENABLE COLUMNS. These columns require a page reload: {columns}. Do you want to reload now? We will reload automatically"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:369
+#: wp-sheet-editor/dev/inc/api/editor.php:370
 msgid "Column removed. Go to \"settings > hide/display columns\" to enable it again"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:370
+#: wp-sheet-editor/dev/inc/api/editor.php:371
 msgid "You have modified rows. Please save the changes because we will refresh the spreadsheet."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:371
+#: wp-sheet-editor/dev/inc/api/editor.php:372
 msgid "You have modified rows. Please save the changes before removing columns from the spreadsheet."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:372
+#: wp-sheet-editor/dev/inc/api/editor.php:373
 msgid "You have modified rows. Please save the changes because we will refresh the spreadsheet. Do you want to refresh now?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:373
+#: wp-sheet-editor/dev/inc/api/editor.php:374
 msgid "Some rows were modified in the background. Please save the changes and reload the spreadsheet to see the changes"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:374
+#: wp-sheet-editor/dev/inc/api/editor.php:375
 msgid "Some rows were modified in the spreadsheet. Please save the changes before using this feature."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:375
+#: wp-sheet-editor/dev/inc/api/editor.php:376
 msgid "We didn't find rows to update from the search query. Please try another search query."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:376
+#: wp-sheet-editor/dev/inc/api/editor.php:377
 msgid "We didn't find rows for the export. Please try another search query."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:377
+#: wp-sheet-editor/dev/inc/api/editor.php:378
 msgid "You can find all the settings here, like columns visibility, etc."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:378
+#: wp-sheet-editor/dev/inc/api/editor.php:379
 msgid "Oops, nothing found"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:379
+#: wp-sheet-editor/dev/inc/api/editor.php:380
 msgid "You can create new items here"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:380
+#: wp-sheet-editor/dev/inc/api/editor.php:381
 msgid "Upload image"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:381
+#: wp-sheet-editor/dev/inc/api/editor.php:382
 msgid "View Gallery"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:382
+#: wp-sheet-editor/dev/inc/api/editor.php:383
 msgid "No options available"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:383
+#: wp-sheet-editor/dev/inc/api/editor.php:384
 #: wp-sheet-editor/dev/inc/api/helpers.php:1444
 msgid "Items loaded in the spreadsheet"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:384
+#: wp-sheet-editor/dev/inc/api/editor.php:385
 msgid "New rows added"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:385
+#: wp-sheet-editor/dev/inc/api/editor.php:386
 msgid "The bulk edit has been executed. Do you want to reload the page to see the changes?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:386
+#: wp-sheet-editor/dev/inc/api/editor.php:387
 msgid "<p>The changes were not saved completely. The process was canceled due to an error .</p><p>You can close this popup.</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:387
+#: wp-sheet-editor/dev/inc/api/editor.php:388
 msgid "<p>The automatic saving failed. Your changes were not saved completely due to an error. You can try again later, if the error persists contact our support team and keep this tab opened</p>"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:388
+#: wp-sheet-editor/dev/inc/api/editor.php:389
 msgid "{updated} attributes have been merged."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:389
+#: wp-sheet-editor/dev/inc/api/editor.php:390
 msgid "{updated} items saved of {total} items that need saving."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:390
+#: wp-sheet-editor/dev/inc/api/editor.php:391
 msgid "{created} items created successfully, {failed} items failed because the AI returned invalid data."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:391
+#: wp-sheet-editor/dev/inc/api/editor.php:392
 msgid "{created} items created successfully"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:392
+#: wp-sheet-editor/dev/inc/api/editor.php:393
 msgid "Scanning variations to be created. {updated} products of {total} products have been processed."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:393
+#: wp-sheet-editor/dev/inc/api/editor.php:394
 msgid "{deleted} duplicates have been removed."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:394
+#: wp-sheet-editor/dev/inc/api/editor.php:395
 msgid "All items have been saved."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:395
+#: wp-sheet-editor/dev/inc/api/editor.php:396
 msgid "Please check if you have unsaved changes. If you have, please save them or they will be dismissed."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:396
+#: wp-sheet-editor/dev/inc/api/editor.php:397
 msgid "Everything is already saved."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:397
+#: wp-sheet-editor/dev/inc/api/editor.php:398
 msgid "The server did not accept our request. Bad request, please try refresh the page and try again."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:398
+#: wp-sheet-editor/dev/inc/api/editor.php:399
 msgid "The server didn't accept our request. You don't have permission to do this action. Please log in again."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:399
+#: wp-sheet-editor/dev/inc/api/editor.php:400
 msgid "The server is not available or overloaded. Please try again later."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:400
+#: wp-sheet-editor/dev/inc/api/editor.php:401
 msgid "The server is not available or overloaded. Do you want to try again?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:401
+#: wp-sheet-editor/dev/inc/api/editor.php:402
 msgid "The auto saving failed: the server is not available or overloaded. Do you want to try again?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:402
+#: wp-sheet-editor/dev/inc/api/editor.php:403
 msgid "The server wasn't able to process our request. Server error. Please try again later."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:403
+#: wp-sheet-editor/dev/inc/api/editor.php:404
 msgid "The server has exceeded its allocated resources and is not able to process our request."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:404
+#: wp-sheet-editor/dev/inc/api/editor.php:405
 msgid "The server is busy and took too long to respond to our request. Please try again later."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:405
+#: wp-sheet-editor/dev/inc/api/editor.php:406
 msgid "The server could not process our request. Please try again later."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:406
+#: wp-sheet-editor/dev/inc/api/editor.php:407
 msgid "Change background color"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:407
+#: wp-sheet-editor/dev/inc/api/editor.php:408
 msgid "<h3>Missing column?</h3><button class=\"button show-column-missing-tips\"  data-remodal-target=\"modal-columns-visibility\">Open columns manager</button> or <button class=\"button\">Close this</button>"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/api/editor.php:413
+#: wp-sheet-editor/dev/inc/api/editor.php:414
 msgid "<span class=\"review-tip\">Do we deserve a 5-star review? <a href=\"%s\" target=\"_blank\" class=\"dismiss-review-tip\">Yes, you deserve it</a> . - . <a href=\"\"  class=\"dismiss-review-tip\">No</a></span>"
 msgstr ""
 

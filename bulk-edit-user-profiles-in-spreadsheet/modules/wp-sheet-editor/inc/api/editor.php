@@ -303,6 +303,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 			}
 
 			$texts = array(
+				'bulk_edit_paused'                  => __( 'Paused', 'vg_sheet_editor' ),
 				'formula_preview_button'                  => __( 'Show preview', 'vg_sheet_editor' ),
 				'formula_preview_sample_row_id'           => __( 'Sample row ID', 'vg_sheet_editor' ),
 				'formula_preview_old_value'               => __( 'Old value', 'vg_sheet_editor' ),
