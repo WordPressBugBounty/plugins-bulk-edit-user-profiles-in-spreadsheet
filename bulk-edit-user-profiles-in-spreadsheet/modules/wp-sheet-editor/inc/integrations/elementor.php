@@ -4,7 +4,7 @@ if ( ! class_exists( 'WPSE_Elementor_Integration' ) ) {
 
 	class WPSE_Elementor_Integration {
 
-		private static $instance = false;
+		private static $instance = null;
 
 		private function __construct() {
 

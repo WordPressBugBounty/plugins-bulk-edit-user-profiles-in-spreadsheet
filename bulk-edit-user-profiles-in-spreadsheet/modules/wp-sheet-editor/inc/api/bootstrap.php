@@ -418,6 +418,13 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 		 * @return bool Whether the post type can be edited with the block editor.
 		 */
 		public function use_block_editor_for_post_type( $post_type ) {
+			$post_types_use_gutenberg = VGSE()->get_option( 'post_types_use_gutenberg', '' );
+			if ( $post_types_use_gutenberg ) {
+				$post_types_use_gutenberg = array_map( 'trim', explode( ',', $post_types_use_gutenberg ) );
+				if ( in_array( $post_type, $post_types_use_gutenberg, true ) ) {
+					return true;
+				}
+			}
 			if ( $post_type === 'product' ) {
 				return false;
 			}

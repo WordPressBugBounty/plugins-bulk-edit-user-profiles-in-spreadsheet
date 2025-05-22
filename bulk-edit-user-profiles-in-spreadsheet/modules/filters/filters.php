@@ -6,7 +6,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 	 */
 	class WP_Sheet_Editor_Filters {
 
-		private static $instance = false;
+		private static $instance = null;
 		var $plugin_url          = null;
 		var $plugin_dir          = null;
 
@@ -201,10 +201,11 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 				$editor->args['toolbars']->register_item(
 					'column_locator',
 					array(
-						'type'         => 'html',
-						'help_tooltip' => __( 'Enter a word and we will find the first matching column. You will avoid scrolling through dozens of columns to find the one you need.', 'vg_sheet_editor' ),
-						'content'      => '<input type="search" id="column-locator-input" placeholder="' . __( 'Locate column', 'vg_sheet_editor' ) . '"/>',
-						'label'        => __( 'Locate column', 'vg_sheet_editor' ),
+						'type'             => 'html',
+						'help_tooltip'     => __( 'Enter a word and we will find the first matching column. You will avoid scrolling through dozens of columns to find the one you need.', 'vg_sheet_editor' ),
+						'content'          => '<input type="search" id="column-locator-input" list="column-locator-dropdown" placeholder="' . __( 'Locate column', 'vg_sheet_editor' ) . '"/>',
+						'label'            => __( 'Locate column', 'vg_sheet_editor' ),
+						'tooltip_position' => 'right',
 					),
 					$post_type
 				);
@@ -330,7 +331,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 							$columns = VGSE()->helpers->get_unfiltered_provider_columns( $post_type );
 						}
 						$is_date_filter = isset( $columns[ $meta_query['key'] ] ) && $columns[ $meta_query['key'] ]['value_type'] === 'date';
-						if ( $is_date_filter ) {
+						$formatted_str  = isset( $columns[ $meta_query['key'] ] ) && isset( $columns[ $meta_query['key'] ]['formatted'] ) ? serialize( array_keys( $columns[ $meta_query['key'] ]['formatted'] ) ) : '';
+						if ( $is_date_filter && preg_match( '(customDatabaseFormat|dateFormatPhp)', $formatted_str ) ) {
 							$date_format_for_db = isset( $columns[ $meta_query['key'] ]['formatted']['customDatabaseFormat'] ) ? $columns[ $meta_query['key'] ]['formatted']['customDatabaseFormat'] : $columns[ $meta_query['key'] ]['formatted']['dateFormatPhp'];
 						}
 						if ( empty( $date_format_for_db ) ) {

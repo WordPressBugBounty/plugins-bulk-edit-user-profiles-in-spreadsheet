@@ -4,7 +4,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 
 	class WP_Sheet_Editor_Ajax {
 
-		private static $instance = false;
+		private static $instance = null;
 
 		private function __construct() {
 

@@ -116,6 +116,7 @@ if ( !class_exists( 'WPSE_Users_Sheet' ) ) {
             $blacklisted_fields[] = 'bb_profile_slug';
             $blacklisted_fields[] = 'course_time_\\d+';
             $blacklisted_fields[] = 'wpse_api_key';
+            $blacklisted_fields[] = 'wpse_excel_api_key';
             return $blacklisted_fields;
         }
 

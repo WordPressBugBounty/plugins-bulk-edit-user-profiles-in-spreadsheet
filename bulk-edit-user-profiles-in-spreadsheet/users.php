@@ -2,7 +2,7 @@
 /*
 	Plugin Name: WP Sheet Editor - Users
 	Description: Edit users in spreadsheet.
-	Version: 1.5.39
+	Version: 1.5.40
 	Author:      WP Sheet Editor
 	Author URI:  https://wpsheeteditor.com/?utm_source=wp-admin&utm_medium=plugins-list&utm_campaign=users
 	Plugin URI: https://wpsheeteditor.com/extensions/edit-users-spreadsheet/?utm_source=wp-admin&utm_medium=plugins-list&utm_campaign=users

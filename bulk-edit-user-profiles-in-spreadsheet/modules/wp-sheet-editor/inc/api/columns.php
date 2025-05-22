@@ -75,7 +75,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 		}
 
 		function get_blacklisted_column_keywords( $provider ) {
-			$blacklisted_keys = apply_filters( 'vg_sheet_editor/columns/blacklisted_columns', array( 'nxs_snap', '_edit_lock', '_edit_last', '_wp_old_slug', '_wpcom_is_markdown', 'vgse_column_sizes', 'wxr_import', '^_oembed', '^\d+_\d+_\d+$', '_user_wished_', '_user_wished_user', '_rehub_views_date', '-wpfoof-', '^_transient_tribe', '_learndash_memberpress_enrolled_courses_access', 'course_\d+_access_from', 'ld_sent_notification_enroll_course_', 'learndash_last_known_course_', 'learndash_group_users_', '_badgeos_achievements_', 'learndash_group_leaders_', 'course_timer_completed_', 'course_completed_', 'screen_layout_', 'enrolled_courses_access_counter_', '_sfwd-quizzes_', '_uo-course-cert-', 'screen_options_per_page', 'gform_recent_forms_', '^manage.+columnshidden_', '^edit_.+_per_page', 'uo_timer_', '_screen_options_default', '_edd_download_limit_override', '_wcj_product_input_fields', 'seopress_pro_rich_snippets', 'seopress_analysis_data', '[a-zA-Z0-9]{28,}$', '_wvs_product_attributes', 'wcml_sync_hash', 'product_tabel_', '_wp_attachment_backup_sizes', '_wp_attached_file', 'thb_postviews_count_', '_wcct_goaldeal_', 'amazonS3_cache_', '_wcct_product_taxonomy_term_ids', '_eg_gallery_data_gallery', '_user_IP', '_wds_readability', 'kc_data_', '_wds_analysis_checks', '_user_liked_', 'wpsebe', '^snap', 'better-related-', '_count-views_', '_ywcp_component_data_list', '_userwish_IP', '_fv_flowplayer_http', '_heateor_sss_shares_meta', '_wpas_skip_', 'cred_user_notification_data', 'googlesitekit_survey_timeouts_', 'yoast_test_helper_notifications', '_mylisting_stats_cache_', 'wpil_links_inbound_internal_count_data' ), $provider, $this );
+			$blacklisted_keys = apply_filters( 'vg_sheet_editor/columns/blacklisted_columns', array( 'nxs_snap', '_edit_lock', '_edit_last', '_wp_old_slug', '_wpcom_is_markdown', 'vgse_column_sizes', 'wxr_import', '^_oembed', '^\d+_\d+_\d+$', '_user_wished_', '_user_wished_user', '_rehub_views_date', '-wpfoof-', '^_transient_tribe', '_learndash_memberpress_enrolled_courses_access', 'course_\d+_access_from', 'ld_sent_notification_enroll_course_', 'learndash_last_known_course_', 'learndash_group_users_', '_badgeos_achievements_', 'learndash_group_leaders_', 'course_timer_completed_', 'course_completed_', 'screen_layout_', 'enrolled_courses_access_counter_', '_sfwd-quizzes_', '_uo-course-cert-', 'screen_options_per_page', 'gform_recent_forms_', '^manage.+columnshidden_', '^edit_.+_per_page', 'uo_timer_', '_screen_options_default', '_edd_download_limit_override', '_wcj_product_input_fields', 'seopress_pro_rich_snippets', 'seopress_analysis_data', '[a-zA-Z0-9]{28,}$', '_wvs_product_attributes', 'wcml_sync_hash', 'product_tabel_', '_wp_attachment_backup_sizes', '_wp_attached_file', 'thb_postviews_count_', '_wcct_goaldeal_', 'amazonS3_cache_', '_wcct_product_taxonomy_term_ids', '_eg_gallery_data_gallery', '_user_IP', '_wds_readability', 'kc_data_', '_wds_analysis_checks', '_user_liked_', 'wpsebe', '^snap', 'better-related-', '_count-views_', '_ywcp_component_data_list', '_userwish_IP', '_fv_flowplayer_http', '_heateor_sss_shares_meta', '_wpas_skip_', 'cred_user_notification_data', 'googlesitekit_survey_timeouts_', 'yoast_test_helper_notifications', '_mylisting_stats_cache_', 'wpil_links_inbound_internal_count_data', '_et_builder_module_features_cache' ), $provider, $this );
 			if ( ! empty( VGSE()->options['blacklist_columns'] ) ) {
 				$blacklisted_keys = array_merge( $blacklisted_keys, array_map( 'trim', explode( ',', VGSE()->options['blacklist_columns'] ) ) );
 			}
@@ -153,6 +153,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 
 			// JS doesn't support columns with key length
 			if ( $key === 'length' ) {
+				$this->add_rejection( $key, 'column_key_length_not_supported_by_js', $provider );
 				return;
 			}
 
@@ -273,6 +274,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 				'allow_role_restrictions_in_columns_manager' => true,
 				'allow_readonly_option_in_columns_manager' => true,
 				'value_type'                               => '', // text, number, email, date, post_terms, boton_gallery, boton_gallery_multiple, view_post, handsontable, metabox
+				'allow_numeric_select_value'               => false, // When we save a friendly select, we allow the user to enter the friendly value and we replace it with the value key to save in the database, we only allow string keys but you can enable this if you want to save int keys as the select value
 			);
 
 			$args = wp_parse_args( $args, $defaults );

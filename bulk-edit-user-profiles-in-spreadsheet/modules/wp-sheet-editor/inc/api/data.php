@@ -9,7 +9,6 @@ if ( ! class_exists( 'WP_Sheet_Editor_Data' ) ) {
 		public $all_statuses             = array();
 
 		private function __construct() {
-
 		}
 
 		/**
@@ -97,6 +96,9 @@ if ( ! class_exists( 'WP_Sheet_Editor_Data' ) ) {
 			} elseif ( $key === 'post_content' ) {
 				// Removed the wpautop to save the value as is received including line breaks
 				//              $out = empty(VGSE()->options['be_disable_wpautop']) ? wpautop($item) : $item;
+				if ( VGSE()->get_option( 'use_autop_save_classic_content' ) && strpos( $item, '<!--' ) === false ) {
+					$item = wpautop( $item );
+				}
 				$out = $item;
 			} elseif ( $key === 'post_date' ) {
 				$out = $this->change_date_format_for_saving( $item );
@@ -519,7 +521,7 @@ ORDER BY user_login ASC",
 					if ( $term ) {
 						// WPML should always return the term in the current language through get_terms. But there is a very rare bug where it would return terms in all languages after saving multiple rows. So we have to run this filter to ensure we get the value in the correct lang
 						$term = apply_filters( 'wpml_object_id', $term, $taxonomy, false );
-						
+
 						$term_id = (int) $term;
 						// Don't allow users without capabilities to create new product categories or tags
 					} elseif ( in_array( $taxonomy, $woocommerce_taxonomies ) && ! WP_Sheet_Editor_Helpers::current_user_can( 'manage_product_terms' ) || ! $auto_create ) {
@@ -532,7 +534,7 @@ ORDER BY user_login ASC",
 						}
 
 						$term_id = $term['term_id'];
-						$created++;
+						++$created;
 					}
 
 					// Only requires assign the last category.
@@ -576,7 +578,7 @@ ORDER BY user_login ASC",
 
 			$row_terms     = explode( $separator, $categories );
 			$all_row_terms = implode( '', $row_terms );
-			if ( is_numeric( $all_row_terms ) ) {
+			if ( preg_match( '/^\d+$/', $all_row_terms ) ) {
 				$ids_in_query_placeholders  = implode( ', ', array_fill( 0, count( $row_terms ), '%d' ) );
 				$term_ids_from_number_names = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM $wpdb->termmeta WHERE meta_key = 'wpse_old_platform_id' AND meta_value IN ($ids_in_query_placeholders) GROUP BY meta_value", array_map( 'intval', $row_terms ) ) ) );
 
@@ -590,11 +592,11 @@ ORDER BY user_login ASC",
 			// Also, we already have the option "Manage taxonomy column values as term slugs?" which can be activated if they want to use slugs for terms
 			// So this was a little redundant
 			/* if (!empty($categories) && strpos($categories, $separator) === false && strpos($categories, ' ') === false) {
-			  $term = get_term_by('slug', trim($categories), $taxonomy);
-			  if ($term && $term->slug === trim($categories)) {
-			  return array($term->term_id);
-			  }
-			  } */
+				$term = get_term_by('slug', trim($categories), $taxonomy);
+				if ($term && $term->slug === trim($categories)) {
+				return array($term->term_id);
+				}
+				} */
 
 			if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
 				// Allow to save > symbol when the taxonomy is not hierarchical and the symbol appears at the beginning and there's only one term
@@ -724,4 +726,3 @@ ORDER BY user_login ASC",
 	}
 
 }
-

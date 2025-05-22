@@ -4,7 +4,7 @@ if ( ! class_exists( 'WPSE_Queues' ) ) {
 
 	class WPSE_Queues {
 
-		private static $instance = false;
+		private static $instance = null;
 		var $directory           = null;
 		var $secret_key          = null;
 

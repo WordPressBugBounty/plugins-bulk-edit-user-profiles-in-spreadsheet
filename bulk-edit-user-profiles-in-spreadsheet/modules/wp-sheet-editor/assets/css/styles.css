@@ -2035,7 +2035,8 @@ color: #444;
 }
 
 #vgse-wrapper .button-container input[type="search"] {
-width: 120px;
+width: 140px;
+line-height: 16px;
 }
 
 .remodal .individual-variations-wrapper,
@@ -2171,11 +2172,6 @@ margin-top: 10px;
 #vgse-wrapper button.wpse-delete-saved-item {
 float: right !important;
 display: inline-block;
-}
-
-.modal-columns-visibility .column-settings,
-.modal-columns-visibility .column-settings-field.settings-for-type {
-display: none;
 }
 
 .modal-columns-visibility .column-settings.settings-opened {
@@ -2339,8 +2335,7 @@ border-width: 1px;
 .remodal .vgse-sorter-section .wpse-columns-bulk-actions {
 margin-bottom: 30px;
 width: 100%;
-display: none;
-overflow: auto;
+    /* overflow: auto; */
 }
 
 .remodal .vgse-sorter-section .wpse-columns-bulk-actions input {
@@ -2383,8 +2378,12 @@ color: orange;
 position: relative;
 }
 
-#vgse-wrapper .vg-toolbar .button-container.run_filters-container:hover .toolbar-submenu {
-width: 360px;
+#vgse-wrapper .vg-toolbar .button-container.run_filters-container .toolbar-submenu {
+width: 360px !important;
+}
+
+#vgse-wrapper .vg-toolbar .button-container.run_filters-container.expand-submenu .toolbar-submenu {
+top: 30px;
 }
 
 #vgse-wrapper .vg-toolbar .toolbar-submenu .wpse-favorite-search-field {
@@ -2879,6 +2878,7 @@ a[data-remodal-target] {
 .wpse-advanced-filters-operator-selector option[data-value-type="date"] {
     display: none;
 }
+
 /* Disabled because it breaks the dynamic height set by handsontable on the fixed columns */
 /* #vgse-wrapper .handsontable th {
     height: 28px !important;
@@ -3090,8 +3090,10 @@ html.wp-toolbar.vgse-dark-mode,
     filter: invert(100%);
 }
 
-.vgse-dark-mode .modal-google-sheets .login-with-google-btn,
-.vgse-dark-mode .modal-google-sheets .login-with-google-btn.disconnect[data-scope="current"] {
+.vgse-dark-mode .modal-google-sheets .login-btn,
+.vgse-dark-mode .modal-google-sheets .login-btn.disconnect[data-scope="current"],
+.vgse-dark-mode .modal-excel .login-btn,
+.vgse-dark-mode .modal-excel .login-btn.disconnect[data-scope="current"] {
     background-color: transparent;
     color: #ddd;
 }
@@ -3345,7 +3347,8 @@ html.wpse-loading-tinymce iframe#editpost_ifr {
     float: left !important;
 }
 
-#wpcontent, #wpfooter {
+#wpcontent,
+#wpfooter {
     margin-left: 160px;
     margin-right: 0;
 }
@@ -3411,6 +3414,7 @@ html.wpse-loading-tinymce iframe#editpost_ifr {
 .select2-container {
     max-width: 100%;
 }
+
 /* Move the x button in the selected terms in chosen to the left side to improve UX  */
 .handsontableInputHolder .chosen-container-multi .chosen-choices li.search-choice .search-choice-close {
     left: 3px;
@@ -3419,6 +3423,53 @@ html.wpse-loading-tinymce iframe#editpost_ifr {
 .handsontableInputHolder .chosen-container-multi .chosen-choices li.search-choice {
     padding-left: 20px;
     padding-right: 5px;
+}
+
+span.select2-dropdown.select2-dropdown--below {
+    min-width: 200px !important;
+}
+
+.post-types-form .filter-sheets {
+    margin-bottom: 15px;
+}
+
+/*Ensure that the tooltips in the toolbar dropdowns are visible inside the dropdown because they are cut off if they overflow*/
+.toolbar-submenu [data-wpse-tooltip^="down"][aria-label]::before {
+    left: 0;
+    width: 90%;
+    -webkit-transform: none;
+            transform: none;
+}
+
+.custom-columns-page-content-alpine textarea {
+    width: 100%;
+    min-height: 60px;
+}
+
+.custom-columns-form label {
+    display: block;
+}
+
+.custom-columns-form h3 {
+    cursor: pointer;
+}
+
+.custom-columns-form h3 i {
+    float: right;
+}
+
+.modal-columns-visibility .vgse-sorter li .column-title,
+.modal-columns-visibility .vgse-sorter i.fa-refresh {
+    float: left;
+}
+
+.modal-columns-visibility .vgse-sorter i.fa-refresh {
+    line-height: 19px;
+    margin-left: 10px;
+}
+
+.modal-columns-visibility .column-settings {
+    clear: both;
 }
 .be-loading-anim {
     position: relative;

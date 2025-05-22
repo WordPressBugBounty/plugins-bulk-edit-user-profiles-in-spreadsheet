@@ -32,7 +32,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 	class WP_Sheet_Editor {
 
 		private $post_type;
-		public $version     = '2.25.17';
+		public $version     = '2.25.18';
 		public $textname    = 'vg_sheet_editor';
 		public $options_key = 'vg_sheet_editor';
 		public $plugin_url  = null;
@@ -1292,7 +1292,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 					vgse_global_data.delayed_js_urls.forEach((url) => {
 						setTimeout(() => {
 							vgseInsertScriptTag(url);
-						}, 500);
+						}, 1000);
 					});
 				}
 			</script>

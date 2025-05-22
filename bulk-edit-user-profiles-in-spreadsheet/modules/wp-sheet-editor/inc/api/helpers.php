@@ -797,8 +797,10 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 						}
 
 						if ( $allowed_values && ! empty( $cell_value ) && ! isset( $allowed_values[ $cell_value ] ) ) {
-							$value_key = array_search( $cell_value, $allowed_values, true );
-							if ( $value_key !== false && is_string( $value_key ) ) {
+							$value_key       = array_search( $cell_value, $allowed_values, true );
+							$allow_value_key = ( empty( $column_settings['allow_numeric_select_value'] ) && is_string( $value_key ) ) || ( ! empty( $column_settings['allow_numeric_select_value'] ) && $value_key !== false );
+
+							if ( $value_key !== false && $allow_value_key ) {
 								$item[ $key ] = $value_key;
 								if ( function_exists( 'WPSE_Logger_Obj' ) && ! empty( VGSE()->helpers->get_job_id_from_request() ) ) {
 									WPSE_Logger_Obj()->entry( sprintf( 'Saving row with index: %d - Converting friendly value to database format: %s to %s', $row_index + 1, $cell_value, $value_key ), sanitize_text_field( VGSE()->helpers->get_job_id_from_request() ) );
@@ -2629,7 +2631,16 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 
 		public function deep_sanitization( $data, $sanitization_function ) {
 			if ( is_string( $data ) ) {
+				$is_slashed_initially = strpos( $data, '\\' ) !== false;
+				// Use unslash to ensure the sanitization function works correctly, then we slash again to ensure it's saved correctly later
+				if ( $is_slashed_initially ) {
+					$data = wp_unslash( $data );
+				}
 				$data = str_replace( '&amp;', '&', $sanitization_function( $data ) );
+
+				if ( $is_slashed_initially ) {
+					$data = wp_slash( $data );
+				}
 			} elseif ( is_array( $data ) ) {
 				foreach ( $data as $key => $value ) {
 					if ( self::current_user_can( 'unfiltered_html' ) && ! empty( VGSE()->options['be_allow_raw_content_unfiltered_html_capability'] ) && $key === 'post_content' ) {
@@ -2643,7 +2654,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 		}
 
 		public function safe_html( $data ) {
-			return $this->deep_sanitization( $data, 'wp_kses_post' );
+			$data = $this->deep_sanitization( $data, 'wp_kses_post' );
+			return $data;
 		}
 
 		public function safe_text_only( $var ) {
@@ -2889,6 +2901,41 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 			$counter += (int) $count;
 
 			update_option( 'vgse_' . $key . '_counter', $counter );
+		}
+
+		/**
+		 * User has any of these roles
+		 *
+		 * @param  string[] $roles
+		 * @param  int $user_id
+		 * @return boolean
+
+		 */
+		function user_has_any_role( $roles, $user_id = null ) {
+			global $wpdb;
+			if ( is_object( $user_id ) && ! is_wp_error( $user_id ) ) {
+				$user_id = $user_id->ID;
+			}
+			if ( ! $user_id ) {
+				$user_id = get_current_user_id();
+			}
+			if ( ! $user_id ) {
+				return false;
+			}
+
+			$blog_id = null;
+			if ( is_multisite() ) {
+				$blog_id = get_current_blog_id();
+			}
+
+			$meta_key   = $wpdb->get_blog_prefix( $blog_id ) . 'capabilities';
+			$user_roles = maybe_unserialize( get_user_meta( $user_id, $meta_key, true ) );
+			if ( empty( $user_roles ) || ! is_array( $user_roles ) ) {
+				return false;
+			}
+
+			$matching_roles = array_intersect_key( $user_roles, array_flip( $roles ) );
+			return ! empty( $matching_roles );
 		}
 	}
 

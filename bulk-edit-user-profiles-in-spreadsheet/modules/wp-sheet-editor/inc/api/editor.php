@@ -155,6 +155,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 				'fontawesome_solid',
 				'katax_admin_js',
 				'DPVDWselect2',
+				'eate_dashboard',
 			);
 
 			if ( ! empty( VGSE()->options['be_disable_heartbeat'] ) ) {
@@ -353,7 +354,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 				'create_variations'                       => __( 'Create variations', 'vg_sheet_editor' ),
 				'copy_variations'                         => __( 'Copy variations from this product', 'vg_sheet_editor' ),
 				'enter_column_name'                       => __( 'Rename column', 'vg_sheet_editor' ),
-				'delete_meta_key'                         => __( 'Delete field', 'vg_sheet_editor' ),
+				'delete_meta_key'                         => __( 'Delete field from database', 'vg_sheet_editor' ),
 				'delete_meta_key_confirmation'            => __( 'We will delete this meta field from the database and you will lose the values saved in this field on all the rows. You should make a backup to be able to restore in the future. Do you want to continue with the deletion?', 'vg_sheet_editor' ),
 				'delete_serialized_meta_key'              => __( 'Delete serialized field', 'vg_sheet_editor' ),
 				'delete_serialized_meta_key_confirmation' => __( 'We will delete this serialized field, which includes all its subfields, from the database and you will lose the values saved in this field on all the rows. You should make a backup to be able to restore in the future. Do you want to continue with the deletion?', 'vg_sheet_editor' ),

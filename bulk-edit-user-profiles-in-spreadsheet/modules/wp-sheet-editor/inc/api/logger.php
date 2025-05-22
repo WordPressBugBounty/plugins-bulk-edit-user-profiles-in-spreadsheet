@@ -4,7 +4,7 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 
 	class WPSE_Logger {
 
-		private static $instance = false;
+		private static $instance = null;
 		public $directory        = null;
 		public $secret_key       = null;
 		public $current_job_id   = null;
@@ -97,12 +97,49 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 			$this->current_job_id = $job_id;
 		}
 
+
+		function get_caller_info() {
+			$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 3 );
+			if ( isset( $backtrace[2] ) ) {
+				$caller  = $backtrace[2];
+				$caller2 = $backtrace[1];
+				return array(
+					'file'     => $caller['file'],
+					'line'     => $caller2['line'],
+					'function' => $caller['function'],
+				);
+			}
+			return null;
+		}
+		/**
+			* Logs an entry to a specific job's log file.
+			*
+			* This method writes a log entry to a file associated with a specific job. If no job ID is provided,
+			* it uses the current job ID if available. The message can be a string or any type, which will be
+			* converted to a string using var_export if necessary. If the job ID is 'auto', the method will
+			* automatically determine the job ID based on the caller's file name and prepend the function name
+			* and line number to the message.
+			*
+			* @param mixed     $message The log message to be written. Can be a string or any other type.
+			* @param string|int $job_id  Optional. The ID of the job. Can be 'auto' to determine automatically based on the caller's file name and method. Can be 'null' to use the current job id set globally. Defaults to null.
+			*
+			* @return bool|Logger Returns false if no job ID is provided, otherwise returns the Logger instance.
+			*/
 		function entry( $message, $job_id = null ) {
 			if ( ! $job_id && $this->current_job_id ) {
 				$job_id = $this->current_job_id;
 			}
 			if ( ! $job_id ) {
 				return false;
+			}
+			if ( ! is_string( $message ) ) {
+				$message = var_export( $message, true );
+			}
+
+			if ( $job_id === 'auto' ) {
+				$caller  = $this->get_caller_info();
+				$job_id  = pathinfo( $caller['file'], PATHINFO_FILENAME );
+				$message = $caller['function'] . ':' . $caller['line'] . PHP_EOL . $message;
 			}
 			$file_path = $this->get_job_file( $job_id );
 			if ( ! file_exists( $file_path ) ) {
@@ -114,7 +151,7 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 			$time = current_time( 'mysql' ) . '.' . $micro;
 
 			$fp = fopen( $file_path, 'a' ); //opens file in append mode
-			fwrite( $fp, $time . ' - ' . html_entity_decode( wp_kses_post( $message ) ) . PHP_EOL . PHP_EOL );
+			fwrite( $fp, $time . ' (WordPress timezone) - ' . html_entity_decode( wp_kses_post( $message ) ) . PHP_EOL . PHP_EOL );
 			fclose( $fp );
 			return $this;
 		}

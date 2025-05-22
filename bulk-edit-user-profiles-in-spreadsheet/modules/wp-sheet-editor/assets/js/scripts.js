@@ -361,7 +361,8 @@ function beAddRowsFilter(filter) {
 						return jQuery(this).data('filter-key') === filterKey;
 					});
 					$existingFilter.remove();
-					$currentFilters.append('<a href="#" class="button advanced-filter" data-filter-key="' + filterKey + '"><i class="fa fa-remove"></i> ' + publicKey + ' ' + operator + ' ' + publicValue + '</a>');
+					var fieldLabel = typeof vgse_editor_settings.final_spreadsheet_columns_settings[publicKey] !== 'undefined' ? vgse_editor_settings.final_spreadsheet_columns_settings[publicKey].title : publicKey;
+					$currentFilters.append('<a href="#" class="button advanced-filter" data-filter-key="' + filterKey + '"><i class="fa fa-remove"></i> ' + fieldLabel + ' ' + operator + ' ' + publicValue + '</a>');
 				}
 			});
 		}
@@ -388,7 +389,8 @@ function beAddRowsFilter(filter) {
 					return jQuery(this).data('filter-key') === filterKey;
 				});
 				$existingFilter.remove();
-				$currentFilters.append('<a href="#" class="button advanced-filter" data-filter-key="' + filterKey + '"><i class="fa fa-remove"></i> ' + publicKey + ' ' + operator + ' ' + publicValue + '</a>');
+				var fieldLabel = typeof vgse_editor_settings.final_spreadsheet_columns_settings[publicKey] !== 'undefined' ? vgse_editor_settings.final_spreadsheet_columns_settings[publicKey].title : publicKey;
+				$currentFilters.append('<a href="#" class="button advanced-filter" data-filter-key="' + filterKey + '"><i class="fa fa-remove"></i> ' + fieldLabel + ' ' + operator + ' ' + publicValue + '</a>');
 			}
 		});
 		if (!$currentFilters.find('.button').length) {
@@ -548,9 +550,7 @@ function loading_ajax(options) {
 		}
 		jQuery('.sombra_popup').fadeIn(1000);
 	} else {
-		jQuery('.sombra_popup').fadeOut(800, function () {
-
-		});
+		jQuery('.sombra_popup').fadeOut(800);
 	}
 }
 
@@ -624,7 +624,7 @@ jQuery(document).ajaxError(function (event, xhr, ajaxOptions, thrownError) {
 	if (requestData.indexOf('vgse') < 0 && ajaxOptions.url.indexOf(vgse_editor_settings.rest_base_url + 'sheet-editor') < 0) {
 		return true;
 	}
-	loading_ajax({ estado: false });
+	loading_ajax(false);
 	if (typeof window.vgseDontNotifyServerError === 'boolean' && window.vgseDontNotifyServerError) {
 		window.vgseDontNotifyServerError = false;
 	} else if (xhr.statusText !== 'abort') {
@@ -658,7 +658,7 @@ jQuery(document).ajaxComplete(function (event, xhr, ajaxOptions, thrownError) {
 	setTimeout(function () {
 		if (xhr.statusText !== 'abort' && window.vgse_editor_settings) {
 			if (xhr.responseText === '0' || xhr.responseText === 0 || thrownError) {
-				loading_ajax({ estado: false });
+				loading_ajax(false);
 				if (typeof window.vgseDontNotifyServerError === 'boolean' && window.vgseDontNotifyServerError) {
 					window.vgseDontNotifyServerError = false;
 				} else {
@@ -676,7 +676,7 @@ jQuery(document).ajaxComplete(function (event, xhr, ajaxOptions, thrownError) {
  * @param bool customInsert If we want to load rows but use custom success controller.
  */
 function beLoadPosts(data, callback, customInsert, removeExisting) {
-	loading_ajax({ estado: true });
+	loading_ajax(true);
 
 	var timeoutId = setTimeout(function () {
 		jQuery('.wpse-stuck-loading').css('display', 'block');
@@ -741,10 +741,10 @@ function beLoadPosts(data, callback, customInsert, removeExisting) {
 				vgAddRowsToSheet(response.data.rows, null, removeExisting);
 				var successMessage = response.data.message || vgse_editor_settings.texts.posts_loaded;
 				notification({ mensaje: successMessage, tipo: 'info' });
-				loading_ajax({ estado: false });
+				loading_ajax(false);
 			} else {
 				// Disable loading screen and notify of error
-				loading_ajax({ estado: false });
+				loading_ajax(false);
 				notification({ mensaje: response.data.message, tipo: 'info' });
 				vgseAddFoundRowsCount(0);
 			}
@@ -759,7 +759,7 @@ function beLoadPosts(data, callback, customInsert, removeExisting) {
 				data.wpse_reset_posts_per_page = vgse_editor_settings.posts_per_page;
 				beLoadPosts(data, callback, customInsert, removeExisting);
 				setTimeout(function () {
-					loading_ajax({ estado: true });
+					loading_ajax(true);
 				}, 200);
 			}
 		}
@@ -1534,10 +1534,10 @@ function vgseRemoveAllFilters(reloadSpreadsheet) {
 	}
 }
 
-function vgseInitLazySelects() {
+function vgseInitLazySelects(lazy_loaded_select_options) {
 	var $selects = jQuery('select[data-lazy-key]:not([data-already-lazy])');
 	$selects.each(function () {
-		vgseLazySelect(jQuery(this), jQuery(this).data('lazy-key'));
+		vgseLazySelect(jQuery(this), jQuery(this).data('lazy-key'), lazy_loaded_select_options);
 	});
 }
 /**
@@ -1550,12 +1550,15 @@ function vgseInitLazySelects() {
  * @param key 
  * @returns 
  */
-function vgseLazySelect($select, key) {
+function vgseLazySelect($select, key, lazy_loaded_select_options) {
 	if ($select.attr('multiple')) {
 		return true;
 	}
-	if (!vgse_editor_settings.lazy_loaded_select_options) {
-		vgse_editor_settings.lazy_loaded_select_options = {};
+	if(!lazy_loaded_select_options){
+		var lazy_loaded_select_options = vgse_editor_settings.lazy_loaded_select_options;
+	}
+	if (!lazy_loaded_select_options) {
+		lazy_loaded_select_options = {};
 	}
 	var options = {};
 	var generateOptionsFromSelect = function () {
@@ -1570,7 +1573,7 @@ function vgseLazySelect($select, key) {
 				options[jQuery(this).val()] = jQuery(this).text();
 			}
 		});
-		vgse_editor_settings.lazy_loaded_select_options[key] = options;
+		lazy_loaded_select_options[key] = options;
 	};
 	var removeUnselectedElements = function () {
 		var $selectedElement = $select.find('option:selected');
@@ -1592,17 +1595,17 @@ function vgseLazySelect($select, key) {
 		});
 	}
 
-	if (!vgse_editor_settings.lazy_loaded_select_options || !vgse_editor_settings.lazy_loaded_select_options[key]) {
+	if (!lazy_loaded_select_options || !lazy_loaded_select_options[key]) {
 		generateOptionsFromSelect();
 	}
 
 	if (!$select.find('option').length && typeof $select.data('selected') === 'string') {
-		$select.append('<option value="' + vgseStripHtml($select.data('selected')) + '">' + vgseStripHtml(vgse_editor_settings.lazy_loaded_select_options[key][$select.data('selected')]) + '</option>');
+		$select.append('<option value="' + vgseStripHtml($select.data('selected')) + '">' + vgseStripHtml(lazy_loaded_select_options[key][$select.data('selected')]) + '</option>');
 	}
 	removeUnselectedElements();
 
 	$select.on('focus', function (e) {
-		var options = vgse_editor_settings.lazy_loaded_select_options[key];
+		var options = lazy_loaded_select_options[key];
 		if (options) {
 			var selected = $select.val();
 			$select.empty();
@@ -1734,10 +1737,10 @@ jQuery(document).ready(function (e) {
 			jQuery(this).attr('aria-label', vgse_editor_settings.texts[value]);
 		}
 	});
-	
+
 	// Alpine.js requires this manual trigger to update the model, since it doesn't detect programmatic field value updates	
-	jQuery('body').on('change', 'input[x-model],select[x-model],textarea[x-model]', function(){
-		if(typeof Alpine !== 'undefined'){
+	jQuery('body').on('change', 'input[x-model],select[x-model],textarea[x-model]', function () {
+		if (typeof Alpine !== 'undefined') {
 			jQuery(this).get(0).dispatchEvent(new Event('input'));
 		}
 	});
@@ -2690,7 +2693,7 @@ jQuery(document).ready(function (e) {
 	});
 	// Keyboard shortcut: ctrl + s for quick saving when a modal is not opened
 	document.addEventListener('keydown', function (e) {
-		if (e.key.toLowerCase() === 's' && e.ctrlKey && !jQuery('.remodal-is-opened').length) {
+		if (e.key && e.key.toLowerCase() === 's' && e.ctrlKey && !jQuery('.remodal-is-opened').length) {
 			e.preventDefault();
 			hot.deselectCell();
 			jQuery('.wpse-save').trigger('click');
@@ -2745,7 +2748,7 @@ jQuery(document).ready(function (e) {
 		if (!fullData.length) {
 
 			jQuery($progress).find('.response').append('<p>' + vgse_editor_settings.texts.no_changes_to_save + '</p>');
-			loading_ajax({ estado: false });
+			loading_ajax(false);
 
 			$progress.find('.remodal-cancel').removeClass('hidden');
 			$progress.find('.be-loading-anim').hide();
@@ -2766,7 +2769,7 @@ jQuery(document).ready(function (e) {
 				errors.forEach(function (error) {
 					jQuery($progress).find('.response').append('<p>' + error + '</p>');
 				});
-				loading_ajax({ estado: false });
+				loading_ajax(false);
 
 				$progress.find('.remodal-cancel').removeClass('hidden');
 				$progress.find('.be-loading-anim').hide();
@@ -2897,7 +2900,7 @@ jQuery(document).ready(function (e) {
 					}
 					jQuery($progress).find('.response').empty().append('<p class="saving-complete-message">' + successMessage + '</p>');
 
-					loading_ajax({ estado: false });
+					loading_ajax(false);
 
 
 					notification({ mensaje: vgse_editor_settings.texts.everything_saved });
@@ -2986,7 +2989,7 @@ jQuery(document).ready(function (e) {
 	if (typeof wp !== 'undefined' && wp.media) {
 		jQuery('body').on('click', '.set_custom_images:not(.multiple)', function (e) {
 			e.preventDefault();
-			loading_ajax({ estado: true });
+			loading_ajax(true);
 			var button = jQuery(this);
 			var $cell = button.parent('td');
 			var cellCoords = hot.getCoords($cell[0]);
@@ -3065,7 +3068,7 @@ jQuery(document).ready(function (e) {
 				wpsePrepareGalleryFilesForCellFormat(gallery, cellCoords);
 			});
 			media_uploader.open();
-			loading_ajax({ estado: false });
+			loading_ajax(false);
 			return false;
 		});
 	}
@@ -3077,7 +3080,7 @@ jQuery(document).ready(function (e) {
 		jQuery('body').on('click', '.set_custom_images.multiple', function (e) {
 			e.preventDefault();
 
-			loading_ajax({ estado: true });
+			loading_ajax(true);
 			var button = jQuery(this);
 			var $cell = button.parent('td');
 			var cellCoords = hot.getCoords($cell[0]);
@@ -3144,7 +3147,7 @@ jQuery(document).ready(function (e) {
 				wpsePrepareGalleryFilesForCellFormat(gallery, cellCoords);
 			});
 			media_uploader.open();
-			loading_ajax({ estado: false });
+			loading_ajax(false);
 			return false;
 		});
 	}
@@ -3364,7 +3367,7 @@ jQuery(document).ready(function (e) {
 				vgseAddFoundRowsCount(response.data.total);
 				vgAddRowsToSheet(response.data.rows);
 
-				loading_ajax({ estado: false });
+				loading_ajax(false);
 				var successMessage = response.data.message || vgse_editor_settings.texts.posts_loaded;
 				notification({ mensaje: successMessage });
 				//Para detener el scroll mientras se ejecuta otro y volver a activarlo
@@ -3375,7 +3378,7 @@ jQuery(document).ready(function (e) {
 				}
 			} else {
 
-				loading_ajax({ estado: false });
+				loading_ajax(false);
 				notification({ mensaje: response.data.message, tipo: 'info', time: 30000 });
 				window.scrroll = false;
 			}
@@ -3607,9 +3610,8 @@ jQuery(document).ready(function (e) {
 
 		var defaultColumns = columns_format(format);
 
-		if (typeof vgseColumnsVisibilityUpdateHOT === 'function' && window.vgseColumnsVisibilityUsed) {
-			vgseColumnsVisibilityUpdateHOT(defaultColumns, vgse_editor_settings.colHeaders, vgse_editor_settings.colWidth, 'softUpdate');
-
+		if (window.vgseColumnsVisibilityUsed) {
+			Alpine.$data(document.querySelector('[x-data="vgseColumnsManager"]')).columnsVisibilityUpdateHOT(defaultColumns, vgse_editor_settings.colHeaders, vgse_editor_settings.colWidth, 'softUpdate');
 		} else {
 			hot.updateSettings({
 				columns: defaultColumns
@@ -3625,7 +3627,7 @@ jQuery(document).ready(function (e) {
 		var post_type = jQuery('#post_type_new_row').val();
 		var rows = (jQuery(this).next('.number_rows').length && jQuery(this).next('.number_rows').val()) ? parseInt(jQuery(this).next('.number_rows').val()) : 1;
 		var extra_data = typeof window.wpseAddRowExtraData !== 'undefined' ? window.wpseAddRowExtraData : null;
-		loading_ajax({ estado: true });
+		loading_ajax(true);
 
 		// Create posts as drafts
 		jQuery.ajax({
@@ -3641,7 +3643,7 @@ jQuery(document).ready(function (e) {
 					vgseAddFoundRowsCount(window.beFoundRows + parseInt(rows));
 					vgAddRowsToSheet(res.data.message, 'prepend');
 
-					loading_ajax({ estado: false });
+					loading_ajax(false);
 					notification({ mensaje: vgse_editor_settings.texts.new_rows_added });
 
 					// Scroll up to the new rows
@@ -3650,7 +3652,7 @@ jQuery(document).ready(function (e) {
 						jQuery(window).scrollTop(cellsPosition);
 					}
 				} else {
-					loading_ajax({ estado: false });
+					loading_ajax(false);
 					notification({ mensaje: res.data.message, tipo: 'error', tiempo: 60000 });
 				}
 
@@ -3841,11 +3843,11 @@ jQuery(document).ready(function () {
 		var $allTrigger = jQuery(this);
 		var $step = $allTrigger.parents('.setup-step');
 		var $forms = $step.find('form');
-		loading_ajax({ estado: true });
+		loading_ajax(true);
 
 		if (!$forms.length) {
 			nextStep();
-			loading_ajax({ estado: false });
+			loading_ajax(false);
 			return true;
 		}
 
@@ -3864,7 +3866,7 @@ jQuery(document).ready(function () {
 			if ($saved.length === savedNeeded) {
 				clearInterval(intervalId);
 				nextStep();
-				loading_ajax({ estado: false });
+				loading_ajax(false);
 			}
 		}, 800);
 	});
@@ -4008,7 +4010,7 @@ function initHandsontableForPopup(data, modalSettings) {
 		initEditorIframe(modalSettings);
 
 	}
-	loading_ajax({ estado: false });
+	loading_ajax(false);
 }
 
 function initEditorIframe(modalSettings) {
@@ -4161,7 +4163,7 @@ jQuery(document).ready(function () {
 		var data = window.vgseWCAttsCurrent;
 
 		if (data.modalSettings.edit_modal_cancel_action) {
-			loading_ajax({ estado: true });
+			loading_ajax(true);
 
 			var functionNames = data.modalSettings.edit_modal_cancel_action.replace('js_function_name:', '').split(',');
 			functionNames.forEach(function (functionName) {
@@ -4178,7 +4180,7 @@ jQuery(document).ready(function () {
 		var nonce = jQuery('.remodal-bg').data('nonce');
 		var data = window.vgseWCAttsCurrent;
 
-		loading_ajax({ estado: true });
+		loading_ajax(true);
 
 		if (data.modalSettings.type === 'handsontable') {
 			var attrData = hotAttr.getSourceData();
@@ -4233,7 +4235,7 @@ jQuery(document).ready(function () {
 			}
 		});
 		jQuery('.custom-modal-editor').remodal().close();
-		loading_ajax({ estado: false });
+		loading_ajax(false);
 	});
 
 	jQuery(document).on('closed', '.custom-modal-editor', function () {
@@ -4257,7 +4259,7 @@ jQuery(document).ready(function () {
 		$modal.find('.modal-general-title, .modal-description').hide();
 
 		jQuery('.custom-modal-editor').removeClass('modal-editor-' + data.modalSettings.key);
-		loading_ajax({ estado: false });
+		loading_ajax(false);
 
 	});
 	// Load modal and spreadsheet
@@ -4269,7 +4271,7 @@ jQuery(document).ready(function () {
 		if (!data) {
 			return true;
 		}
-		loading_ajax({ estado: true });
+		loading_ajax(true);
 		var $modal = jQuery('.custom-modal-editor');
 		$modal.data('column-key', data.modalSettings.key);
 
@@ -4452,11 +4454,10 @@ function vgsePostTypeSetupPostTypesSaved(data) {
 		}, function (response) {
 			$next.append(response.data.html);
 
-			$next.find('[name="save_post_type_settings"]').prop('checked', true);
-
-			if (typeof vgseColumnsVisibilityInit !== 'undefined') {
-				vgseColumnsVisibilityInit();
-			}
+			setTimeout(() => {
+				const columnsManager = Alpine.$data(document.querySelector('[x-data="vgseColumnsManager"]'));
+				columnsManager.saveChangesInServer = true;
+			}, 200);
 		});
 	}
 }
@@ -4559,6 +4560,9 @@ jQuery(document).ready(function () {
 
 // Helper functionality for tools with saved items
 jQuery(document).ready(function () {
+	if (typeof vgse_editor_settings === 'undefined' || !vgse_editor_settings.is_administrator) {
+		return;
+	}
 	// Allow to delete saved search
 	var $buttons = jQuery('.toolbar-submenu [data-saved-item]');
 	$buttons.each(function () {
@@ -4644,7 +4648,7 @@ jQuery(document).ready(function () {
 			// Calculate the new position for vertical and horizontal centering
 			var leftPosition = (viewportWidth - modalWidth) / 2;
 			var topPosition = (viewportHeight - modalHeight) / 2;
-			if(topPosition < 0){
+			if (topPosition < 0) {
 				topPosition = 0;
 			}
 

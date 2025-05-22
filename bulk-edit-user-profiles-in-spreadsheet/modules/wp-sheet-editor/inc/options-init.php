@@ -4,7 +4,7 @@ if ( ! class_exists( 'WPSE_Options_Page' ) ) {
 
 	class WPSE_Options_Page {
 
-		private static $instance = false;
+		private static $instance = null;
 		var $sections            = array();
 
 		private function __construct() {
@@ -175,6 +175,19 @@ if ( ! class_exists( 'WPSE_Options_Page' ) ) {
 						'title'   => __( 'Disable the replacement of line breaks with p tags?', 'vg_sheet_editor' ),
 						'desc'    => __( 'When the sheet loads and saves post content, we run it through wpautop to prevent issues with line breaks. You can disable this if you dont want to see/save the p tags in the content.', 'vg_sheet_editor' ),
 						'default' => false,
+					),
+					array(
+						'id'      => 'use_autop_save_classic_content',
+						'type'    => 'switch',
+						'title'   => __( 'Replace line breaks with p tags when saving content that doesn\'t use blocks?', 'vg_sheet_editor' ),
+						'desc'    => __( 'By default, we save the content with line breaks or p tags as entered in the cell. Eanble this option if your theme doesn\'t auto convert line breaks to p tags', 'vg_sheet_editor' ),
+						'default' => false,
+					),
+					array(
+						'id'      => 'post_types_use_gutenberg',
+						'type'    => 'text',
+						'title'   => __( 'What post types use the block editor for the content?', 'vg_sheet_editor' ),
+						'desc'    => __( 'By default, we try to automatically detect which post types use the block editor. But sometimes we\'re unable to detect some post types that use the block editor. Enter a comma separated list of post type keys here.', 'vg_sheet_editor' ),
 					),
 					array(
 						'id'      => 'be_disable_data_prefetch',

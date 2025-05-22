@@ -154,7 +154,7 @@ if ( !class_exists( 'WP_Sheet_Editor_CORE_Modules_Init' ) ) {
 }
 // WPML : Change language to english when we load the spreadsheet page
 if ( !function_exists( 'vgse_filter_wpml_admin_language' ) ) {
-    if ( isset( $_GET['page'] ) && strpos( $_GET['page'], 'vgse-bulk-edit-' ) !== false && strpos( json_encode( $_COOKIE ), '_icl_' ) !== false ) {
+    if ( isset( $_GET['page'] ) && strpos( $_GET['page'], 'vgse-bulk-edit-' ) !== false && !empty( $_COOKIE ) && strpos( json_encode( $_COOKIE ), '_icl_' ) !== false ) {
         add_filter(
             'get_user_metadata',
             'vgse_filter_wpml_admin_language',

@@ -94,7 +94,6 @@ if ( ! class_exists( 'WP_Sheet_Editor_Infinite_Serialized_Field' ) ) {
 								array(
 									'key'                  => $column_key,
 									'data_type'            => 'meta_data',
-									'column_width'         => 300,
 									'title'                => $title,
 									'type'                 => '',
 									'get_value_callback'   => array( $this, 'get_value' ),

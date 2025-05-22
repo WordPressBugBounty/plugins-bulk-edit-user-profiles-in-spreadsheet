@@ -236,6 +236,10 @@ if ( ! class_exists( 'VG_Freemium_Plugin_SDK' ) ) {
 			if ( is_multisite() && ! is_super_admin() ) {
 				return;
 			}
+			if ( wp_doing_ajax() || wp_doing_cron() ) {
+				return;
+			}
+			
 			// Bail if no activation redirect
 			$flag_key = $this->settings['plugin_prefix'] . 'welcome_redirect';
 

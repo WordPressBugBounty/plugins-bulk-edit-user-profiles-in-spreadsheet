@@ -11,7 +11,7 @@ if ( ! class_exists( 'VGSE_Provider_User' ) ) {
 
 	class VGSE_Provider_User extends VGSE_Provider_Abstract {
 
-		private static $instance = false;
+		private static $instance = null;
 		var $key                 = 'user';
 		var $is_post_type        = false;
 		static $data_store       = array();
