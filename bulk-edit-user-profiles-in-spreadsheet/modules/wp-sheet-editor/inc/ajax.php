@@ -7,7 +7,6 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 		private static $instance = null;
 
 		private function __construct() {
-
 		}
 
 		/*
@@ -208,7 +207,10 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 				wp_send_json_error( array( 'message' => __( 'Request not allowed. Try again later.', 'vg_sheet_editor' ) ) );
 			}
 
-			$titles = $wpdb->get_col( $wpdb->prepare( "SELECT post_title FROM $wpdb->posts WHERE post_type = %s LIMIT 500", $post_type ) );
+			$post_statuses       = get_post_stati( array( 'show_in_admin_status_list' => false ), 'names' );
+			$status_placeholders = implode( ', ', array_fill( 0, count( $post_statuses ), '%s' ) );
+			$query_args          = array_merge( array( $post_type ), $post_statuses );
+			$titles              = $wpdb->get_col( $wpdb->prepare( "SELECT post_title FROM $wpdb->posts WHERE post_type = %s AND post_status NOT IN ($status_placeholders) LIMIT 500", $query_args ) );
 
 			wp_send_json_success( array( 'data' => $titles ) );
 		}

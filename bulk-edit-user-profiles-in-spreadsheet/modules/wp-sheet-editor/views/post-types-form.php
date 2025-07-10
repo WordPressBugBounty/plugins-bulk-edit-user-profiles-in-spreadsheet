@@ -28,13 +28,20 @@ if ( empty( $post_types ) ) {
 				<?php } ?>
 	<?php
 	foreach ( $sheets as $sheet ) {
-		$key              = $sheet['key'];
-		$post_type_name   = $sheet['label'];
-		$disabled         = ( ! empty( $sheet['is_disabled'] ) ) ? ' disabled ' : '';
-		$maybe_go_premium = $sheet['description'];
+		$key                           = $sheet['key'];
+		$post_type_name                = $sheet['label'];
+		$disabled                      = ( ! empty( $sheet['is_disabled'] ) ) ? ' disabled ' : '';
+		$maybe_go_premium              = $sheet['description'];
+		$type_manually_created_by_user = ! empty( $custom_post_types_raw ) && in_array( $key, $custom_post_types_raw, true ) && VGSE()->helpers->user_can_manage_options() && post_type_exists( $key );
 		?>
 		<template x-if="!searchTerm || '<?php echo esc_attr( wp_kses_post( trim( $post_type_name ) ) ); ?>'.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1">
-			<div class="post-type-field post-type-<?php echo esc_attr( $key ); ?>"><input type="checkbox" name="post_types[]" value="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" <?php echo esc_attr( $disabled ); ?> <?php checked( in_array( $key, $enabled_post_types ) ); ?>> <label for="<?php echo esc_attr( $key ); ?>"><?php echo wp_kses_post( $post_type_name ); ?> <?php echo wp_kses_post( $maybe_go_premium ); ?></label></div>
+			<div class="post-type-field post-type-<?php echo esc_attr( $key ); ?>">
+				<input type="checkbox" name="post_types[]" value="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" <?php echo esc_attr( $disabled ); ?> <?php checked( in_array( $key, $enabled_post_types ) ); ?>>
+				<label for="<?php echo esc_attr( $key ); ?>"><?php echo wp_kses_post( $post_type_name ); ?> <?php echo wp_kses_post( $maybe_go_premium ); ?></label>
+				<?php if ( $type_manually_created_by_user ) { ?>
+					<button class="button vgse-delete-post-type" data-post-type="<?php echo esc_attr( $key ); ?>"><i class="fa fa-remove"></i></button>
+				<?php } ?>
+			</div>
 		</template>
 	<?php } ?>
 	<input type="hidden" name="action" value="vgse_save_post_types_setting">

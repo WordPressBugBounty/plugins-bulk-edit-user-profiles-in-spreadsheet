@@ -1391,7 +1391,7 @@ function vgseInputToFormattedColumnField(selectedField, $fields, valueFieldSelec
 		var valueClasses = $value.attr('class');
 
 		// if the field is not a text input, it means it's already formatted, exit
-		if ((!$value.is('input') && !$value.is('textarea')) || ($value.attr('type') && $value.attr('type') !== 'text')) {
+		if (!$value || (!$value.is('input') && !$value.is('textarea')) || ($value.attr('type') && $value.attr('type') !== 'text')) {
 			return true;
 		}
 		var alpineModel = $value.attr('x-model') ? ' x-model="'+$value.attr('x-model')+'"' : '';
@@ -1412,7 +1412,7 @@ function vgseInputToFormattedColumnField(selectedField, $fields, valueFieldSelec
 				});
 			});
 		} else if (typeof columnSettings.formatted.type !== 'undefined' && columnSettings.formatted.type === 'autocomplete' && typeof columnSettings.formatted.source === 'string' && columnSettings.formatted.source === "searchUsers") {
-			$value.replaceWith('<input class="' + valueClasses + '" name="' + valueName + '" '+alpineModel+' list="wpse-bulk-edit-users-list-' + selectedField + '"><datalist class="' + valueClasses + '" id="wpse-bulk-edit-users-list-' + selectedField + '"></datalist>');
+			$value.replaceWith('<input class="' + valueClasses + '" name="' + valueName + '" '+alpineModel+' list="wpse-bulk-edit-users-list-' + selectedField + '" type="text"><datalist class="' + valueClasses + '" id="wpse-bulk-edit-users-list-' + selectedField + '"></datalist>');
 
 			$fields.find('input[list="wpse-bulk-edit-users-list-' + selectedField + '"]').keyup(_throttle(function (e) {
 				var query = jQuery(this).val();
@@ -2462,6 +2462,36 @@ jQuery(document).ready(function (e) {
 
 						var url = vgse_editor_settings.final_spreadsheet_columns_settings.open_wp_editor.external_button_template.replace('{ID}', rowIds[0]);
 						window.open(url, '_blank');
+					}
+				},
+				'view': {
+					name: vgse_editor_settings.texts.view_row,
+					hidden: function () {
+						return typeof vgse_editor_settings.final_spreadsheet_columns_settings.view_post !== 'object';
+					},
+					callback: function (key, selection, clickEvent) {
+						console.log(key);
+						var rowIndex = [];
+						selection.forEach(function (range) {
+							if (range.start.row < range.end.row) {
+								vgseRange(range.start.row, range.end.row).forEach(function (index) {
+									rowIndex.push(index);
+								});
+							} else {
+								rowIndex.push(range.start.row);
+							}
+						});
+
+						let firstUrl = null;
+						rowIndex.forEach(function (index) {
+							if(!firstUrl){
+								firstUrl = hot.getDataAtRowProp(index, 'view_post');
+							}
+						});
+
+						if(firstUrl){
+							window.open(firstUrl, '_blank');
+						}
 					}
 				},
 			}

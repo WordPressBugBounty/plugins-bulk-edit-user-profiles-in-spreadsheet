@@ -259,7 +259,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns_Visibility' ) ) {
 		 */
 		public function enqueue_assets() {
 			wp_enqueue_script( 'wp-sheet-editor-sortable', plugins_url( '/assets/vendor/Sortable/Sortable.min.js', __FILE__ ), array( 'jquery' ), VGSE()->version );
-			wp_enqueue_script( 'wp-sheet-editor-columns-visibility-modal', plugins_url( '/assets/js/init.js', __FILE__ ), array( 'wp-sheet-editor-sortable' ), VGSE()->version );
+			wp_enqueue_script( 'wp-sheet-editor-columns-visibility-modal', plugins_url( '/assets/js/init.js', __FILE__ ), array( 'wp-sheet-editor-sortable' ), filemtime( __DIR__ . '/assets/js/init.js' ) );
 		}
 
 		public function render_settings_modal( $post_type, $partial_form = false, $options = null, $current_url = null, $visible_columns = null ) {
@@ -306,7 +306,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns_Visibility' ) ) {
 			// might not appear in the enabled nor disabled lists. Force them to appear at least as disabled.
 			foreach ( $filtered_columns as $column_key => $column_settings ) {
 				if ( ! isset( $visible_columns[ $column_key ] ) ) {
-					$options[ $post_type ]['disabled'][ $column_key ] = $column_settings;
+					$options[ $post_type ]['disabled'][ $column_key ] = $column_settings['title'];
 				}
 			}
 			$default_column_data = array(

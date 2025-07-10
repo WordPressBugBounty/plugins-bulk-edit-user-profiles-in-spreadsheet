@@ -1794,8 +1794,17 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 			if ( ! $url ) {
 				return false;
 			}
+			// Convert Google Drive links to downloadable URL
+			if ( strpos( $url, 'https://drive.google.com/file/d/' ) === 0 ) {
+				preg_match( '/\/d\/([^\/]+)/', $url, $matches );
+				if ( ! empty( $matches[1] ) ) {
+					$url = 'https://drive.google.com/uc?export=download&id=' . $matches[1];
+				}
+			}
+
+			$accept_url_parameters = VGSE()->get_option( 'external_files_accept_url_parameters' ) || stripos( $url, 'google.com' ) !== false;
 			// Remove query strings, we accept only static files.
-			if ( empty( VGSE()->get_option( 'external_files_accept_url_parameters' ) ) ) {
+			if ( empty( $accept_url_parameters ) ) {
 				$url = preg_replace( '/\?.*/', '', $url );
 			} else {
 				// html_entity_decode is needed when we're saving query strings, because the query strings are usually encoded during sanitization which breaks some types of query strings
@@ -1852,23 +1861,27 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 			}
 
 			// We set the file extension late because if we're saving dynamic URLs, we don't know the file mime type until after the file is downloaded
-			if ( ! empty( VGSE()->get_option( 'external_files_accept_url_parameters' ) ) && is_string( $file_path ) ) {
-				$mime_type   = wp_get_image_mime( $file_path );
-				$mime_to_ext = apply_filters(
-					'getimagesize_mimes_to_exts',
-					array(
-						'image/jpeg' => 'jpg',
-						'image/png'  => 'png',
-						'image/gif'  => 'gif',
-						'image/bmp'  => 'bmp',
-						'image/tiff' => 'tif',
-						'image/webp' => 'webp',
-					)
-				);
-				if ( isset( $mime_to_ext[ $mime_type ] ) ) {
-					$save_as .= '.' . $mime_to_ext[ $mime_type ];
-				} else {
-					$save_as = basename( $url );
+			if ( ! empty( $accept_url_parameters ) && is_string( $file_path ) ) {
+				// Use the incoming file name as file name + random string
+				$save_as = wp_generate_password( 6, false, false ) . '-' . basename( $file_path );
+
+				// Detect extension if the file path doesn't contain extension
+				if ( strpos( $save_as, '.' ) === false ) {
+					$mime_type   = wp_get_image_mime( $file_path );
+					$mime_to_ext = apply_filters(
+						'getimagesize_mimes_to_exts',
+						array(
+							'image/jpeg' => 'jpg',
+							'image/png'  => 'png',
+							'image/gif'  => 'gif',
+							'image/bmp'  => 'bmp',
+							'image/tiff' => 'tif',
+							'image/webp' => 'webp',
+						)
+					);
+					if ( isset( $mime_to_ext[ $mime_type ] ) ) {
+						$save_as .= '.' . $mime_to_ext[ $mime_type ];
+					}
 				}
 			}
 			$attachment_id = $this->add_file_to_gallery_from_path( $file_path, $save_as, $post_id, $url );

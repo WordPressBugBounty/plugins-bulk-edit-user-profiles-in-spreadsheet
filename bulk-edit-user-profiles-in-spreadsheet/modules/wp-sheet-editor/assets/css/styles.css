@@ -1861,7 +1861,7 @@ are rendered but handsontable sets visibility:hiden*/
 
 .wpse-full-screen #wpcontent,
 .wpse-full-screen #wpfooter {
-    margin-left: 0;
+    margin-left: 0 !important;
 }
 
 html.wp-toolbar.wpse-full-screen {

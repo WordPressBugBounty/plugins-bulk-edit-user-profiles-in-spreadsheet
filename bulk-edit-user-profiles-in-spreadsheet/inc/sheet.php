@@ -53,6 +53,89 @@ if ( !class_exists( 'WPSE_Users_Sheet' ) ) {
             );
         }
 
+        function execute_formula_delete_user(
+            $results,
+            $user_id,
+            $spreadsheet_column,
+            $formula,
+            $post_type,
+            $spreadsheet_columns,
+            $raw_form_data
+        ) {
+            if ( $post_type !== $this->key || $raw_form_data['action_name'] !== 'delete_user' ) {
+                return $results;
+            }
+            if ( !WP_Sheet_Editor_Helpers::current_user_can( 'delete_users' ) ) {
+                // Return any modified value so the progress text shows the number of updated orders
+                $out = array(
+                    'initial_data'  => 'before',
+                    'modified_data' => 'after',
+                );
+                return $out;
+            }
+            $assign_to = null;
+            $assign_to_username = ( empty( $raw_form_data['formula_data'] ) || empty( $raw_form_data['formula_data'][0] ) ? null : $raw_form_data['formula_data'][0] );
+            if ( $assign_to_username ) {
+                $user = get_user_by( 'login', $assign_to_username );
+                if ( $user ) {
+                    $assign_to = $user->ID;
+                }
+            }
+            if ( !empty( VGSE()->options['wpmu_delete_account'] ) && is_multisite() ) {
+                wpmu_delete_user( $user_id );
+            } else {
+                wp_delete_user( $user_id, $assign_to );
+            }
+            // Return any modified value so the progress text shows the number of updated orders
+            $out = array(
+                'initial_data'  => 'before',
+                'modified_data' => 'after',
+            );
+            return $out;
+        }
+
+        /**
+         * Modify the quick actions to include a new delete action.
+         *
+         * @param array   $quick_actions The existing quick actions.
+         * @param string  $post_type     The current post type.
+         * @param object  $editor        The editor object.
+         * @return array  The modified quick actions.
+         */
+        public function modify_quick_actions( $quick_actions, $post_type, $editor ) {
+            if ( isset( $quick_actions['delete'] ) ) {
+                $quick_actions['delete']['columns'] = array('wpse_status');
+                $quick_actions['delete']['type_of_edit'] = 'delete_user';
+                $quick_actions['delete']['values'] = array();
+            }
+            return $quick_actions;
+        }
+
+        function formulas_add_custom_edit_types( $form_builder_args, $post_type ) {
+            if ( $post_type !== $this->key ) {
+                return $form_builder_args;
+            }
+            $form_builder_args['columns_actions']['text']['delete_user'] = 'default';
+            $form_builder_args['default_actions']['delete_user'] = array(
+                'label'               => __( 'Delete user', 'vg_sheet_editor_users' ),
+                'description'         => '',
+                'fields_relationship' => 'AND',
+                'jsCallback'          => 'vgseGenerateFakeFormula',
+                'disallow_preview'    => true,
+                'allowed_column_keys' => array('wpse_status'),
+                'input_fields'        => array(array(
+                    'tag'         => 'input',
+                    'html_attrs'  => array(
+                        'type' => 'text',
+                        ''     => '',
+                    ),
+                    'label'       => __( 'Reassign the content to this user', 'vg_sheet_editor' ),
+                    'description' => __( 'Enter a username to transfer the content from the deleted users to this user, or leave blank to not reassign the content.', 'vg_sheet_editor' ),
+                )),
+            );
+            return $form_builder_args;
+        }
+
         function filter_by_user_role( $query_args ) {
             $query_args['role__in'] = array_keys( VGSE_Users_Helpers_Obj()->get_available_user_roles() );
             if ( !empty( VGSE()->options['users_hide_administrators'] ) ) {

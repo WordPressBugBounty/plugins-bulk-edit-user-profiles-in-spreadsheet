@@ -150,10 +150,27 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 
 			$time = current_time( 'mysql' ) . '.' . $micro;
 
+			$message = $this->mask_private_values( $message );
+
 			$fp = fopen( $file_path, 'a' ); //opens file in append mode
 			fwrite( $fp, $time . ' (WordPress timezone) - ' . html_entity_decode( wp_kses_post( $message ) ) . PHP_EOL . PHP_EOL );
 			fclose( $fp );
 			return $this;
+		}
+
+		function mask_private_values( $message ) {
+			// Regex pattern to match a UUID
+			$pattern = '/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/';
+
+			// Apply the replacement
+			$message = preg_replace_callback(
+				$pattern,
+				function ( $matches ) {
+					return substr( $matches[0], 0, -10 ) . 'xxxxx';
+				},
+				$message
+			);
+			return $message;
 		}
 
 		function debug( $variables ) {

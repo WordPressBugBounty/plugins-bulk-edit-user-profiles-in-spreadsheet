@@ -156,6 +156,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 				'katax_admin_js',
 				'DPVDWselect2',
 				'eate_dashboard',
+				// Script added by MULTILOCA - WooCommerce Multi Locations Inventory Manager
+				'wcmlim_google_map',
 			);
 
 			if ( ! empty( VGSE()->options['be_disable_heartbeat'] ) ) {
@@ -408,6 +410,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 				'change_background_color'                 => __( 'Change background color', 'vg_sheet_editor' ),
 				'hint_missing_column_on_scroll'           => ( defined( 'VGSE_ANY_PREMIUM_ADDON' ) && VGSE_ANY_PREMIUM_ADDON && VGSE()->helpers->user_can_manage_options() && is_admin() ) ? __( '<h3>Missing column?</h3><button class="button show-column-missing-tips"  data-remodal-target="modal-columns-visibility">Open columns manager</button> or <button class="button">Close this</button>', 'vg_sheet_editor' ) : '',
 				'open_regular_editor'                     => __( 'WP Editor', 'vg_sheet_editor' ),
+				'view_row'                     => __( 'View', 'vg_sheet_editor' ),
 			);
 
 			$extension            = VGSE()->helpers->get_extension_by_post_type( $current_provider_in_page );

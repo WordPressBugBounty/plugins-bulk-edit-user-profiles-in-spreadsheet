@@ -2,14 +2,14 @@
 /*
 	Plugin Name: WP Sheet Editor - Users
 	Description: Edit users in spreadsheet.
-	Version: 1.5.40
+	Version: 1.5.41
 	Author:      WP Sheet Editor
 	Author URI:  https://wpsheeteditor.com/?utm_source=wp-admin&utm_medium=plugins-list&utm_campaign=users
 	Plugin URI: https://wpsheeteditor.com/extensions/edit-users-spreadsheet/?utm_source=wp-admin&utm_medium=plugins-list&utm_campaign=users
 	License:     GPL2
 	License URI: https://www.gnu.org/licenses/gpl-2.0.html
 	WC requires at least: 4.0
-	WC tested up to: 9.5
+	WC tested up to: 9.9
 	Text Domain: vg_sheet_editor_users
 	Domain Path: /lang
 	 */

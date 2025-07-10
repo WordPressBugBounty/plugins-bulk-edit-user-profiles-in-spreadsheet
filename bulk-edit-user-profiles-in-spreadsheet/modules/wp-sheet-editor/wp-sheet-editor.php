@@ -32,7 +32,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 	class WP_Sheet_Editor {
 
 		private $post_type;
-		public $version     = '2.25.18';
+		public $version     = '2.25.19';
 		public $textname    = 'vg_sheet_editor';
 		public $options_key = 'vg_sheet_editor';
 		public $plugin_url  = null;
@@ -667,6 +667,23 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 			add_action( 'vg_sheet_editor/on_uninstall', array( $this, 'on_uninstall' ) );
 			add_action( 'admin_page_access_denied', array( $this, 'catch_license_page_error' ) );
 			$this->maybe_auto_enable_sheet();
+
+			add_filter( 'stateless_skip_cache_busting', array( $this, 'disable_filename_randomization_for_wpse_files' ), 10, 2 );
+		}
+
+		/**
+		 * The "WP-Stateless for Google Cloud" plugin randomizes file names in the uploads folder, breaking all our logs, exports, imports, etc. This will disable the randomization for file names containing our private site key.
+		 *
+		 * @param  null|string $disable null to randomize file names or file name to skip randomization
+		 * @param  string $filename
+		 * @return null|string
+		 */
+		public function disable_filename_randomization_for_wpse_files( $disable, $filename ) {
+			$site_key = get_option( 'vgse_secret_key' );
+			if ( ( $site_key && strpos( $filename, $site_key ) !== false ) || preg_match( '/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/', $filename ) ) {
+				$disable = $filename;
+			}
+			return $disable;
 		}
 
 		function maybe_auto_enable_sheet() {
@@ -1299,7 +1316,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 				<?php
 				$js = ob_get_clean();
 				$js = str_replace( array( '<script>', '</script>' ), '', $js );
-				wp_register_script( 'wpse-delayed-js', '',);
+				wp_register_script( 'wpse-delayed-js', '' );
 				wp_enqueue_script( 'wpse-delayed-js' );
 				wp_add_inline_script( 'wpse-delayed-js', $js );
 			}
