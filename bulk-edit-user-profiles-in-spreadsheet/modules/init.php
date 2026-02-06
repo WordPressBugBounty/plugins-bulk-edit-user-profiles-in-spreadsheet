@@ -3,9 +3,9 @@
 defined( 'ABSPATH' ) || exit;
 if ( !class_exists( 'WP_Sheet_Editor_CORE_Modules_Init' ) ) {
     class WP_Sheet_Editor_CORE_Modules_Init {
-        var $product_directory = null;
+        public $product_directory = null;
 
-        var $freemius_instance = null;
+        public $freemius_instance = null;
 
         function __construct( $product_directory, $freemius_instance = null, $auto_init = true ) {
             $this->product_directory = $product_directory;
@@ -16,12 +16,16 @@ if ( !class_exists( 'WP_Sheet_Editor_CORE_Modules_Init' ) ) {
                 $this->init( array('wp-sheet-editor') );
                 add_action( 'plugins_loaded', array($this, 'init') );
             }
+            if ( !isset( $GLOBALS['wp_sheet_edit_init_counter'] ) ) {
+                $GLOBALS['wp_sheet_edit_init_counter'] = 0;
+            }
+            $GLOBALS['wp_sheet_edit_init_counter']++;
         }
 
         public function get_editor_page_key() {
             $out = false;
             if ( isset( $_GET['page'] ) && strpos( $_GET['page'], 'vgse-bulk-edit-' ) !== false ) {
-                $out = str_replace( 'vgse-bulk-edit-', '', sanitize_text_field( $_GET['page'] ) );
+                $out = str_replace( 'vgse-bulk-edit-', '', sanitize_text_field( wp_unslash( $_GET['page'] ) ) );
             }
             return apply_filters( 'vg_sheet_editor/modules_init/editor_page_key', $out );
         }

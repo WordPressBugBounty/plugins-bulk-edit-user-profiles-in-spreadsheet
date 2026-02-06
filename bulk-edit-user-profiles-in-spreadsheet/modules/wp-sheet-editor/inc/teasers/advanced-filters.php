@@ -7,7 +7,7 @@ if (!class_exists('WP_Sheet_Editor_Advanced_Filters_Teaser')) {
 	 */
 	class WP_Sheet_Editor_Advanced_Filters_Teaser {
 
-		static private $instance = false;
+		private static $instance = false;
 
 		private function __construct() {
 			
@@ -19,6 +19,9 @@ if (!class_exists('WP_Sheet_Editor_Advanced_Filters_Teaser')) {
 			}
 
 			if (class_exists('WP_Sheet_Editor_Advanced_Filters')) {
+				return;
+			}
+			if(VGSE()->get_option('be_disable_extension_offerings')){
 				return;
 			}
 
@@ -36,14 +39,16 @@ if (!class_exists('WP_Sheet_Editor_Advanced_Filters_Teaser')) {
 
 				$labels[count($labels) - 1] = ' or ' . end($labels);
 				?>">
-					<label><?php printf(__('Enter %s', 'vg_sheet_editor' ), implode(', ', $labels)); ?> - <a href="<?php echo esc_url(VGSE()->get_buy_link('advanced-filters-teaser')); ?>" target="_blank"><?php _e('Go Premium', 'vg_sheet_editor' ); ?></a><a href="#" data-wpse-tooltip="right" aria-label="<?php _e('Enter the names of ' . implode(', ', $labels)); ?>">( ? )</a></label>
-					<select readonly data-placeholder="<?php _e('Category name...', 'vg_sheet_editor' ); ?>" name="apply_to[]" class="select2"  multiple data-remote="true" data-action="vgse_search_taxonomy_terms" data-min-input-length="4">
+					<label><?php 
+					// translators: %s: taxonomy names
+					printf(esc_html__('Enter %s', 'vg_sheet_editor' ), esc_html( implode(', ', $labels) )); ?> - <a href="<?php echo esc_url(VGSE()->get_buy_link('advanced-filters-teaser')); ?>" target="_blank"><?php esc_html_e('Go Premium', 'vg_sheet_editor' ); ?></a></label>
+					<select readonly data-placeholder="<?php esc_html_e('Category name...', 'vg_sheet_editor' ); ?>" name="apply_to[]" class="select2"  multiple data-remote="true" data-action="vgse_search_taxonomy_terms" data-min-input-length="4">
 
 					</select>
 				</li>
 
 				<li>
-					<label><?php _e('Date range from', 'vg_sheet_editor' ); ?> <a href="#" data-wpse-tooltip="right" aria-label="<?php _e('Show items published between these dates'); ?>">( ? )</a></label><input type="date" name="date_from" readonly /> <?php _e('to', 'vg_sheet_editor' ); ?> <input type="date" name="date_to" readonly/>  - <a href="<?php echo esc_url(VGSE()->get_buy_link('advanced-filters-teaser')); ?>" target="_blank"><?php _e('Go Premium', 'vg_sheet_editor' ); ?></a>
+					<label><?php esc_html_e('Date range from', 'vg_sheet_editor' ); ?> <a href="#" data-wpse-tooltip="right" aria-label="<?php esc_html_e('Show items published between these dates'); ?>">( ? )</a></label><input type="date" name="date_from" readonly /> <?php esc_html_e('to', 'vg_sheet_editor' ); ?> <input type="date" name="date_to" readonly/>  - <a href="<?php echo esc_url(VGSE()->get_buy_link('advanced-filters-teaser')); ?>" target="_blank"><?php esc_html_e('Go Premium', 'vg_sheet_editor' ); ?></a>
 				</li>
 				<?php
 			}
@@ -51,7 +56,7 @@ if (!class_exists('WP_Sheet_Editor_Advanced_Filters_Teaser')) {
 			if (!empty($post_type_columns)) {
 				?>
 				<li>
-					<h3><?php _e('Advanced search', 'vg_sheet_editor' ); ?> <small><a href="<?php echo esc_url(VGSE()->get_buy_link('advanced-filters-teaser')); ?>" target="_blank"><?php _e('Go Premium', 'vg_sheet_editor' ); ?></a></small></h3>
+					<h3><?php esc_html_e('Advanced search', 'vg_sheet_editor' ); ?> <small><a href="<?php echo esc_url(VGSE()->get_buy_link('advanced-filters-teaser')); ?>" target="_blank"><?php esc_html_e('Go Premium', 'vg_sheet_editor' ); ?></a></small></h3>
 					<ul class="advanced-search-teaser">
 						<?php
 						foreach ($post_type_columns as $column_label => $column_key) {
@@ -107,7 +112,7 @@ if (!class_exists('WP_Sheet_Editor_Advanced_Filters_Teaser')) {
 }
 
 
-add_action('vg_sheet_editor/initialized', 'vgse_init_Advanced_Filters_teaser', 99);
+add_action('vg_sheet_editor/after_init', 'vgse_init_Advanced_Filters_teaser', 99);
 
 if (!function_exists('vgse_init_Advanced_Filters_teaser')) {
 

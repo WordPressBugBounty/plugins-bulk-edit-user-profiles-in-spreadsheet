@@ -15,16 +15,20 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 
 		function delete_row_ids() {
 
-			$error_message = array( 'message' => __( 'You dont have enough permissions to do this action.', 'vg_sheet_editor' ) );
+			$error_message = array( 'message' => esc_html__( 'You dont have enough permissions to do this action.', 'vg_sheet_editor' ) );
+			// The nonce is checked in the method verify_nonce_from_request
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( empty( $_REQUEST['post_type'] ) || empty( VGSE()->helpers->get_nonce_from_request() ) || empty( $_REQUEST['ids'] ) || ! VGSE()->helpers->verify_nonce_from_request() ) {
 				wp_send_json_error( $error_message );
 			}
-			$post_type = VGSE()->helpers->sanitize_table_key( $_REQUEST['post_type'] );
+			$post_type = VGSE()->helpers->sanitize_table_key( wp_unslash( $_REQUEST['post_type'] ) );
 			if ( ! VGSE()->helpers->user_can_edit_post_type( $post_type ) || ! VGSE()->helpers->user_can_delete_post_type( $post_type ) ) {
 				wp_send_json_error( $error_message );
 			}
 			$row_ids = array_map( 'intval', $_REQUEST['ids'] );
 			$row_ids = VGSE()->helpers->get_current_provider()->filter_rows_before_edit( $row_ids, $post_type );
+
+			do_action( 'vg_sheet_editor/delete_row_ids/before', $row_ids, $post_type );
 
 			foreach ( $row_ids as $id ) {
 				VGSE()->helpers->get_current_provider()->update_item_data(
@@ -36,34 +40,40 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 					)
 				);
 			}
-			wp_send_json_success( array( 'message' => __( 'Rows deleted successfully', 'vg_sheet_editor' ) ) );
+			wp_send_json_success( array( 'message' => esc_html__( 'Rows deleted successfully', 'vg_sheet_editor' ) ) );
 		}
 
 		function get_taxonomy_terms() {
 
-			$error_message = array( 'message' => __( 'You dont have enough permissions to do this action.', 'vg_sheet_editor' ) );
+			$error_message = array( 'message' => esc_html__( 'You dont have enough permissions to do this action.', 'vg_sheet_editor' ) );
+			// The nonce is checked in the method verify_nonce_from_request
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( empty( $_REQUEST['post_type'] ) || empty( VGSE()->helpers->get_nonce_from_request() ) || ! VGSE()->helpers->verify_nonce_from_request() ) {
 				wp_send_json_error( $error_message );
 			}
 
-			$post_type = VGSE()->helpers->sanitize_table_key( $_REQUEST['post_type'] );
+			$post_type = VGSE()->helpers->sanitize_table_key( wp_unslash( $_REQUEST['post_type'] ) );
 			// If this is a WC attribute, use WC's sanitization function
-			if ( class_exists( 'WooCommerce' ) && strpos( $_REQUEST['taxonomy_key'], 'pa_' ) === 0 ) {
+			if ( class_exists( 'WooCommerce' ) && isset( $_REQUEST['taxonomy_key'] ) && strpos( wp_unslash( $_REQUEST['taxonomy_key'] ), 'pa_' ) === 0 ) {
 				$taxonomy_key = wc_sanitize_taxonomy_name( $_REQUEST['taxonomy_key'] );
-			} else {
-				$taxonomy_key = VGSE()->helpers->sanitize_table_key( $_REQUEST['taxonomy_key'] );
+			} elseif( isset( $_REQUEST['taxonomy_key'] ) ) {
+				$taxonomy_key = VGSE()->helpers->sanitize_table_key( wp_unslash( $_REQUEST['taxonomy_key'] ) );
 			}
-			if ( ! VGSE()->helpers->user_can_view_post_type( $post_type ) || ! taxonomy_exists( $taxonomy_key ) ) {
+			if ( ! VGSE()->helpers->user_can_view_post_type( $post_type ) || empty( $taxonomy_key ) || ! taxonomy_exists( $taxonomy_key ) ) {
 				wp_send_json_error( $error_message );
 			}
 
-			$source = ( ! empty( $_REQUEST['wpse_source'] ) ) ? sanitize_text_field( $_REQUEST['wpse_source'] ) : '';
-			$out    = VGSE()->data_helpers->get_taxonomy_terms( $taxonomy_key, $source );
+			$source     = ( ! empty( $_REQUEST['wpse_source'] ) ) ? sanitize_text_field( wp_unslash( $_REQUEST['wpse_source'] ) ) : '';
+			$term_field = ( ! empty( $_REQUEST['term_field'] ) ) ? sanitize_text_field( wp_unslash( $_REQUEST['term_field'] ) ) : 'name';
+			if ( ! in_array( $term_field, array( 'name', 'slug' ), true ) ) {
+				wp_send_json_error( $error_message );
+			}
+			$out = VGSE()->data_helpers->get_taxonomy_terms( $taxonomy_key, $source, $term_field );
 
 			if ( is_array( $out ) ) {
 				$out = array_map( 'html_entity_decode', $out );
 
-				$search_term = ( ! empty( $_REQUEST['search'] ) ) ? html_entity_decode( sanitize_text_field( $_REQUEST['search'] ) ) : '';
+				$search_term = ( ! empty( $_REQUEST['search'] ) ) ? html_entity_decode( sanitize_text_field( wp_unslash( $_REQUEST['search'] ) ) ) : '';
 				if ( ! empty( $search_term ) ) {
 					foreach ( $out as $index => $term ) {
 						if ( stripos( $term, $search_term ) === false ) {
@@ -79,21 +89,23 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 		function load_rows() {
 
 			if ( empty( $_REQUEST['post_type'] ) || empty( VGSE()->helpers->get_nonce_from_request() ) ) {
-				wp_send_json_error( array( 'message' => __( 'Missing parameters.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'Missing parameters.', 'vg_sheet_editor' ) ) );
 			}
+			// The nonce is checked in the method verify_nonce_from_request
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( ! VGSE()->helpers->verify_nonce_from_request() || ! VGSE()->helpers->user_can_view_post_type( $_REQUEST['post_type'] ) ) {
-				$message = array( 'message' => __( 'You dont have enough permissions to load rows.', 'vg_sheet_editor' ) );
+				$message = array( 'message' => esc_html__( 'You dont have enough permissions to load rows.', 'vg_sheet_editor' ) );
 				wp_send_json_error( $message );
 			}
 
 			$request_data = array(
 				'nonce'                     => sanitize_text_field( VGSE()->helpers->get_nonce_from_request() ),
-				'post_type'                 => VGSE()->helpers->sanitize_table_key( $_REQUEST['post_type'] ),
+				'post_type'                 => VGSE()->helpers->sanitize_table_key( wp_unslash( $_REQUEST['post_type'] ) ),
 				'paged'                     => isset( $_REQUEST['paged'] ) ? intval( $_REQUEST['paged'] ) : 1,
 				'posts_per_page'            => isset( $_REQUEST['posts_per_page'] ) ? intval( $_REQUEST['posts_per_page'] ) : 0,
 				'wpse_reset_posts_per_page' => isset( $_REQUEST['wpse_reset_posts_per_page'] ) ? (int) $_REQUEST['wpse_reset_posts_per_page'] : 0,
-				'wpse_source_suffix'        => isset( $_REQUEST['wpse_source_suffix'] ) ? sanitize_text_field( $_REQUEST['wpse_source_suffix'] ) : '',
-				'wpse_source'               => isset( $_REQUEST['wpse_source'] ) ? sanitize_text_field( $_REQUEST['wpse_source'] ) : '',
+				'wpse_source_suffix'        => isset( $_REQUEST['wpse_source_suffix'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['wpse_source_suffix'] ) ) : '',
+				'wpse_source'               => isset( $_REQUEST['wpse_source'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['wpse_source'] ) ) : '',
 				'filters'                   => vgse_filters_init()->get_raw_filters(),
 			);
 			// Reset the number of rows per page, we receive this parameter from the client when
@@ -128,24 +140,27 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 		 */
 
 		function save_rows() {
-			if ( empty( $_REQUEST['post_type'] ) || empty( VGSE()->helpers->get_nonce_from_request() ) || ! VGSE()->helpers->verify_sheet_permissions_from_request( 'edit' ) || ! VGSE()->helpers->verify_nonce_from_request() ) {
-				wp_send_json_error( array( 'message' => __( 'You dont have enough permissions to save changes.', 'vg_sheet_editor' ) ) );
+			// The nonce is checked in the method verify_nonce_from_request
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( empty( $_REQUEST['post_type'] ) || empty( VGSE()->helpers->get_nonce_from_request() ) || ! VGSE()->helpers->verify_sheet_permissions_from_request( 'edit' ) || ! VGSE()->helpers->verify_nonce_from_request() || ! isset( $_REQUEST['data'] ) ) {
+				wp_send_json_error( array( 'message' => esc_html__( 'You dont have enough permissions to save changes.', 'vg_sheet_editor' ) ) );
 			}
 			$params         = array(
 				'nonce'               => sanitize_text_field( VGSE()->helpers->get_nonce_from_request() ),
-				'post_type'           => VGSE()->helpers->sanitize_table_key( $_REQUEST['post_type'] ),
+				'post_type'           => VGSE()->helpers->sanitize_table_key( wp_unslash( $_REQUEST['post_type'] ) ),
 				'allow_to_create_new' => ! empty( $_REQUEST['allow_to_create_new'] ),
-				'wpse_source'         => isset( $_REQUEST['wpse_source'] ) ? sanitize_text_field( $_REQUEST['wpse_source'] ) : null,
+				'wpse_source'         => isset( $_REQUEST['wpse_source'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['wpse_source'] ) ) : null,
 				'filters'             => vgse_filters_init()->get_raw_filters(),
 			);
-			$params['data'] = VGSE()->helpers->sanitize_data_for_db( $_REQUEST['data'], $params['post_type'] );
+			$params['data'] = VGSE()->helpers->sanitize_data_for_db( wp_unslash( $_REQUEST['data'] ), $params['post_type'] );
 
+			$params = apply_filters( 'vg_sheet_editor/save_rows/params', $params );
 			$result = VGSE()->helpers->save_rows( $params );
 
 			if ( is_wp_error( $result ) ) {
 				wp_send_json_error(
 					array(
-						'message' => $result->get_error_message(),
+						'message' => implode( ', ', $result->get_error_messages() ),
 					)
 				);
 			}
@@ -154,7 +169,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 			update_user_meta( get_current_user_id(), 'wpse_has_saved_sheet', 1 );
 			wp_send_json_success(
 				array(
-					'message' => __( 'Changes saved successfully', 'vg_sheet_editor' ),
+					'message' => esc_html__( 'Changes saved successfully', 'vg_sheet_editor' ),
 					'deleted' => array_unique( VGSE()->deleted_rows_ids ),
 				)
 			);
@@ -166,12 +181,14 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 
 		function insert_individual_post() {
 			if ( empty( $_REQUEST['post_type'] ) || empty( $_REQUEST['rows'] ) || empty( VGSE()->helpers->get_nonce_from_request() ) ) {
-				wp_send_json_error( array( 'message' => __( 'Missing parameters.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'Missing parameters.', 'vg_sheet_editor' ) ) );
 			}
+			// The nonce is checked in the method verify_nonce_from_request
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( ! VGSE()->helpers->verify_nonce_from_request() || ! VGSE()->helpers->verify_sheet_permissions_from_request( 'edit' ) ) {
-				wp_send_json_error( array( 'message' => __( 'You dont have enough permissions to create new rows.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'You dont have enough permissions to create new rows.', 'vg_sheet_editor' ) ) );
 			}
-			$post_type            = VGSE()->helpers->sanitize_table_key( $_REQUEST['post_type'] );
+			$post_type            = VGSE()->helpers->sanitize_table_key( wp_unslash( $_REQUEST['post_type'] ) );
 			$rows                 = (int) $_REQUEST['rows'];
 			$dont_return_new_rows = ! empty( $_REQUEST['dont_return_new_rows'] ) && $_REQUEST['dont_return_new_rows'] === 'yes';
 
@@ -199,12 +216,14 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 			global $wpdb;
 
 			if ( empty( $_REQUEST['search_post_type'] ) || empty( VGSE()->helpers->get_nonce_from_request() ) ) {
-				wp_send_json_error( array( 'message' => __( 'Missing parameters.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'Missing parameters.', 'vg_sheet_editor' ) ) );
 			}
 			$post_type = VGSE()->helpers->sanitize_table_key( $_REQUEST['search_post_type'] );
 
+			// The nonce is checked in the method verify_nonce_from_request
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( ! VGSE()->helpers->verify_nonce_from_request() || ! VGSE()->helpers->user_can_view_post_type( $post_type ) ) {
-				wp_send_json_error( array( 'message' => __( 'Request not allowed. Try again later.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'Request not allowed. Try again later.', 'vg_sheet_editor' ) ) );
 			}
 
 			$post_statuses       = get_post_stati( array( 'show_in_admin_status_list' => false ), 'names' );
@@ -222,13 +241,15 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 			global $wpdb;
 
 			if ( empty( $_REQUEST['post_type'] ) || empty( $_REQUEST['search'] ) || empty( VGSE()->helpers->get_nonce_from_request() ) ) {
-				wp_send_json_error( array( 'message' => __( 'Missing parameters.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'Missing parameters.', 'vg_sheet_editor' ) ) );
 			}
-			$post_type = VGSE()->helpers->sanitize_table_key( $_REQUEST['post_type'] );
+			$post_type = VGSE()->helpers->sanitize_table_key( wp_unslash( $_REQUEST['post_type'] ) );
 			$search    = sanitize_text_field( wp_unslash( html_entity_decode( $_REQUEST['search'], ENT_QUOTES ) ) );
 
+			// The nonce is checked in the method verify_nonce_from_request
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( ! VGSE()->helpers->verify_nonce_from_request() || ! VGSE()->helpers->user_can_view_post_type( $post_type ) ) {
-				wp_send_json_error( array( 'message' => __( 'Request not allowed. Try again later.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'Request not allowed. Try again later.', 'vg_sheet_editor' ) ) );
 			}
 
 			$where         = ' post_type = %s AND (post_title LIKE %s ';
@@ -244,11 +265,14 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 				$prepared_data[] = (int) $search;
 			}
 			$where      .= ') ';
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$sql         = apply_filters( 'vg_sheet_editor/find_post_by_name_sql', $wpdb->prepare( "SELECT * FROM $wpdb->posts $join WHERE " . $where . ' LIMIT 10', $prepared_data ), $search, $post_type );
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$posts_found = $wpdb->get_results( $sql );
 
 			if ( empty( $posts_found ) ) {
-				wp_send_json_error( array( 'message' => __( 'No items found.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'No items found.', 'vg_sheet_editor' ) ) );
 			}
 
 			$out = array();
@@ -266,20 +290,22 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 		 * Controller for saving individual field of post
 		 */
 		function save_single_post_data() {
-			if ( empty( $_REQUEST['post_id'] ) || empty( $_REQUEST['key'] ) || empty( VGSE()->helpers->get_nonce_from_request() ) || empty( $_REQUEST['type'] ) || empty( $_REQUEST['post_type'] ) ) {
-				wp_send_json_error( array( 'message' => __( 'Missing parameters.', 'vg_sheet_editor' ) ) );
+			if ( empty( $_REQUEST['post_id'] ) || ! isset( $_REQUEST['content'] ) || empty( $_REQUEST['key'] ) || empty( VGSE()->helpers->get_nonce_from_request() ) || empty( $_REQUEST['type'] ) || empty( $_REQUEST['post_type'] ) ) {
+				wp_send_json_error( array( 'message' => esc_html__( 'Missing parameters.', 'vg_sheet_editor' ) ) );
 			}
+			// The nonce is checked in the method verify_nonce_from_request
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( ! VGSE()->helpers->verify_nonce_from_request() ) {
-				wp_send_json_error( array( 'message' => __( 'You dont have enough permissions to save changes.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'You dont have enough permissions to save changes.', 'vg_sheet_editor' ) ) );
 			}
-			$post_type = VGSE()->helpers->sanitize_table_key( $_REQUEST['post_type'] );
+			$post_type = VGSE()->helpers->sanitize_table_key( wp_unslash( $_REQUEST['post_type'] ) );
 			if ( ! VGSE()->helpers->user_can_edit_post_type( $post_type ) ) {
-				wp_send_json_error( array( 'message' => __( 'You dont have enough permissions to save changes.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'You dont have enough permissions to save changes.', 'vg_sheet_editor' ) ) );
 			}
-			$content = wp_kses_post( html_entity_decode( $_REQUEST['content'] ) );
+			$content = wp_kses_post( html_entity_decode( wp_unslash( $_REQUEST['content'] ) ) );
 			$id      = (int) $_REQUEST['post_id'];
-			$key     = sanitize_text_field( $_REQUEST['key'] );
-			$type    = sanitize_text_field( $_REQUEST['type'] );
+			$key     = sanitize_text_field( wp_unslash( $_REQUEST['key'] ) );
+			$type    = sanitize_text_field( wp_unslash( $_REQUEST['type'] ) );
 
 			if ( VGSE()->options['be_disable_post_actions'] ) {
 				$post_type = get_post_type( $id );
@@ -293,13 +319,15 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 			if ( is_wp_error( $result ) ) {
 
 				$errors = $result->get_error_messages();
-				wp_send_json_success( array( 'message' => sprintf( __( 'Error: %s', 'vg_sheet_editor' ), implode( ', ', $errors ) ) ) );
+				/* translators: %s: Error messages */
+				wp_send_json_success( array( 'message' => sprintf( esc_html__( 'Error: %s', 'vg_sheet_editor' ), implode( ', ', $errors ) ) ) );
 			} else {
 				VGSE()->helpers->increase_counter( 'editions' );
 				VGSE()->helpers->increase_counter( 'processed' );
 
 				$title = VGSE()->data_helpers->get_post_data( 'post_title', $id );
-				wp_send_json_success( array( 'message' => sprintf( __( 'Saved: %s', 'vg_sheet_editor' ), $title ) ) );
+				/* translators: %s: Post title */
+				wp_send_json_success( array( 'message' => sprintf( esc_html__( 'Saved: %s', 'vg_sheet_editor' ), $title ) ) );
 			}
 		}
 
@@ -314,13 +342,15 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 		function search_users() {
 			global $wpdb;
 			if ( empty( $_REQUEST['search'] ) || empty( VGSE()->helpers->get_nonce_from_request() ) || empty( $_REQUEST['post_type'] ) ) {
-				wp_send_json_error( array( 'message' => __( 'Missing parameters.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'Missing parameters.', 'vg_sheet_editor' ) ) );
 			}
 
+			// The nonce is checked in the method verify_nonce_from_request
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( ! VGSE()->helpers->verify_nonce_from_request() || ! VGSE()->helpers->user_can_view_post_type( $_REQUEST['post_type'] ) ) {
-				wp_send_json_error( array( 'message' => __( 'You dont have enough permissions to search taxonomy terms.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'You dont have enough permissions to search taxonomy terms.', 'vg_sheet_editor' ) ) );
 			}
-			$search      = sanitize_text_field( $_REQUEST['search'] );
+			$search      = sanitize_text_field( wp_unslash( $_REQUEST['search'] ) );
 			$include_ids = ! empty( $_REQUEST['include_ids'] );
 
 			if ( $include_ids ) {
@@ -335,19 +365,21 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 		function search_taxonomy_terms() {
 			global $wpdb;
 			if ( empty( $_REQUEST['search'] ) || empty( VGSE()->helpers->get_nonce_from_request() ) || empty( $_REQUEST['post_type'] ) ) {
-				wp_send_json_error( array( 'message' => __( 'Missing parameters.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'Missing parameters.', 'vg_sheet_editor' ) ) );
 			}
 
-			$post_type        = VGSE()->helpers->sanitize_table_key( $_REQUEST['post_type'] );
+			$post_type        = VGSE()->helpers->sanitize_table_key( wp_unslash( $_REQUEST['post_type'] ) );
 			$is_global_search = ! empty( $_REQUEST['global_search'] );
 
 			// Note. The global search is allowed for administrators only
+			// The nonce is checked in the method verify_nonce_from_request
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( ! VGSE()->helpers->verify_nonce_from_request() || ( ! $is_global_search && ! VGSE()->helpers->user_can_view_post_type( $post_type ) ) || ( $is_global_search && ! VGSE()->helpers->user_can_manage_options() ) ) {
-				wp_send_json_error( array( 'message' => __( 'You dont have enough permissions to search taxonomy terms.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'You dont have enough permissions to search taxonomy terms.', 'vg_sheet_editor' ) ) );
 			}
 
-			$search        = wp_unslash( sanitize_text_field( $_REQUEST['search'] ) );
-			$output_format = ( isset( $_REQUEST['output_format'] ) ) ? sanitize_text_field( $_REQUEST['output_format'] ) : '';
+			$search        = wp_unslash( sanitize_text_field( wp_unslash( $_REQUEST['search'] ) ) );
+			$output_format = ( isset( $_REQUEST['output_format'] ) ) ? sanitize_text_field( wp_unslash( $_REQUEST['output_format'] ) ) : '';
 
 			if ( $is_global_search ) {
 				$taxonomies = get_taxonomies(
@@ -362,15 +394,17 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 			}
 
 			if ( ! empty( $_REQUEST['taxonomies'] ) ) {
-				$taxonomies = is_string( $_REQUEST['taxonomies'] ) ? explode( ',', sanitize_text_field( $_REQUEST['taxonomies'] ) ) : array_map( 'sanitize_text_field', $_REQUEST['taxonomies'] );
+				$taxonomies = is_string( $_REQUEST['taxonomies'] ) ? explode( ',', sanitize_text_field( wp_unslash( $_REQUEST['taxonomies'] ) ) ) : array_map( 'sanitize_text_field', $_REQUEST['taxonomies'] );
 			}
 
 			if ( empty( $taxonomies ) ) {
-				wp_send_json_error( array( 'message' => __( 'No taxonomies found.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'No taxonomies found.', 'vg_sheet_editor' ) ) );
 			}
 
 			$taxonomies_in_query_placeholders = implode( ', ', array_fill( 0, count( $taxonomies ), '%s' ) );
 			$sql                              = $wpdb->prepare( "SELECT term.slug id,term.name text,tax.taxonomy taxonomy, term.slug slug FROM $wpdb->term_taxonomy as tax JOIN $wpdb->terms as term ON term.term_id = tax.term_id WHERE tax.taxonomy IN ($taxonomies_in_query_placeholders) AND term.name LIKE %s ", array_merge( $taxonomies, array( '%' . $wpdb->esc_like( $search ) . '%' ) ) );
+			
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$results                          = $wpdb->get_results( $sql, ARRAY_A );
 
 			if ( ! $results || is_wp_error( $results ) ) {
@@ -388,7 +422,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 
 				if ( ! isset( $taxonomies_labels[ $result['taxonomy'] ] ) ) {
 					$tmp_tax                                  = get_taxonomy( $result['taxonomy'] );
-					$label                                    = ( $tmp_tax->label === __( 'Tags' ) && $tmp_tax->name !== 'post_tag' ) ? $tmp_tax->name : $tmp_tax->label;
+					$label                                    = ( $tmp_tax->label === esc_html__( 'Tags', 'default' ) && $tmp_tax->name !== 'post_tag' ) ? $tmp_tax->name : $tmp_tax->label;
 					$taxonomies_labels[ $result['taxonomy'] ] = $label;
 				}
 
@@ -413,13 +447,15 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 		 */
 		function save_post_types_setting() {
 			if ( empty( VGSE()->helpers->get_nonce_from_request() ) || empty( $_REQUEST['post_types'] ) || empty( $_REQUEST['append'] ) ) {
-				wp_send_json_error( array( 'message' => __( 'Missing parameters.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'Missing parameters.', 'vg_sheet_editor' ) ) );
 			}
+			// The nonce is checked in the method verify_nonce_from_request
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( ! VGSE()->helpers->verify_nonce_from_request() || ! VGSE()->helpers->user_can_manage_options() ) {
-				wp_send_json_error( array( 'message' => __( 'You dont have enough permissions to perform this action.', 'vg_sheet_editor' ) ) );
+				wp_send_json_error( array( 'message' => esc_html__( 'You dont have enough permissions to perform this action.', 'vg_sheet_editor' ) ) );
 			}
 			$post_types = array_map( array( VGSE()->helpers, 'sanitize_table_key' ), $_REQUEST['post_types'] );
-			$append     = sanitize_text_field( $_REQUEST['append'] );
+			$append     = sanitize_text_field( wp_unslash( $_REQUEST['append'] ) );
 
 			$settings = get_option( VGSE()->options_key, array() );
 			if ( empty( $settings['be_post_types'] ) ) {
@@ -441,9 +477,9 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 		}
 
 		function save_gutenberg_content() {
-			$_REQUEST['content']   = wp_kses_post( $_REQUEST['data'] );
+			$_REQUEST['content']   = isset( $_REQUEST['data'] ) ? wp_kses_post( wp_unslash( $_REQUEST['data'] ) ) : '';
 			$_REQUEST['post_id']   = (int) $_REQUEST['postId'];
-			$_REQUEST['post_type'] = VGSE()->helpers->sanitize_table_key( $_REQUEST['postType'] );
+			$_REQUEST['post_type'] = VGSE()->helpers->sanitize_table_key( wp_unslash( $_REQUEST['postType'] ) );
 			$_REQUEST['type']      = 'post_data';
 			$_REQUEST['key']       = 'post_content';
 			$this->save_single_post_data();
@@ -541,6 +577,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 		}
 
 		function set_settings() {
+			// The nonce is checked in the method verify_nonce_from_request
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( empty( VGSE()->helpers->get_nonce_from_request() ) || empty( $_REQUEST['settings'] ) || ! VGSE()->helpers->verify_nonce_from_request() || ! VGSE()->helpers->user_can_manage_options() ) {
 				wp_send_json_error();
 			}
@@ -571,6 +609,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 		}
 
 		function dismiss_review_tip() {
+			// The nonce is checked in the method verify_nonce_from_request
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( empty( VGSE()->helpers->get_nonce_from_request() ) || ! VGSE()->helpers->verify_nonce_from_request() ) {
 				wp_send_json_error();
 			}
@@ -583,10 +623,12 @@ if ( ! class_exists( 'WP_Sheet_Editor_Ajax' ) ) {
 			if ( ! VGSE()->helpers->user_can_manage_options() ) {
 				wp_send_json_error();
 			}
-			if ( empty( VGSE()->helpers->get_nonce_from_request() ) || ! VGSE()->helpers->verify_nonce_from_request() ) {
+			// The nonce is checked in the method verify_nonce_from_request
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( empty( VGSE()->helpers->get_nonce_from_request() ) || ! VGSE()->helpers->verify_nonce_from_request() || ! isset( $_REQUEST['key'] ) ) {
 				wp_send_json_error();
 			}
-			$key = sanitize_text_field( $_REQUEST['key'] );
+			$key = sanitize_text_field( wp_unslash( $_REQUEST['key'] ) );
 			// Only allow to dismiss notices with keys starting with wpse_hide_
 			if ( strpos( $key, 'wpse_hide_' ) !== 0 ) {
 				wp_send_json_error();

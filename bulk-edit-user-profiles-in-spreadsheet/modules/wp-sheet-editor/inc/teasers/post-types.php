@@ -7,8 +7,8 @@ if (!class_exists('WP_Sheet_Editor_Post_Types_Teaser')) {
 	 */
 	class WP_Sheet_Editor_Post_Types_Teaser {
 
-		static private $instance = false;
-		var $post_types = array();
+		private static $instance = false;
+		public $post_types = array();
 
 		private function __construct() {
 			
@@ -58,7 +58,8 @@ if (!class_exists('WP_Sheet_Editor_Post_Types_Teaser')) {
 
 					$editor->args['toolbars']->register_item('edit_' . $post_type_tease, array(
 						'type' => 'button',
-						'content' => sprintf(__('Edit %s', 'vg_sheet_editor' ), $label),
+						// translators: 1: post type label
+						'content' => sprintf(esc_html__('Edit %s', 'vg_sheet_editor' ), esc_html($label)),
 						'icon' => 'fa fa-edit',
 						'allow_in_frontend' => false,
 						'extra_html_attributes' => 'data-remodal-target="modal-edit-' . $post_type_tease . '"',
@@ -80,57 +81,63 @@ if (!class_exists('WP_Sheet_Editor_Post_Types_Teaser')) {
 						margin-left: 30px;
 					}
 				</style>
-				<div class="remodal remodal<?php echo rand(8, 888); ?>" data-remodal-id="modal-edit-<?php echo esc_attr($post_type_tease); ?>" data-remodal-options="closeOnOutsideClick: false, hashTracking: false">
+				<div class="remodal remodal<?php echo esc_attr( wp_rand(8, 888) ); ?>" data-remodal-id="modal-edit-<?php echo esc_attr($post_type_tease); ?>" data-remodal-options="closeOnOutsideClick: false, hashTracking: false">
 
 					<div class="modal-content">
-						<h3><?php printf(__('Edit WordPress %s', 'vg_sheet_editor' ), VGSE()->helpers->get_post_type_label($post_type_tease)); ?></h3>
+						<h3><?php 
+						// translators: 1: post type label
+						printf(esc_html__('Edit WordPress %s', 'vg_sheet_editor' ), esc_html( VGSE()->helpers->get_post_type_label($post_type_tease)) ); ?></h3>
 
-						<p><?php printf(__('The spreadsheet editor can be used to edit your WordPress %s.', 'vg_sheet_editor' ), VGSE()->helpers->get_post_type_label($post_type_tease)); ?></p>
+						<p><?php 
+						// translators: 1: post type label
+						printf( esc_html__('The spreadsheet editor can be used to edit your WordPress %s.', 'vg_sheet_editor' ), esc_html( VGSE()->helpers->get_post_type_label($post_type_tease)) ); ?></p>
 
 						<?php if ($post_type_tease === 'attachment') { ?>
-							<p><?php printf(__('You can edit your Media information like:', 'vg_sheet_editor' ), VGSE()->helpers->get_post_type_label($post_type_tease), VGSE()->helpers->get_post_type_label($post_type_tease)); ?></p>
+							<p><?php esc_html_e('You can edit your Media information like:', 'vg_sheet_editor' ); ?></p>
 							<ul class="vg-naked-list" style="margin-left: 130px;">
-								<li><?php _e('Title', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Caption', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Alternative text', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Description', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Date', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Uploaded by user', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Status', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Enable comments', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('And see previews while editing', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Title', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Caption', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Alternative text', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Description', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Date', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Uploaded by user', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Status', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Enable comments', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('And see previews while editing', 'vg_sheet_editor' ); ?></li>
 							</ul>
 						<?php } ?>
 						<?php if ($post_type_tease === apply_filters('vg_sheet_editor/woocommerce/product_post_type_key', 'product')) { ?>
 
-							<p><?php printf(__('You can edit your WooCommerce products information like:', 'vg_sheet_editor' ), VGSE()->helpers->get_post_type_label($post_type_tease), VGSE()->helpers->get_post_type_label($post_type_tease)); ?></p>
+							<p><?php esc_html_e('You can edit your WooCommerce products information like:', 'vg_sheet_editor' ); ?></p>
 							<ul class="vg-naked-list" style="margin-left: 130px;">
-								<li><?php _e('Title', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Short description', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Full content', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Sale price', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Regular price', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Sale price dates', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Featured image', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Gallery', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Visibility', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Is Downloadable', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Is Virtual', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Sold individually', 'vg_sheet_editor' ); ?></li>
-								<li><?php _e('Purchase note', 'vg_sheet_editor' ); ?></li>		
-								<li><?php _e('Enable reviews', 'vg_sheet_editor' ); ?></li>	
+								<li><?php esc_html_e('Title', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Short description', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Full content', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Sale price', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Regular price', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Sale price dates', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Featured image', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Gallery', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Visibility', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Is Downloadable', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Is Virtual', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Sold individually', 'vg_sheet_editor' ); ?></li>
+								<li><?php esc_html_e('Purchase note', 'vg_sheet_editor' ); ?></li>		
+								<li><?php esc_html_e('Enable reviews', 'vg_sheet_editor' ); ?></li>	
 							</ul>
 						<?php } else { ?>
-							<p><?php printf(__('With our editor you will be able to edit all the information of <br/>your %s saving you a lot of time.', 'vg_sheet_editor' ), VGSE()->helpers->get_post_type_label($post_type_tease)); ?></p>
+							<p><?php 
+						// translators: 1: post type label
+						printf( esc_html__('With our editor you will be able to edit all the information of your %s saving you a lot of time.', 'vg_sheet_editor' ), esc_html( VGSE()->helpers->get_post_type_label($post_type_tease)) ); ?></p>
 
 						<?php } ?>
 
-						<p><?php _e('This feature is available as premium extension.', 'vg_sheet_editor' ); ?></p>
+						<p><?php esc_html_e('This feature is available as premium extension.', 'vg_sheet_editor' ); ?></p>
 
 					</div>
 					<br>
-					<a href="<?php echo esc_url(VGSE()->get_buy_link('post-types-teaser', null, false, $post_type_tease)); ?>" class="remodal-confirm" target="_blank"><?php _e('Buy extension now!', 'vg_sheet_editor' ); ?></a>
-					<button data-remodal-action="confirm" class="remodal-cancel"><?php _e('Close', 'vg_sheet_editor' ); ?></button>
+					<a href="<?php echo esc_url(VGSE()->get_buy_link('post-types-teaser', null, false, $post_type_tease)); ?>" class="remodal-confirm" target="_blank"><?php esc_html_e('Buy extension now!', 'vg_sheet_editor' ); ?></a>
+					<button data-remodal-action="confirm" class="remodal-cancel"><?php esc_html_e('Close', 'vg_sheet_editor' ); ?></button>
 				</div>
 				<?php
 			}

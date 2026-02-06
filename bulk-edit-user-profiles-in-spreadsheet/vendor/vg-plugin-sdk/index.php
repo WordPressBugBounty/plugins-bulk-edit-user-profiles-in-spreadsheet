@@ -77,7 +77,7 @@ if ( ! class_exists( 'VG_Freemium_Plugin_SDK' ) ) {
 			load_plugin_textdomain( $this->textname, false, $lang_path );
 
 			if ( empty( $this->settings['buy_link_text'] ) ) {
-				$this->settings['buy_link_text'] = __( 'Buy extension now', $this->textname );
+				$this->settings['buy_link_text'] = esc_html__( 'Buy extension now', $this->textname );
 			}
 		}
 
@@ -160,7 +160,7 @@ if ( ! class_exists( 'VG_Freemium_Plugin_SDK' ) ) {
 		 */
 		function render_welcome_page() {
 			if ( ! current_user_can( 'manage_options' ) ) {
-				wp_die( __( 'You dont have enough permissions to view this page.', $this->textname ) );
+				wp_die( esc_html__( 'You dont have enough permissions to view this page.', $this->textname ) );
 			}
 
 			do_action( 'vg_plugin_sdk/welcome_page/before_rendering', $this->settings );
@@ -192,7 +192,7 @@ if ( ! class_exists( 'VG_Freemium_Plugin_SDK' ) ) {
 		 */
 		function render_whats_new_page() {
 			if ( ! current_user_can( 'manage_options' ) ) {
-				wp_die( __( 'You dont have enough permissions to view this page.', $this->textname ) );
+				wp_die( esc_html__( 'You dont have enough permissions to view this page.', $this->textname ) );
 			}
 
 			$page_id = 'whatsnew-page';

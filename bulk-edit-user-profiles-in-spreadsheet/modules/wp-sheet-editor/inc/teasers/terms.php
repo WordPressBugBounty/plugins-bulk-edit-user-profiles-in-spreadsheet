@@ -7,7 +7,7 @@ if (!class_exists('WP_Sheet_Editor_Terms_Teaser')) {
 	 */
 	class WP_Sheet_Editor_Terms_Teaser {
 
-		static private $instance = false;
+		private static $instance = false;
 
 		private function __construct() {
 			
@@ -16,6 +16,9 @@ if (!class_exists('WP_Sheet_Editor_Terms_Teaser')) {
 		function init() {
 
 			if (class_exists('WP_Sheet_Editor_Taxonomy_Terms') || !is_admin()) {
+				return;
+			}
+			if(VGSE()->get_option('be_disable_extension_offerings')){
 				return;
 			}
 			foreach (get_taxonomies() as $taxonomy) {
@@ -51,7 +54,7 @@ if (!class_exists('WP_Sheet_Editor_Terms_Teaser')) {
 					'key' => $taxonomy->name,
 					'label' => $taxonomy->label,
 					'is_disabled' => true,
-					'description' => $is_free ? '<small><a href="' . esc_url($free_url) . '" target="_blank">' . __('(Install free extension)', 'vg_sheet_editor' ) . '</a></small>' : '<small><a href="' . esc_url($premium_url) . '" target="_blank">' . __('(Pro extension)', 'vg_sheet_editor' ) . '</a></small>',
+					'description' => $is_free ? '<small><a href="' . esc_url($free_url) . '" target="_blank">' . esc_html__('(Install free extension)', 'vg_sheet_editor' ) . '</a></small>' : '<small><a href="' . esc_url($premium_url) . '" target="_blank">' . esc_html__('(Pro extension)', 'vg_sheet_editor' ) . '</a></small>',
 				);
 			}
 
@@ -65,9 +68,9 @@ if (!class_exists('WP_Sheet_Editor_Terms_Teaser')) {
 			if (empty($_GET['taxonomy'])) {
 				return;
 			}
-			$taxonomy = sanitize_text_field($_GET['taxonomy']);
+			$taxonomy = sanitize_text_field(wp_unslash($_GET['taxonomy']));
 			?>
-			<hr><p class="wpse-quick-access"><?php _e('<b>Tip from WP Sheet Editor:</b> Edit thousands of categories at once, make advanced searches, view all the info in one page, and more.', 'vg_sheet_editor' ); ?><br><a href="https://wpsheeteditor.com/extensions/categories-tags-product-attributes-taxonomies-spreadsheet/?utm_source=wp-admin&utm_medium=terms-list-teaser&utm_campaign=<?php echo esc_attr($taxonomy); ?>"  target="_blank"><?php _e('Edit in a Spreadsheet', 'vg_sheet_editor' ); ?></a></p><hr>
+			<hr><p class="wpse-quick-access"><b><?php esc_html_e('Tip from WP Sheet Editor:', 'vg_sheet_editor'); ?></b> <?php esc_html_e('Edit thousands of categories at once, make advanced searches, view all the info in one page, and more.', 'vg_sheet_editor' ); ?><br><a href="https://wpsheeteditor.com/extensions/categories-tags-product-attributes-taxonomies-spreadsheet/?utm_source=wp-admin&utm_medium=terms-list-teaser&utm_campaign=<?php echo esc_attr($taxonomy); ?>"  target="_blank"><?php esc_html_e('Edit in a Spreadsheet', 'vg_sheet_editor' ); ?></a></p><hr>
 			<?php
 		}
 
@@ -97,7 +100,7 @@ if (!class_exists('WP_Sheet_Editor_Terms_Teaser')) {
 }
 
 
-add_action('vg_sheet_editor/initialized', 'vgse_init_terms_teaser');
+add_action('vg_sheet_editor/after_init', 'vgse_init_terms_teaser');
 
 if (!function_exists('vgse_init_terms_teaser')) {
 

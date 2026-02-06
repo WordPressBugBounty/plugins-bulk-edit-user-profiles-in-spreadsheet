@@ -4,8 +4,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Infinite_Serialized_Field' ) ) {
 
 	class WP_Sheet_Editor_Infinite_Serialized_Field {
 
-		var $settings    = array();
-		var $column_keys = array();
+		public $settings    = array();
+		public $column_keys = array();
 
 		function __construct( $settings = array() ) {
 			if ( ! empty( VGSE()->options['be_disable_serialized_columns'] ) || ! apply_filters( 'vg_sheet_editor/serialized_addon/is_enabled', true ) ) {
@@ -108,6 +108,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Infinite_Serialized_Field' ) ) {
 									'allow_search_during_import' => false,
 									'allow_for_variations' => ! empty( $this->settings['allow_in_wc_product_variations'] ),
 									'serialized_field_original_key' => $this->settings['sample_field_key'],
+									'prefetch_meta_key'    => $this->settings['sample_field_key'],
 								),
 								$this->settings['column_settings']
 							),

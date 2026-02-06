@@ -1,5 +1,5 @@
 <?php
-
+defined( 'ABSPATH' ) || exit;
 if ( ! class_exists( 'WPSE_Elementor_Integration' ) ) {
 
 	class WPSE_Elementor_Integration {
@@ -53,7 +53,7 @@ if ( ! class_exists( 'WPSE_Elementor_Integration' ) ) {
 					array(
 						'data_type'                => 'post_data',
 						'column_width'             => 115,
-						'title'                    => __( 'Elementor', VGSE()->textname ),
+						'title'                    => esc_html__( 'Elementor', 'vg_sheet_editor' ),
 						'type'                     => 'external_button',
 						'supports_formulas'        => false,
 						'allow_to_hide'            => true,

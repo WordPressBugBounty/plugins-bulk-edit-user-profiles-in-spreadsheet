@@ -2,11 +2,14 @@
 
 if ( ! class_exists( 'WP_Sheet_Editor_Serialized_Field' ) ) {
 
+	/**
+	 * @deprecated 2.25.20-beta.2 Use WP_Sheet_Editor_Infinite_Serialized_Field instead
+	 */
 	class WP_Sheet_Editor_Serialized_Field {
 
-		var $snippets_options = array();
-		var $settings         = array();
-		var $column_keys      = array();
+		public $snippets_options = array();
+		public $settings         = array();
+		public $column_keys      = array();
 
 		function __construct( $args ) {
 
@@ -186,7 +189,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Serialized_Field' ) ) {
 
 			if ( ! empty( $column_settings['is_single_level'] ) ) {
 				$post_criterias[ $criteria_key ] = $value;
-			} elseif ( is_array( $post_criterias[ $criteria_index ] ) ) {
+			} elseif ( isset( $post_criterias[ $criteria_index ] ) && is_array( $post_criterias[ $criteria_index ] ) ) {
 				$post_criterias[ $criteria_index ][ $criteria_key ] = $value;
 			}
 

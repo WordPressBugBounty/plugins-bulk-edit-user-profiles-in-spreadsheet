@@ -32,7 +32,7 @@ if ( !class_exists( 'WPSE_BuddyPress_Custom_Fields' ) ) {
                     $field_key = implode( '_', array($field->id, $field->group_id, 'bb') );
                     $args = array(
                         'data_type'           => 'post_data',
-                        'title'               => sprintf( __( 'BP: %s', vgse_users()->textname ), esc_html( $field->name ) ),
+                        'title'               => sprintf( esc_html__( 'BP: %s', vgse_users()->textname ), esc_html( $field->name ) ),
                         'supports_formulas'   => true,
                         'get_value_callback'  => array($this, 'get_field_value'),
                         'save_value_callback' => array($this, 'save_field_value'),
@@ -52,7 +52,7 @@ if ( !class_exists( 'WPSE_BuddyPress_Custom_Fields' ) ) {
                             'type'             => 'date',
                             'dateFormatPhp'    => 'Y-m-d',
                             'correctFormat'    => true,
-                            'defaultDate'      => date( 'Y-m-d' ),
+                            'defaultDate'      => gmdate( 'Y-m-d' ),
                             'datePickerConfig' => array(
                                 'firstDay'       => 0,
                                 'showWeekNumber' => true,
@@ -67,7 +67,7 @@ if ( !class_exists( 'WPSE_BuddyPress_Custom_Fields' ) ) {
                 $editor->args['columns']->register_item( 'bp-members-profile-member-type', $editor->provider->key, array(
                     'data_type'             => 'meta_data',
                     'column_width'          => 200,
-                    'title'                 => __( 'Profile type', vgse_users()->textname ),
+                    'title'                 => esc_html__( 'Profile type', vgse_users()->textname ),
                     'type'                  => '',
                     'supports_formulas'     => true,
                     'supports_sql_formulas' => false,
@@ -108,7 +108,7 @@ if ( !class_exists( 'WPSE_BuddyPress_Custom_Fields' ) ) {
             if ( !empty( $cell_args['bp_field'] ) ) {
                 if ( $cell_args['bp_field']['type'] === 'datebox' && !empty( $value ) ) {
                     $value = BP_XProfile_ProfileData::get_value_byid( $field_id, $post->ID );
-                    $value = date( 'Y-m-d', strtotime( $value ) );
+                    $value = gmdate( 'Y-m-d', strtotime( $value ) );
                 }
             }
             return $value;
@@ -129,7 +129,7 @@ if ( !class_exists( 'WPSE_BuddyPress_Custom_Fields' ) ) {
                     $data_to_save = array_map( 'trim', explode( ',', $data_to_save ) );
                 }
                 if ( in_array( $cell_args['bp_field']['type'], array('datebox') ) ) {
-                    $data_to_save = date( 'Y-m-d H:i:s', strtotime( $data_to_save ) );
+                    $data_to_save = gmdate( 'Y-m-d H:i:s', strtotime( $data_to_save ) );
                 }
             }
             xprofile_set_field_data( $field_id, $post_id, $data_to_save );

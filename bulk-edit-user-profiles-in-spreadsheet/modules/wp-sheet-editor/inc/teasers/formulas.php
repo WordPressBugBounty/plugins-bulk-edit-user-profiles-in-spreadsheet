@@ -7,7 +7,7 @@ if (!class_exists('WP_Sheet_Editor_Formulas_Teaser')) {
 	 */
 	class WP_Sheet_Editor_Formulas_Teaser {
 
-		static private $instance = false;
+		private static $instance = false;
 
 		private function __construct() {
 			
@@ -31,7 +31,7 @@ if (!class_exists('WP_Sheet_Editor_Formulas_Teaser')) {
 			foreach ($post_types as $post_type) {
 				$editor->args['toolbars']->register_item('run_formula', array(
 					'type' => 'button',
-					'content' => __('Apply changes in bulk', 'vg_sheet_editor' ),
+					'content' => esc_html__('Apply changes in bulk', 'vg_sheet_editor' ),
 					'icon' => 'fa fa-terminal',
 					'extra_html_attributes' => 'data-remodal-target="modal-formula"',
 					'toolbar_key' => 'secondary',
@@ -53,27 +53,27 @@ if (!class_exists('WP_Sheet_Editor_Formulas_Teaser')) {
 			<div class="remodal remodal4" data-remodal-id="modal-formula" data-remodal-options="closeOnOutsideClick: false, hashTracking: false">
 
 				<div class="modal-content">
-					<h3><?php _e('Bulk Update feature', 'vg_sheet_editor' ); ?></h3>
+					<h3><?php esc_html_e('Bulk Update feature', 'vg_sheet_editor' ); ?></h3>
 
-					<p><?php _e('The "bulk update" feature allows you to update several posts at once <br/>and you can do a lot of cool things, for example:', 'vg_sheet_editor' ); ?></p>
+					<p><?php esc_html_e('The "bulk update" feature allows you to update several posts at once.', 'vg_sheet_editor'); ?><br/><?php esc_html_e('You can do a lot of cool things, for example:', 'vg_sheet_editor'); ?></p>
 
 					<ul class="vg-naked-list">
-						<li><?php _e('Replace words or phrases in your posts titles, content, or other fields', 'vg_sheet_editor' ); ?></li>
-						<li><?php _e('Increase or decrease products prices', 'vg_sheet_editor' ); ?></li>
-						<li><?php _e('Increase or decrease products stock', 'vg_sheet_editor' ); ?></li>
-						<li><?php _e('Move all your drafts to published posts or any other status', 'vg_sheet_editor' ); ?></li>
-						<li><?php _e('Set hundreds of products at once as out of stock or in stock', 'vg_sheet_editor' ); ?></li>
-						<li><?php _e('Add call to actions or any text at the beginning or ending of your posts', 'vg_sheet_editor' ); ?></li>
-						<li><?php _e('Replace old shortcodes with new shortcodes in all your posts', 'vg_sheet_editor' ); ?></li>
-						<li><?php _e('Set the same featured image in all the posts in a category', 'vg_sheet_editor' ); ?></li>
-						<li><?php _e('Move hundreds of posts to the trash', 'vg_sheet_editor' ); ?></li>
-						<li><?php _e('Etc.', 'vg_sheet_editor' ); ?></li>						
+						<li><?php esc_html_e('Replace words or phrases in your posts titles, content, or other fields', 'vg_sheet_editor' ); ?></li>
+						<li><?php esc_html_e('Increase or decrease products prices', 'vg_sheet_editor' ); ?></li>
+						<li><?php esc_html_e('Increase or decrease products stock', 'vg_sheet_editor' ); ?></li>
+						<li><?php esc_html_e('Move all your drafts to published posts or any other status', 'vg_sheet_editor' ); ?></li>
+						<li><?php esc_html_e('Set hundreds of products at once as out of stock or in stock', 'vg_sheet_editor' ); ?></li>
+						<li><?php esc_html_e('Add call to actions or any text at the beginning or ending of your posts', 'vg_sheet_editor' ); ?></li>
+						<li><?php esc_html_e('Replace old shortcodes with new shortcodes in all your posts', 'vg_sheet_editor' ); ?></li>
+						<li><?php esc_html_e('Set the same featured image in all the posts in a category', 'vg_sheet_editor' ); ?></li>
+						<li><?php esc_html_e('Move hundreds of posts to the trash', 'vg_sheet_editor' ); ?></li>
+						<li><?php esc_html_e('Etc.', 'vg_sheet_editor' ); ?></li>						
 					</ul>
-					<p><?php _e('Imagine being able to do all those changes to hundreds or thousands of posts at once in just a few minutes. The formulas feature is available as premium extension.', 'vg_sheet_editor' ); ?></p>
+					<p><?php esc_html_e('Imagine being able to do all those changes to hundreds or thousands of posts at once in just a few minutes. The formulas feature is available as premium extension.', 'vg_sheet_editor' ); ?></p>
 				</div>
 				<br>
-				<a href="<?php echo esc_url(VGSE()->get_buy_link('formulas-teaser')); ?>" class="remodal-confirm" target="_blank"><?php _e('Buy extension now!', 'vg_sheet_editor' ); ?></a>
-				<button data-remodal-action="confirm" class="remodal-cancel"><?php _e('Close', 'vg_sheet_editor' ); ?></button>
+				<a href="<?php echo esc_url(VGSE()->get_buy_link('formulas-teaser')); ?>" class="remodal-confirm" target="_blank"><?php esc_html_e('Buy extension now!', 'vg_sheet_editor' ); ?></a>
+				<button data-remodal-action="confirm" class="remodal-cancel"><?php esc_html_e('Close', 'vg_sheet_editor' ); ?></button>
 			</div>
 			<?php
 		}

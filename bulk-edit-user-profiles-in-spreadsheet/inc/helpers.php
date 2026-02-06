@@ -18,7 +18,7 @@ if ( !class_exists( 'VGSE_Users_Helpers' ) ) {
 
         function get_available_user_roles() {
             $out = array(
-                'subscriber' => __( 'Subscriber', vgse_users()->textname ),
+                'subscriber' => esc_html__( 'Subscriber', vgse_users()->textname ),
             );
             return apply_filters( 'wpse_users_allowed_roles', $out );
         }

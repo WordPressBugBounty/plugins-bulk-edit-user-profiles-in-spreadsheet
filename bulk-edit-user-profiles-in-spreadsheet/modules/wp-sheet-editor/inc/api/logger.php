@@ -28,20 +28,20 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 		}
 
 		function maybe_download_log_file() {
-			if ( empty( $_GET['wpseelf'] ) || ! VGSE()->helpers->user_can_manage_options() ) {
+			if ( empty( $_GET['wpseelf'] ) || ! VGSE()->helpers->user_can_manage_options() || empty( $_GET['wpselognonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wpselognonce'] ), 'bep-nonce' ) ) {
 				return;
 			}
 
 			if ( strpos( $_GET['wpseelf'], '.' ) !== false || strpos( $_GET['wpseelf'], '/' ) !== false || strpos( $_GET['wpseelf'], '\\' ) !== false ) {
 				die();
 			}
-			$job_id           = sanitize_file_name( $_GET['wpseelf'] );
+			$job_id           = sanitize_file_name( wp_unslash( $_GET['wpseelf'] ) );
 			$path             = $this->get_job_file( $job_id );
 			$file_name        = current( explode( '.', basename( $path ) ) );
 			$public_file_name = str_replace( '-' . $this->get_site_key(), '', $file_name );
 
 			if ( ! file_exists( $path ) ) {
-				die( __( 'The log file does not exist.', 'vg_sheet_editor' ) );
+				die( esc_html__( 'The log file does not exist.', 'vg_sheet_editor' ) );
 			}
 
 			// output headers so that the file is downloaded rather than displayed
@@ -63,12 +63,100 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 			}
 		}
 
+		/**
+		 * Trims log files to keep only the latest 10,000 lines
+		 *
+		 * @return void
+		 */
+		function trim_log_files() {
+			$files = VGSE()->helpers->get_files_list( $this->directory, '.txt' );
+
+			foreach ( $files as $file ) {
+				// Skip if file is too small to need trimming
+				if ( filesize( $file ) < 10485 ) {
+					continue;
+				}
+
+				// Process file in chunks to avoid loading entire file into memory
+				$this->trim_large_file( $file, 10000 );
+			}
+		}
+
+		/**
+		 * Memory-efficient file trimming using buffered reading
+		 *
+		 * @param string $file Path to the file
+		 * @param int $keep_lines Number of lines to keep
+		 * @return void
+		 */
+		function trim_large_file( $file, $keep_lines ) {
+			// First pass: count total lines
+			$total_lines = 0;
+			$handle      = fopen( $file, 'r' );
+
+			if ( ! $handle ) {
+				return;
+			}
+
+			// Count lines in chunks to avoid loading entire file
+			while ( ! feof( $handle ) ) {
+				$buffer       = fread( $handle, 8192 );
+				$total_lines += substr_count( $buffer, "\n" );
+			}
+			fclose( $handle );
+
+			// If we don't need to trim, exit early
+			if ( $total_lines <= $keep_lines ) {
+				return;
+			}
+
+			// Calculate how many lines to skip
+			$lines_to_skip = $total_lines - $keep_lines;
+
+			// Second pass: copy only the lines we want to keep
+			$temp_file     = $file . '.tmp';
+			$input_handle  = fopen( $file, 'r' );
+			$output_handle = fopen( $temp_file, 'w' );
+
+			if ( ! $input_handle || ! $output_handle ) {
+				if ( $input_handle ) {
+					fclose( $input_handle );
+				}
+				if ( $output_handle ) {
+					fclose( $output_handle );
+				}
+				return;
+			}
+
+			$current_line = 0;
+			while ( ! feof( $input_handle ) && $current_line < $lines_to_skip ) {
+				$line = fgets( $input_handle );
+				if ( $line !== false ) {
+					++$current_line;
+				}
+			}
+
+			// Copy remaining lines to temp file
+			while ( ! feof( $input_handle ) ) {
+				$line = fgets( $input_handle );
+				if ( $line !== false ) {
+					fwrite( $output_handle, $line );
+				}
+			}
+
+			fclose( $input_handle );
+			fclose( $output_handle );
+
+			// Replace original file with trimmed version
+			rename( $temp_file, $file );
+		}
+
 		function delete_old_files() {
 			$files = VGSE()->helpers->get_files_list( $this->directory, '.txt' );
 			foreach ( $files as $file ) {
 				$expiration_hours = (int) $this->file_expiration_hours();
 				if ( file_exists( $file ) && ( time() - filemtime( $file ) > $expiration_hours * 3600 ) ) {
-					unlink( $file );
+					wp_delete_file( $file );
 				}
 			}
 		}
@@ -76,7 +164,15 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 		function get_log_download_url( $job_id ) {
 			$out = null;
 			if ( ! empty( $job_id ) ) {
-				$out = esc_url_raw( add_query_arg( 'wpseelf', sanitize_file_name( $job_id ), admin_url( 'index.php' ) ) );
+				$out = esc_url_raw(
+					add_query_arg(
+						array(
+							'wpseelf'      => sanitize_file_name( $job_id ),
+							'wpselognonce' => wp_create_nonce( 'bep-nonce' ),
+						),
+						admin_url( 'index.php' )
+					)
+				);
 			}
 			return $out;
 		}
@@ -148,13 +244,13 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 			$t     = microtime( true );
 			$micro = sprintf( '%06d', ( $t - floor( $t ) ) * 1000000 );
 
-			$time = current_time( 'mysql' ) . '.' . $micro;
+			$time = current_time( 'mysql', true ) . '.' . $micro;
 
 			$message = $this->mask_private_values( $message );
 
-			$fp = fopen( $file_path, 'a' ); //opens file in append mode
-			fwrite( $fp, $time . ' (WordPress timezone) - ' . html_entity_decode( wp_kses_post( $message ) ) . PHP_EOL . PHP_EOL );
-			fclose( $fp );
+			$fp = fopen( $file_path, 'a' );  // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+			fwrite( $fp, $time . ' (UTC) - ' . html_entity_decode( $message ) . PHP_EOL . PHP_EOL ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+			fclose( $fp ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 			return $this;
 		}
 
@@ -166,7 +262,7 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 			$message = preg_replace_callback(
 				$pattern,
 				function ( $matches ) {
-					return substr( $matches[0], 0, -10 ) . 'xxxxx';
+					return substr( $matches[0], 0, -10 ) . 'xxxxxxxxxx';
 				},
 				$message
 			);
@@ -194,20 +290,20 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 
 			$time = current_time( 'mysql' ) . '.' . $micro;
 
-			$fp = fopen( $file_path, 'a' ); //opens file in append mode
-			fwrite( $fp, $time . ' - ' . html_entity_decode( wp_kses_post( $message ) ) . PHP_EOL . PHP_EOL );
-			fclose( $fp );
+			$fp = fopen( $file_path, 'a' );  // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+			fwrite( $fp, $time . ' - ' . html_entity_decode( wp_kses_post( $message ) ) . PHP_EOL . PHP_EOL ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+			fclose( $fp ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 			return $this;
 		}
 
 
 		function init() {
 			$this->directory = apply_filters( 'vg_sheet_editor/logs/directory', WP_CONTENT_DIR . '/uploads/wp-sheet-editor/logs' );
-			do_action( 'wpse_delete_old_csvs', array( $this, 'delete_old_files' ) );
+			add_action( 'wpse_daily_cron', array( $this, 'delete_old_files' ) );
+			add_action( 'wpse_daily_cron', array( $this, 'trim_log_files' ) );
 			if ( is_admin() ) {
 				$this->maybe_create_directories();
 				add_action( 'vg_sheet_editor/initialized', array( $this, 'maybe_download_log_file' ) );
-				add_action( 'admin_init', array( $this, 'delete_old_files' ) );
 				add_action( 'vg_sheet_editor/editor/before_init', array( $this, 'register_toolbar' ), 80 );
 			}
 			register_shutdown_function( array( $this, 'log_errors' ) );
@@ -221,7 +317,7 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 					array(
 						'type'                  => 'button',
 						'allow_in_frontend'     => false,
-						'content'               => __( 'Error log', 'vg_sheet_editor' ),
+						'content'               => esc_html__( 'Error log', 'vg_sheet_editor' ),
 						'toolbar_key'           => 'secondary',
 						'extra_html_attributes' => 'data-remodal-target="modal-error-log"',
 						'parent'                => 'support',
@@ -238,36 +334,77 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 			$lines     = array();
 
 			if ( file_exists( $file_path ) ) {
-				$fp = fopen( $file_path, 'r' );
-				while ( ! feof( $fp ) ) {
-					$line = fgets( $fp, 4096 );
-					array_push( $lines, $line );
-					if ( count( $lines ) > $max_lines ) {
-						array_shift( $lines );
-					}
-				}
-				fclose( $fp );
-			}
+				$handle = fopen( $file_path, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+				if ( $handle ) {
+					$pos   = -2;
+					$t     = ' ';
+					$lines = array();
 
-			$lines = array_map( 'trim', $lines );
+					fseek( $handle, 0, SEEK_END );
+					$file_size = ftell( $handle );
+
+					while ( count( $lines ) <= $max_lines && $file_size > abs( $pos ) ) {
+						fseek( $handle, $pos, SEEK_END );
+						$char = fgetc( $handle );
+						if ( $char === "\n" || $char === "\r" ) {
+							if ( ! empty( trim( $t ) ) ) {
+								$lines[] = trim( $t );
+							}
+							$t = '';
+						} else {
+							$t = $char . $t;
+						}
+						$pos--;
+					}
+
+					if ( ! empty( trim( $t ) ) ) {
+						$lines[] = trim( $t );
+					}
+					fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+					$lines = array_reverse( $lines );
+				}
+			}
 			return $lines;
 		}
 		function render_error_log_modal() {
-			$errors = implode( PHP_EOL, $this->get_last_n_lines( 'error_log', 500 ) );
+			$errors_string = implode( PHP_EOL, $this->get_last_n_lines( 'error_log', 500 ) );
+			// Split the log string into individual error entries based on the double newline separator.
+			$error_entries = array_filter( array_map( 'trim', preg_split( '/\n\s*\n/', $errors_string ) ) );
 			?>
 			<div data-remodal-id="modal-error-log" data-remodal-options="closeOnOutsideClick: false"
 				class="remodal remodal-error-log modal-error-log remodal-extra-large">
 
-				<h2><?php _e( 'Error log', 'vg_sheet_editor' ); ?></h2>
-				<?php if ( empty( $errors ) ) { ?>
-					<p><?php _e( 'We haven\'t detected any fatal errors yet.', 'vg_sheet_editor' ); ?></p>
+				<h2><?php esc_html_e( 'Error log', 'vg_sheet_editor' ); ?></h2>
+				<?php if ( empty( $error_entries ) ) { ?>
+					<p><?php esc_html_e( 'We haven\'t detected any fatal errors yet.', 'vg_sheet_editor' ); ?></p>
 				<?php } else { ?>
-					<p><?php printf( __( 'Here you can see the fatal errors related to WP Sheet Editor. If you experience any error while using WP Sheet Editor, you can see if any entry appears below with a related date and time, and send the full error message to the WP Sheet Editor support team. This log is reset every %d days.', 'vg_sheet_editor' ), $this->file_expiration_hours() / 24 ); ?></p>
-					<pre><?php echo esc_html( sanitize_textarea_field( trim( $errors ) ) ); ?></pre>
+					<p>
+					<?php
+						/* translators: %d: Number of days after which the log file expires */
+						printf( esc_html__( 'Here you can see the fatal errors related to WP Sheet Editor. If you experience any error while using WP Sheet Editor, you can see if any entry appears below with a related date and time, and send the full error message to the WP Sheet Editor support team. This log is reset every %d days.', 'vg_sheet_editor' ), (int) $this->file_expiration_hours() / 24 );
+					?>
+						</p>
+						<ul class="wpse-error-log-list">
+						<?php
+						foreach ( $error_entries as $entry ) :
+							// Separate the main message from the stack trace
+							$parts   = preg_split( '/\nStack trace:/', $entry, 2 );
+							$message = trim( $parts[0] );
+							$trace   = isset( $parts[1] ) ? trim( $parts[1] ) : '';
+							?>
+								<li x-data="{ showTrace: false }">
+									<span><?php echo esc_html( $message ); ?></span>
+								<?php if ( $trace ) : ?>
+										<button class="button" @click="showTrace = !showTrace" x-text="showTrace ? vgse_editor_settings.texts.hide_trace : vgse_editor_settings.texts.show_trace"></button>
+										<pre x-show="showTrace" x-transition><?php echo esc_html( "Stack trace:\n" . $trace ); ?></pre>
+								<?php endif; ?>
+								</li>
+							<?php endforeach; ?>
+						</ul>
 				<?php } ?>
-				<button data-remodal-action="confirm" class="remodal-cancel"><?php _e( 'Close', 'vg_sheet_editor' ); ?></button>
+				<button data-remodal-action="confirm" class="remodal-cancel"><?php esc_html_e( 'Close', 'vg_sheet_editor' ); ?></button>
 			</div>
-			<?php
+					<?php
 		}
 
 
@@ -279,7 +416,8 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 		public function log_errors() {
 			$error = error_get_last();
 			if ( $error && in_array( $error['type'], array( E_ERROR, E_PARSE, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR ), true ) && preg_match( '/(Fatal|Uncaught Error|sheet-editor|bulk-edit-events|bulk-edit-posts-on-frontend|bulk-edit-categories-tags|bulk-edit-user-profiles-in-spreadsheet|woo-coupons-bulk-editor|woo-bulk-edit-products|woo-products-bulk-editor)/', $error['message'] ) ) {
-				$this->entry( sprintf( __( '%1$s in %2$s on line %3$s', 'vg_sheet_editor' ), $error['message'], $error['file'], $error['line'] ), 'error_log' );
+				/* translators: %1$s: Error message, %2$s: File path, %3$s: Line number */
+				$this->entry( sprintf( esc_html__( '%1$s in %2$s on line %3$s', 'vg_sheet_editor' ), $error['message'], $error['file'], $error['line'] ), 'error_log' );
 			}
 		}
 

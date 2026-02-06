@@ -23,7 +23,7 @@ class VGSE_Provider_Post extends VGSE_Provider_Abstract {
 		$ids_in_query_placeholders = implode( ', ', array_fill( 0, count( $row_ids ), '%d' ) );
 		$prepare_data              = array_merge( $row_ids, array( get_current_user_id(), $post_type ) );
 		$prepare_sql               = "SELECT ID FROM $wpdb->posts WHERE ID IN ($ids_in_query_placeholders) AND post_author = %s AND post_type = %s";
-		$allowed_row_ids           = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( $prepare_sql, $prepare_data ) ) );
+		$allowed_row_ids           = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( $prepare_sql, $prepare_data ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return $allowed_row_ids;
 	}
 
@@ -74,13 +74,12 @@ class VGSE_Provider_Post extends VGSE_Provider_Abstract {
 
 		$post_types_in_query_placeholders = implode( ', ', array_fill( 0, count( $post_type ), '%s' ) );
 		$sql                              = $wpdb->prepare(
-			"DELETE pm FROM $meta_table_name pm INNER JOIN $wpdb->posts p ON 
-p.ID = pm.post_id 
-WHERE p.post_type IN ($post_types_in_query_placeholders) 
-AND pm.meta_key = %s",
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"DELETE pm FROM $meta_table_name pm INNER JOIN $wpdb->posts p ON p.ID = pm.post_id WHERE p.post_type IN ($post_types_in_query_placeholders) AND pm.meta_key = %s",
 			array_merge( $post_type, array( $old_key ) )
 		);
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$modified = $wpdb->query( $sql );
 		return $modified;
 	}
@@ -97,14 +96,13 @@ AND pm.meta_key = %s",
 		}
 		$post_types_in_query_placeholders = implode( ', ', array_fill( 0, count( $post_type ), '%s' ) );
 		$sql                              = $wpdb->prepare(
-			"UPDATE $meta_table_name pm LEFT JOIN $wpdb->posts p ON 
-p.ID = pm.post_id 
-SET pm.meta_key = %s
-WHERE p.post_type IN ($post_types_in_query_placeholders) 
-AND pm.meta_key = %s",
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"UPDATE $meta_table_name pm LEFT JOIN $wpdb->posts p ON p.ID = pm.post_id SET pm.meta_key = %s
+WHERE p.post_type IN ($post_types_in_query_placeholders) AND pm.meta_key = %s",
 			array_merge( array( $new_key ), $post_type, array( $old_key ) )
 		);
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$modified = $wpdb->query( $sql );
 		return $modified;
 	}
@@ -224,18 +222,27 @@ AND pm.meta_key = %s",
 		);
 
 		// Exclude serialized sub column
+		$serialized_meta_keys = array();
 		foreach ( $raw_meta_columns as $index => $raw_meta_column ) {
 			if ( ! empty( $raw_meta_column['serialized_field_original_key'] ) ) {
 				unset( $raw_meta_columns[ $index ] );
+				$serialized_meta_keys[] = $raw_meta_column['serialized_field_original_key'];
 			}
 		}
 
-		$meta_columns = apply_filters( 'vgse_sheet_editor/provider/post/prefetch/meta_keys', array_unique( array_values( array_merge( array_keys( $raw_meta_columns ), wp_list_pluck( $raw_meta_columns, 'key_for_formulas' ) ) ) ), $post_type );
+		$custom_prefetch_meta_keys = array();
+		foreach ( $spreadsheet_columns as $key => $column ) {
+			if ( ! empty( $column['prefetch_meta_key'] ) ) {
+				$custom_prefetch_meta_keys[] = $column['prefetch_meta_key'];
+			}
+		}
+
+		$meta_columns = apply_filters( 'vgse_sheet_editor/provider/post/prefetch/meta_keys', array_unique( array_values( array_merge( array_keys( $raw_meta_columns ), wp_list_pluck( $raw_meta_columns, 'key_for_formulas' ), $serialized_meta_keys, $custom_prefetch_meta_keys ) ) ), $post_type );
 
 		$post_meta_table       = $this->get_meta_table_name( $post_type );
 		$post_meta_post_id_key = $this->get_meta_table_post_id_key( $post_type );
 
-		$meta_columns_groups = array_chunk( $meta_columns, 100 );
+		$meta_columns_groups = array_chunk( $meta_columns, 1000 );
 		$post_meta_raw       = array();
 
 		foreach ( $meta_columns_groups as $meta_columns_group ) {
@@ -244,15 +251,11 @@ AND pm.meta_key = %s",
 			$meta_columns_group_in_query_placeholders = implode( ', ', array_fill( 0, count( $meta_columns_group_sanitized ), '%s' ) );
 			$post_ids_in_query_placeholders           = implode( ', ', array_fill( 0, count( $post_ids ), '%d' ) );
 			$meta_sql                                 = $wpdb->prepare(
-				"SELECT m1.* 
-FROM $post_meta_table as m1 USE INDEX () 
-WHERE m1.meta_key IN ($meta_columns_group_in_query_placeholders) AND 
-m1.$post_meta_post_id_key IN ($post_ids_in_query_placeholders)  AND 
-	m1.meta_value <> ''  
-	GROUP BY m1.$post_meta_post_id_key, m1.meta_key",
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+				"SELECT m1.post_id,m1.meta_key,m1.meta_value FROM $post_meta_table as m1 WHERE m1.meta_key IN ($meta_columns_group_in_query_placeholders) AND m1.$post_meta_post_id_key IN ($post_ids_in_query_placeholders)",
 				array_merge( $meta_columns_group_sanitized, $post_ids )
 			);
-			$post_meta_raw_group                      = $wpdb->get_results( $meta_sql, ARRAY_A );
+			$post_meta_raw_group = $wpdb->get_results( $meta_sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 			// If any DB error happened during the prefetch, skip the prefetch and disable it for future sessions
 			// If we don't skip, we set all the meta fields as empty at the end of this function so we must avoid that
@@ -303,10 +306,11 @@ m1.$post_meta_post_id_key IN ($post_ids_in_query_placeholders)  AND
 		if ( empty( $taxonomy_columns ) ) {
 			return array();
 		}
-		$separator = VGSE()->helpers->get_term_separator();
-		if ( ! empty( VGSE()->options['manage_taxonomy_columns_term_ids'] ) ) {
+		$separator  = VGSE()->helpers->get_term_separator();
+		$term_field = VGSE()->get_option( 'manage_taxonomy_columns_format' );
+		if ( $term_field === 'term_id' ) {
 			$field_key_to_concatenate = 't.term_id';
-		} elseif ( ! empty( VGSE()->options['manage_taxonomy_columns_term_slugs'] ) ) {
+		} elseif ( $term_field === 'slug' ) {
 			$field_key_to_concatenate = 't.slug';
 		} else {
 			$field_key_to_concatenate = 't.name';
@@ -315,7 +319,9 @@ m1.$post_meta_post_id_key IN ($post_ids_in_query_placeholders)  AND
 		$prepared_data                          = array_merge( array( $separator . ' ' ), array_map( 'trim', $taxonomy_columns ), $post_ids );
 		$taxonomy_columns_in_query_placeholders = implode( ', ', array_fill( 0, count( $taxonomy_columns ), '%s' ) );
 		$post_ids_in_query_placeholders         = implode( ', ', array_fill( 0, count( $post_ids ), '%d' ) );
-		$post_terms_sql                         = $wpdb->prepare(
+
+		$post_terms_sql = $wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			"SELECT tr.object_id, tt.taxonomy, GROUP_CONCAT($field_key_to_concatenate SEPARATOR %s) as terms, GROUP_CONCAT(tt.parent SEPARATOR '') as parents
 FROM $wpdb->terms AS t 
 INNER JOIN $wpdb->term_taxonomy AS tt
@@ -328,7 +334,7 @@ GROUP BY tr.object_id, tt.taxonomy
 ORDER BY t.name ASC",
 			$prepared_data
 		);
-		$post_terms_raw                         = $wpdb->get_results( $post_terms_sql, ARRAY_A );
+		$post_terms_raw = $wpdb->get_results( $post_terms_sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 		foreach ( $post_terms_raw as $post_terms_per_taxonomy ) {
 
@@ -422,7 +428,9 @@ ORDER BY t.name ASC",
 		$has_duplicate_dates = get_transient( $cache_key );
 
 		if ( ! is_string( $has_duplicate_dates ) ) {
-			$sql                 = $wpdb->prepare( "SELECT COUNT(*) as count FROM $wpdb->posts WHERE post_type = %s GROUP BY post_date HAVING count > 1 ORDER BY count DESC LIMIT 1", $wp_query_args['post_type'] );
+			$sql = $wpdb->prepare( "SELECT COUNT(*) as count FROM $wpdb->posts WHERE post_type = %s GROUP BY post_date HAVING count > 1 ORDER BY count DESC LIMIT 1", $wp_query_args['post_type'] );
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$has_duplicate_dates = (int) $wpdb->get_var( $sql ) ? 'yes' : 'no';
 			set_transient( $cache_key, $has_duplicate_dates, DAY_IN_SECONDS );
 		}
@@ -466,9 +474,12 @@ ORDER BY t.name ASC",
 	}
 
 	function get_item_meta( $post_id, $key, $single, $context = 'save', $bypass_cache = false ) {
-		if ( ! $bypass_cache && isset( self::$data_store['meta'][ 'item' . $post_id ] ) && isset( self::$data_store['meta'][ 'item' . $post_id ][ $key ] ) ) {
+		if ( ! $bypass_cache && isset( self::$data_store['meta'][ 'item' . $post_id ] ) && array_key_exists( $key, self::$data_store['meta'][ 'item' . $post_id ] ) ) {
 			$raw_value = self::$data_store['meta'][ 'item' . $post_id ][ $key ];
 		} else {
+			// if ( VGSE_DEBUG && isset( $_SERVER['HTTP_HOST'] ) && strpos( $_SERVER['HTTP_HOST'], 'sheeteditor.local' ) !== false ) {
+			// 	throw new Exception( esc_html__( 'Meta key not prefetched: ' . $key . ' - post type: ' . VGSE()->helpers->get_provider_from_query_string() . '. Consider using prefetch_meta_key when registering the column.', 'vg_sheet_editor' ) );
+			// }
 			$raw_value = get_post_meta( $post_id, $key, $single );
 			self::$data_store['meta'][ 'item' . $post_id ][ $key ] = $raw_value;
 		}
@@ -476,7 +487,7 @@ ORDER BY t.name ASC",
 		$raw_value      = apply_filters( 'vg_sheet_editor/provider/post/get_item_meta', $raw_value, $post_id, $key, $single, $context );
 
 		if ( ! is_null( $original_value ) && is_null( $raw_value ) && VGSE_DEBUG ) {
-			throw new Exception( "Post meta was filtered and didn't return a value.", E_USER_ERROR );
+			throw new Exception( esc_html__( "Post meta was filtered and didn't return a value.", 'vg_sheet_editor' ) );
 		}
 
 		return $raw_value;
@@ -512,6 +523,7 @@ ORDER BY t.name ASC",
 		}
 
 		$ids_in_query_placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_modified = %s, post_modified_gmt = %s WHERE ID IN (" . $ids_in_query_placeholders . ')', array_merge( array( current_time( 'mysql', false ), current_time( 'mysql', true ) ), array_filter( array_map( 'intval', $ids ) ) ) ) );
 
 		$user_id = get_current_user_id();
@@ -530,10 +542,10 @@ ORDER BY t.name ASC",
 					array(
 						'post_id' => $values['ID'],
 						'code'    => 'wpse_invalid_post_type',
-						'message' => sprintf( __( 'Row ID: %1$d, Post type: %2$s does not exist in WordPress. Make sure your CSV uses the right name in the post type column.', 'vg_sheet_editor' ), $values['ID'], sanitize_text_field( $values['post_type'] ) ),
+						/* translators: %1$d: Post ID, %2$s: Post type name */
+						'message' => sprintf( esc_html__( 'Row ID: %1$d, Post type: %2$s does not exist in WordPress. Make sure your CSV uses the right name in the post type column.', 'vg_sheet_editor' ), (int) $values['ID'], sanitize_text_field( $values['post_type'] ) ),
 					)
-				),
-				E_USER_ERROR
+				)
 			);
 		}
 		if ( isset( $values['post_type'] ) && empty( $values['post_type'] ) ) {
@@ -546,10 +558,10 @@ ORDER BY t.name ASC",
 						array(
 							'post_id' => $values['ID'],
 							'code'    => 'wpse_invalid_post_type',
-							'message' => sprintf( __( 'Row ID: %d. You are trying to save an empty post type. Make sure your CSV uses the right name in the post type column.', 'vg_sheet_editor' ), $values['ID'] ),
+							/* translators: %d: Post ID */
+							'message' => sprintf( esc_html__( 'Row ID: %d. You are trying to save an empty post type. Make sure your CSV uses the right name in the post type column.', 'vg_sheet_editor' ), (int) $values['ID'] ),
 						)
-					),
-					E_USER_ERROR
+					)
 				);
 			} else {
 				// If this is any other post type, automatically set the post type from the current sheet
@@ -660,7 +672,8 @@ ORDER BY t.name ASC",
 					wp_delete_post( $post_id, true );
 				}
 			} else {
-				throw new Exception( sprintf( __( 'Row ID: %d, You do not have permission to delete this post.', 'vg_sheet_editor' ), $post_id ), E_USER_ERROR );
+				/* translators: %d: Post ID */
+				throw new Exception( sprintf( esc_html__( 'Row ID: %d, You do not have permission to delete this post.', 'vg_sheet_editor' ), (int) $post_id ) );
 			}
 		} else {
 			if ( count( $values ) === 1 && isset( $post_id ) ) {
@@ -670,6 +683,11 @@ ORDER BY t.name ASC",
 				// if we update a post without sending the author parameter
 				if ( ! isset( $values['post_author'] ) ) {
 					$values['post_author'] = $wpdb->get_var( $wpdb->prepare( "SELECT post_author FROM $wpdb->posts WHERE ID = %d", $post_id ) );
+				}
+
+				// wp_insert_post expects content to be slashed when saving gutenberg blocks
+				if ( isset( $values['post_content'] ) && strpos( $values['post_content'], '\\' ) !== false && strpos( $values['post_content'], '<!-- wp:' ) !== false && VGSE()->get_option( 'be_allow_raw_content_unfiltered_html_capability' ) ) {
+					$values['post_content'] = wp_slash( $values['post_content'] );
 				}
 				$out = wp_update_post( $values, $wp_error );
 				if ( isset( $values['guid'] ) ) {
@@ -750,7 +768,7 @@ ORDER BY t.name ASC",
 			$prepared_data[] = $post_type;
 		}
 
-		$ids = $wpdb->get_col( $wpdb->prepare( $sql, $prepared_data ) );
+		$ids = $wpdb->get_col( $wpdb->prepare( $sql, $prepared_data ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return $ids;
 	}
 
@@ -768,12 +786,128 @@ ORDER BY t.name ASC",
 		return $table_name;
 	}
 
+	/**
+	 * Get unique values for multiple meta fields, with compatibility checks for the database version.
+	 *
+	 * This function uses a modern CTE-based query for performance on supported servers.
+	 * It caches the database version check to avoid running it on every page load.
+	 *
+	 * @param array  $meta_keys  List of meta keys to query.
+	 * @param string $post_type  The post type to search within.
+	 * @param int    $batch_size The number of meta keys to process in a single query.
+	 * @return array Associative array of results, or an empty array if the DB version is not supported.
+	 */
+	function get_meta_field_unique_values_in_bulk( $meta_keys, $post_type, $batch_size = 500 ) {
+		global $wpdb;
+		if ( VGSE()->get_option( 'disable_bulk_sample_values_prefetch' ) ) {
+			return array();
+		}
+
+		$transient_key = 'vgse_modern_db_version';
+		$is_compatible = get_transient( $transient_key );
+
+		if ( false === $is_compatible ) {
+			$db_version    = $wpdb->get_var( 'SELECT VERSION()' );
+			$is_compatible = 'no'; // Default to not compatible
+
+			if ( strpos( strtolower( $db_version ), 'mariadb' ) !== false ) {
+				// It's MariaDB: requires version 10.2+
+				if ( version_compare( $db_version, '10.2', '>=' ) ) {
+					$is_compatible = 'yes';
+				}
+			} else {
+				// It's MySQL: requires version 8.0+
+				if ( version_compare( $db_version, '8.0', '>=' ) ) {
+					$is_compatible = 'yes';
+				}
+			}
+			// Cache the result for one week to avoid re-checking on every request.
+			set_transient( $transient_key, $is_compatible, WEEK_IN_SECONDS );
+		}
+
+		// If the database version is too old, return an empty array to prevent errors.
+		if ( 'no' === $is_compatible ) {
+			return array();
+		}
+
+		if ( empty( $meta_keys ) || ! is_array( $meta_keys ) ) {
+			return array();
+		}
+
+		$post_meta_table       = $this->get_meta_table_name( $post_type );
+		$post_meta_post_id_key = $this->get_meta_table_post_id_key( $post_type );
+		$meta_key_chunks       = array_chunk( $meta_keys, $batch_size );
+		$final_results         = array();
+
+		foreach ( $meta_key_chunks as $chunk ) {
+			$placeholders = implode( ', ', array_fill( 0, count( $chunk ), '%s' ) );
+
+			$sql = "
+            WITH UniqueMeta AS (
+                SELECT DISTINCT m.meta_key, m.meta_value
+                FROM {$wpdb->posts} p
+                JOIN {$post_meta_table} m ON p.ID = m.{$post_meta_post_id_key}
+                WHERE p.post_type = %s AND m.meta_key IN ({$placeholders})
+            )
+            SELECT meta_key, meta_value
+            FROM (
+                SELECT
+                    meta_key,
+                    meta_value,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY meta_key
+                        ORDER BY LENGTH(meta_value) DESC
+                    ) AS rn
+                FROM UniqueMeta
+            ) AS RankedMeta
+            WHERE rn <= 4
+            ORDER BY meta_key, rn;
+        ";
+
+			$query_params = array_merge( array( $post_type ), $chunk );
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$batch_db_results = $wpdb->get_results( $wpdb->prepare( $sql, $query_params ) );
+
+			$grouped_batch_results = array();
+			foreach ( $batch_db_results as $row ) {
+				if ( ! isset( $grouped_batch_results[ $row->meta_key ] ) ) {
+					$grouped_batch_results[ $row->meta_key ] = array();
+				}
+				$grouped_batch_results[ $row->meta_key ][] = $row->meta_value;
+			}
+
+			$final_results = array_merge( $final_results, $grouped_batch_results );
+		}
+
+		foreach ( $final_results as $meta_key => &$values ) {
+			$values = apply_filters( 'vg_sheet_editor/provider/post/meta_field_unique_values', $values, $meta_key, $post_type );
+			$values = apply_filters( 'vg_sheet_editor/provider/post/meta_field_unique_values/' . $post_type . '/' . $meta_key, $values, $meta_key, $post_type );
+
+			foreach ( $values as $index => $value ) {
+				if ( is_string( $value ) && strlen( $value ) > 5000000 ) {
+					unset( $values[ $index ] );
+				}
+			}
+		}
+		unset( $values );
+
+		return $final_results;
+	}
+
 	function get_meta_field_unique_values( $meta_key, $post_type = 'post' ) {
 		global $wpdb;
 		$post_meta_table       = $this->get_meta_table_name( $post_type );
 		$post_meta_post_id_key = $this->get_meta_table_post_id_key( $post_type );
 		$sql                   = $wpdb->prepare( "SELECT m.meta_value FROM $wpdb->posts p LEFT JOIN $post_meta_table m ON p.ID = m.$post_meta_post_id_key WHERE p.post_type = %s AND m.meta_key = %s GROUP BY m.meta_value ORDER BY LENGTH(m.meta_value) DESC LIMIT 4", $post_type, $meta_key );
-		$values                = apply_filters( 'vg_sheet_editor/provider/post/meta_field_unique_values', $wpdb->get_col( $sql ), $meta_key, $post_type );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$values = $wpdb->get_col( $sql );
+
+		// Deprecated. Using this hook is discouraged because it runs for all meta keys of all post types.
+		$values = apply_filters( 'vg_sheet_editor/provider/post/meta_field_unique_values', $values, $meta_key, $post_type );
+
+		// Recommended hook that runs for specific post type and meta key
+		$values = apply_filters( 'vg_sheet_editor/provider/post/meta_field_unique_values/' . $post_type . '/' . $meta_key, $values, $meta_key, $post_type );
 
 		// Remove any field value with extremely long length (5mb) to avoid high memory usage
 		foreach ( $values as $index => $value ) {
@@ -791,11 +925,44 @@ ORDER BY t.name ASC",
 		if ( is_array( $pre_value ) ) {
 			return $pre_value;
 		}
-		$max_fields_limit      = VGSE()->get_option( 'meta_fields_scan_limit', 2500 );
 		$post_meta_table       = $this->get_meta_table_name( $post_type );
 		$post_meta_post_id_key = $this->get_meta_table_post_id_key( $post_type );
-		$meta_keys_sql         = $wpdb->prepare( "SELECT m.meta_key FROM $wpdb->posts p LEFT JOIN $post_meta_table m ON p.ID = m.$post_meta_post_id_key WHERE p.post_type = %s AND m.meta_key NOT LIKE '_nxs_snap%' AND m.meta_key NOT LIKE '_transient_%' AND m.meta_key NOT LIKE '%oembed%' AND m.meta_key NOT LIKE '_crp_cache_%' AND m.meta_key NOT LIKE '%_base64_image%' AND m.meta_value NOT LIKE 'field_%' GROUP BY m.meta_key LIMIT %d", $post_type, $max_fields_limit );
-		$meta_keys             = $wpdb->get_col( $meta_keys_sql );
+		$meta_keys             = array();
+
+		if ( VGSE()->get_option( 'ultra_performance_mode' ) ) {
+			$post_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID 
+     FROM {$wpdb->posts} 
+     WHERE post_type = %s 
+     AND post_status IN ('publish', 'draft')
+     ORDER BY ID DESC 
+     LIMIT 20",
+					$post_type
+				)
+			);
+
+			// Get unique meta keys for these posts
+			$meta_keys = array();
+			if ( ! empty( $post_ids ) ) {
+				// Prepare placeholders for the IN clause
+				$placeholders = implode( ',', array_fill( 0, count( $post_ids ), '%d' ) );
+
+				$meta_keys = $wpdb->get_col(
+					$wpdb->prepare(
+						"SELECT DISTINCT meta_key 
+         FROM {$wpdb->postmeta} m
+         WHERE post_id IN ({$placeholders}) 
+         AND m.meta_key NOT LIKE %s AND m.meta_key NOT LIKE %s AND m.meta_key NOT LIKE %s AND m.meta_key NOT LIKE %s AND m.meta_key NOT LIKE %s AND m.meta_value NOT LIKE %s GROUP BY m.meta_key",
+						array_merge( $post_ids, array( '_nxs_snap%', '_transient_%', '%oembed%', '_crp_cache_%', '%_base64_image%', 'field_%' ) )
+					)
+				);
+			}
+		} else {
+			$max_fields_limit = VGSE()->get_option( 'meta_fields_scan_limit', 2500 );
+			$meta_keys_sql    = $wpdb->prepare( "SELECT m.meta_key FROM $wpdb->posts p LEFT JOIN $post_meta_table m ON p.ID = m.$post_meta_post_id_key WHERE p.post_type = %s AND m.meta_key NOT LIKE %s AND m.meta_key NOT LIKE %s AND m.meta_key NOT LIKE %s AND m.meta_key NOT LIKE %s AND m.meta_key NOT LIKE %s AND m.meta_value NOT LIKE %s GROUP BY m.meta_key LIMIT %d", $post_type, '_nxs_snap%', '_transient_%', '%oembed%', '_crp_cache_%', '%_base64_image%', 'field_%', $max_fields_limit );
+			$meta_keys        = $wpdb->get_col( $meta_keys_sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		}
 		return apply_filters( 'vg_sheet_editor/provider/post/all_meta_fields', $meta_keys, $post_type );
 	}
 }

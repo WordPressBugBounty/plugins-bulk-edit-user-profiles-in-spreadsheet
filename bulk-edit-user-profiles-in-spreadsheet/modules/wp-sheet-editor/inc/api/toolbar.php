@@ -7,7 +7,6 @@ if ( ! class_exists( 'WP_Sheet_Editor_Toolbar' ) ) {
 		private static $registered_items = array();
 
 		function __construct() {
-
 		}
 
 		function remove_item( $key, $toolbar_key, $provider ) {
@@ -48,12 +47,18 @@ if ( ! class_exists( 'WP_Sheet_Editor_Toolbar' ) ) {
 				'container_extra_attributes' => '',
 				'parent'                     => null,
 				'footer_callback'            => null, // PHP callable that returns the popup html
+				'footer_callback_cache'      => false, // Whether to cache the footer_callback output for a day
 				'required_capability'        => null,
 				'require_click_to_expand'    => false,
 				'live_refresh'               => 0, // Number of seconds for the interval to get the toolbar content via ajax
 			);
 
 			$args = wp_parse_args( $args, $defaults );
+
+			// If ultra performance mode is not enabled, force disable the modal cache
+			if ( ! empty( $args['footer_callback_cache'] ) && ! VGSE()->get_option( 'ultra_performance_mode' ) ) {
+				$args['footer_callback_cache'] = false;
+			}
 
 			if ( ! empty( $args['help_tooltip'] ) && strlen( $args['help_tooltip'] ) < 20 ) {
 				$args['tooltip_size'] = 'small';
@@ -105,7 +110,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Toolbar' ) ) {
 				if ( ! empty( $item['icon'] ) ) {
 					$content .= '<i class="' . esc_attr( $item['icon'] ) . '"></i> ';
 				}
-				$content .= esc_html( $item['content'] ) . '</button>';
+				$content .= esc_html( wp_unslash( $item['content'] ) ) . '</button>';
 
 				if ( ! empty( $item['url'] ) ) {
 					$content = str_replace( '<button', '<a href="' . esc_url( $item['url'] ) . '" ', $content );
@@ -157,12 +162,57 @@ if ( ! class_exists( 'WP_Sheet_Editor_Toolbar' ) ) {
 					foreach ( $child_items as $child_item ) {
 						$rendered_children .= $this->get_rendered_item( $child_item['key'], $provider, $child_item['toolbar_key'] );
 					}
-					$out .= '<div class="toolbar-submenu">' . $rendered_children . '</div>';
+					$out .= '<div class="toolbar-submenu"><div class="toolbar-submenu-holder">' . $rendered_children . '</div></div>';
 				}
 			}
 
 			if ( ! empty( $item['footer_callback'] ) && is_callable( $item['footer_callback'] ) ) {
-				add_action( 'vg_sheet_editor/editor_page/after_content', $item['footer_callback'] );
+				add_action(
+					'vg_sheet_editor/editor_page/after_content',
+					function ( $current_post_type ) use ( $item ) {
+						if ( ! empty( $item['footer_callback_cache'] ) ) {
+							$cache_seed = get_option( 'vgse_toolbar_cache_seed' );
+							if ( ! $cache_seed ){
+								$cache_seed = time();
+								update_option( 'vgse_toolbar_cache_seed', $cache_seed, false );
+							}
+							$current_user  = wp_get_current_user();
+							$transient_key = 'vgse_cached_modal_' . md5(
+								implode(
+									'_',
+									array(
+										$cache_seed,
+										$item['key'],
+										$current_post_type,
+										implode( ',', array_keys( array_filter( $current_user->allcaps ) ) ),
+									)
+								)
+							);
+							$html          = get_transient( $transient_key );
+							if ( $html ) {
+								// echo directly because it's template html
+								// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+								echo $html;
+								if ( VGSE_DEBUG ) {
+									echo '<!-- From cache: ' . esc_html( $item['key'] ) . '-->';
+								}
+								return;
+							}
+						}
+						ob_start();
+						call_user_func( $item['footer_callback'], $current_post_type );
+						$html = ob_get_clean();
+						// echo directly because it's template html
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						echo $html;
+						if ( VGSE_DEBUG ) {
+							echo '<!-- No cache: ' . esc_html( $item['key'] ) . '-->';
+						}
+						if ( ! empty( $item['footer_callback_cache'] ) ) {
+							set_transient( $transient_key, $html, DAY_IN_SECONDS );
+						}
+					}
+				);
 			}
 
 			$out .= '</div>';

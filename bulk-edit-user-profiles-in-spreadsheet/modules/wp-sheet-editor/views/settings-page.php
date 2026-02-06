@@ -1,8 +1,8 @@
 <?php defined( 'ABSPATH' ) || exit; ?>
-<div class="remodal-bg quick-setup-page-content" id="vgse-wrapper" data-nonce="<?php echo esc_attr($nonce); ?>">
+<div class="remodal-bg quick-setup-page-content" id="vgse-wrapper">
 	<div class="">
 		<div class="">
-			<h2 class="hidden"><?php _e('Sheet Editor', 'vg_sheet_editor' ); ?></h2>
+			<h2 class="hidden"><?php esc_html_e('Sheet Editor', 'vg_sheet_editor' ); ?></h2>
 			<a href="https://wpsheeteditor.com/?utm_source=wp-admin&utm_medium=quick-setup-logo" target="_blank"><img src="<?php echo esc_url(VGSE()->logo_url); ?>" class="vg-logo"></a>
 		</div>
 

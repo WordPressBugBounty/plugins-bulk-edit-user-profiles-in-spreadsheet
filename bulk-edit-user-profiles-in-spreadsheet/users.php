@@ -2,20 +2,19 @@
 /*
 	Plugin Name: WP Sheet Editor - Users
 	Description: Edit users in spreadsheet.
-	Version: 1.5.41
+	Version: 1.5.43
 	Author:      WP Sheet Editor
 	Author URI:  https://wpsheeteditor.com/?utm_source=wp-admin&utm_medium=plugins-list&utm_campaign=users
 	Plugin URI: https://wpsheeteditor.com/extensions/edit-users-spreadsheet/?utm_source=wp-admin&utm_medium=plugins-list&utm_campaign=users
 	License:     GPL2
 	License URI: https://www.gnu.org/licenses/gpl-2.0.html
+	Requires at least: 4.7
 	WC requires at least: 4.0
-	WC tested up to: 9.9
+	WC tested up to: 10.4.3
 	Text Domain: vg_sheet_editor_users
 	Domain Path: /lang
 	 */
-if ( isset( $_GET['wpse_troubleshoot8987'] ) ) {
-	return;
-}
+
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -80,9 +79,15 @@ if ( ! class_exists( 'WP_Sheet_Editor_Users' ) ) {
 
 		function notify_wrong_core_version() {
 			$plugin_data = get_plugin_data( __FILE__, false, false );
-			?>
-			<div class="notice notice-error">
-				<p><?php _e( 'Please update the WP Sheet Editor plugin and all its extensions to the latest version. The features of the plugin "' . $plugin_data['Name'] . '" will be disabled temporarily because it is the newest version and it conflicts with old versions of other WP Sheet Editor plugins. The features will be enabled automatically after you install the updates.', 'vg_sheet_editor_users' ); ?></p>
+			// Replace with VGSE()->render_message_update_all_wpse_plugins( $plugin_data['Name'] ); in the future
+?>
+			<div class="notice notice-error wpse-notice">
+				<p>
+				<?php
+				// translators: 1: plugin name
+				printf( esc_html__( 'Please update the WP Sheet Editor plugin and all its extensions to the latest version. The features of the plugin "%s" will be disabled temporarily because it is the newest version and it conflicts with old versions of other WP Sheet Editor plugins. The features will be enabled automatically after you install the updates.', 'vg_sheet_editor' ), esc_html( $plugin_data['Name'] ) );
+				?>
+				</p>
 			</div>
 			<?php
 		}
@@ -165,7 +170,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Users' ) ) {
 		 * Register frontend assets
 		 */
 		function register_assets() {
-			wp_enqueue_script( 'wp-sheet-editor-users-js', plugins_url( '/assets/js/init.js', __FILE__ ), array(), VGSE()->version, false );
+			wp_enqueue_script( 'wp-sheet-editor-users-js', plugins_url( '/assets/js/init.js', __FILE__ ), array(), filemtime( __DIR__ . '/assets/js/init.js' ), false );
 		}
 
 		/**

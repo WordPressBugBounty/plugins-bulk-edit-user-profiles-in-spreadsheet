@@ -4,7 +4,7 @@ defined( 'ABSPATH' ) || exit;
 $users_instance = vgse_users();
 ?>
 <p><?php 
-_e( 'Thank you for installing our plugin.', $users_instance->textname );
+esc_html_e( 'Thank you for installing our plugin.', $users_instance->textname );
 ?></p>
 
 <?php 

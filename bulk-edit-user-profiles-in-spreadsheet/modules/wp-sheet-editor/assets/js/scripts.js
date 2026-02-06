@@ -1,5 +1,5 @@
-function vgseHooks(){
-	if(!window.vgseHooksStore){
+function vgseHooks() {
+	if (!window.vgseHooksStore) {
 		window.vgseHooksStore = wp.hooks.createHooks();
 	}
 	return window.vgseHooksStore;
@@ -152,7 +152,7 @@ function vgseCleanObject(obj) {
 	}
 
 	// Unset the products_operator filter when the products filter is missing, because they're both connected
-	if(obj.products_operator && (!obj.products || !obj.products.length)){
+	if (obj.products_operator && (!obj.products || !obj.products.length)) {
 		delete obj.products_operator;
 	}
 }
@@ -236,8 +236,15 @@ function beParseParams(query) {
  * Get rows filters
  * @returns str Filters as query string
  */
-function beGetRowsFilters() {
-	return (jQuery('body').data('be-filters')) ? jQuery.param(jQuery('body').data('be-filters')) : '';
+function beGetRowsFilters(prefix) {
+	const filters = Alpine.store('vgseFilters').activeFilters;
+	if (!filters || !Object.keys(filters).length) {
+		return '';
+	}
+	if (!prefix) {
+		return jQuery.param(filters);
+	}
+	return jQuery.param({ [prefix]: filters });
 }
 
 function vgseEndsWith(str, suffix) {
@@ -247,13 +254,35 @@ function vgseUniqueArray(ar) {
 	var j = {};
 
 	ar.forEach(function (v) {
-		if(v){
+		if (v) {
 			j[JSON.stringify(v) + '::' + typeof v] = v;
 		}
 	});
 
 	return Object.keys(j).map(function (v) {
 		return j[v];
+	});
+}
+
+function vgseUniqueArrayOfObjects(arr) {
+	if (!Array.isArray(arr)) {
+		return arr;
+	}
+	const seen = new Set();
+	return arr.filter(obj => {
+		// Don't filter out empty meta query objects that are used as placeholders for new filters
+		// Update: Exclusion not needed, the filters app adds the placeholders automatically
+		// if (obj && typeof obj === 'object' && !obj.key && !obj.compare && !obj.value) {
+		// 	return true;
+		// }
+		// Create a unique signature for the object to detect duplicates.
+		const signature = obj ? `${obj.source}-${obj.key}-${obj.compare}-${obj.value}` : obj;
+		if (seen.has(signature)) {
+			return false;
+		} else {
+			seen.add(signature);
+			return true;
+		}
 	});
 }
 
@@ -268,7 +297,7 @@ function vgseMergeDeep(objects) {
 			var oVal = obj[key];
 
 			if (Array.isArray(pVal) && Array.isArray(oVal)) {
-				prev[key] = key === 'meta_query' ? pVal.concat(oVal) : vgseUniqueArray(oVal);
+				prev[key] = key === 'meta_query' ? vgseUniqueArrayOfObjects(pVal.concat(oVal)) : vgseUniqueArray(oVal);
 			}
 			else if (isObject(pVal) && isObject(oVal)) {
 				prev[key] = vgseMergeDeep([pVal, oVal]);
@@ -305,110 +334,53 @@ function vgseDecodeURIComponentSafe(s) {
 	}
 	return out;
 }
+function vgseSetTemporaryFilter(filters) {
+	window.vgseOriginalFilters = JSON.parse(JSON.stringify(Alpine.store('vgseFilters').activeFilters));
+	beAddRowsFilter(filters, true);
+}
+function vgseRevertTemporaryFilter() {
+	let out = false;
+	if (window.vgseOriginalFilters) {
+		beAddRowsFilter(window.vgseOriginalFilters, true);
+		window.vgseOriginalFilters = null;
+		out = true;
+	}
+	return out;
+}
 /**
  * Add rows filter
  * @param str|obj filter as query string or object
  * @returns Object|Boolean Current filters object or false on error
  */
-function beAddRowsFilter(filter) {
+function beAddRowsFilter(filter, overwrite) {
 	if (!filter) {
 		return false;
 	}
-	var currentFilters = jQuery('body').data('be-filters');
-	if (!currentFilters) {
-		currentFilters = {};
+	if( typeof filter === 'string' && filter[0] === '{'){
+		filter = JSON.parse(filter);
 	}
+	if(overwrite){
+		Alpine.store('vgseFilters').setDefaultFilters();
+	}
+	const currentFilters = JSON.parse(JSON.stringify(Alpine.store('vgseFilters').activeFilters));
 
-	var newFilterObj = (typeof filter === 'string') ? beParseParams(filter) : filter;
-	var allFilters = vgseMergeDeep([currentFilters, newFilterObj]);
+	const newFilterObj = (typeof filter === 'string') ? beParseParams(filter) : JSON.parse(JSON.stringify(filter));
+	const allFilters = vgseMergeDeep([currentFilters, newFilterObj]);
 	vgseCleanObject(allFilters);
 
-	var $currentFiltersHolders = jQuery('.vgse-current-filters');
-	$currentFiltersHolders.find('.button').remove();
+	vgseReplaceReactiveObject(Alpine.store('vgseFilters').activeFilters, allFilters);
+	vgseReplaceReactiveObject(Alpine.store('vgseFilters').formFilters, allFilters);
+	return allFilters;
+}
 
-	$currentFiltersHolders.each(function () {
-		var $currentFilters = jQuery(this);
-		jQuery.each(allFilters, function (filterKey, filterValue) {
-			if (filterValue && filterKey.indexOf('meta_query') < 0) {
-
-				var publicValue = (typeof filterValue === 'string') ? filterValue : vgseUniqueArray(filterValue).join(', ');
-				publicValue = vgseDecodeURIComponentSafe(vgseStripHtml(publicValue));
-
-				if (publicValue.length > 20) {
-					publicValue = publicValue.substring(0, 20) + '...';
-				}
-				var publicKey = filterKey.replace('[]', '').replace(/_/g, ' ');
-				if(publicValue){
-					$currentFilters.append('<a href="#" class="button" data-filter-key="' + filterKey + '"><i class="fa fa-remove"></i> ' + publicKey + ': ' + publicValue + '</a>');
-				}
-			}
-		});
-
-		if (allFilters.meta_query) {
-			jQuery.each(allFilters.meta_query, function (index, filter) {
-				var publicKey = filter.key;
-				if (publicKey) {
-					var filterKey = 'meta_query';
-					var publicValue = filter.value;
-					var operator = filter.compare;
-					publicValue = vgseDecodeURIComponentSafe(vgseStripHtml(publicValue));
-
-					if (publicValue.length > 20) {
-						publicValue = publicValue.substring(0, 20) + '...';
-					}
-					var filterKey = 'meta_query[' + index + '][key]';
-					var $existingFilter = $currentFilters.find('.advanced-filter').filter(function () {
-						return jQuery(this).data('filter-key') === filterKey;
-					});
-					$existingFilter.remove();
-					var fieldLabel = typeof vgse_editor_settings.final_spreadsheet_columns_settings[publicKey] !== 'undefined' ? vgse_editor_settings.final_spreadsheet_columns_settings[publicKey].title : publicKey;
-					$currentFilters.append('<a href="#" class="button advanced-filter" data-filter-key="' + filterKey + '"><i class="fa fa-remove"></i> ' + fieldLabel + ' ' + operator + ' ' + publicValue + '</a>');
-				}
-			});
-		}
-
-		jQuery('.advanced-filters-list > li').each(function () {
-			var $filter = jQuery(this);
-			var $field = $filter.find('.wpse-advanced-filters-field-selector');
-			var publicKey = $field.val();
-			if (publicKey) {
-				var filterKey = $field.attr('name');
-				var filterValue = $filter.find('.wpse-advanced-filters-value-selector').val();
-				var selectedOperator = $filter.find('.wpse-advanced-filters-operator-selector option:selected');
-				var operator = selectedOperator.data('custom-label') || selectedOperator.text();
-				if (operator === 'ANY') {
-					filterValue = filterValue.replace(';', ' OR ').replace('  ', ' ');
-				}
-				var publicValue = (typeof filterValue === 'string') ? filterValue : filterValue.join(', ');
-				publicValue = vgseDecodeURIComponentSafe(vgseStripHtml(publicValue));
-
-				if (publicValue.length > 20) {
-					publicValue = publicValue.substring(0, 20) + '...';
-				}
-				var $existingFilter = $currentFilters.find('.advanced-filter').filter(function () {
-					return jQuery(this).data('filter-key') === filterKey;
-				});
-				$existingFilter.remove();
-				var fieldLabel = typeof vgse_editor_settings.final_spreadsheet_columns_settings[publicKey] !== 'undefined' ? vgse_editor_settings.final_spreadsheet_columns_settings[publicKey].title : publicKey;
-				$currentFilters.append('<a href="#" class="button advanced-filter" data-filter-key="' + filterKey + '"><i class="fa fa-remove"></i> ' + fieldLabel + ' ' + operator + ' ' + publicValue + '</a>');
-			}
-		});
-		if (!$currentFilters.find('.button').length) {
-			$currentFilters.hide();
-		} else {
-			$currentFilters.css('display', 'inline-block');
-		}
-	});
-
-	if ($currentFiltersHolders.find('.button').length > 1) {
-		$currentFiltersHolders.append('<a href="#" class="button advanced-filter remove-all-filters"><i class="fa fa-remove"></i> ' + vgse_editor_settings.texts.remove_all_filters + '</a>');
-	} else {
-		$currentFiltersHolders.find('.remove-all-filters').remove();
+function vgseReplaceReactiveObject(reactiveObject, newObject) {
+	// 1. CLEAR: Delete all keys from the original object
+	for (const key in reactiveObject) {
+		delete reactiveObject[key];
 	}
 
-	jQuery('body').data('be-filters', allFilters);
-
-	return allFilters;
+	// 2. FILL: Copy all properties from the new object
+	Object.assign(reactiveObject, JSON.parse(JSON.stringify(newObject)));
 }
 
 /* Ajax calls loop 
@@ -703,6 +675,7 @@ function beLoadPosts(data, callback, customInsert, removeExisting) {
 
 	// Apply filters to request
 	data.filters = vgseGetFiltersJson();
+	window.vgseFiltersUsedInLastLoadRows = data.filters ? JSON.parse(data.filters) : {};
 	window.beLastLoadRowsAjax = jQuery.ajax({
 		url: vgse_global_data.ajax_url,
 		//		url: vgse_global_data.ajax_url+'?XDEBUG_PROFILE=1',
@@ -764,7 +737,30 @@ function beLoadPosts(data, callback, customInsert, removeExisting) {
 			}
 		}
 	});
+	return window.beLastLoadRowsAjax;
 }
+
+/**
+ * Converts a string into a slug.
+ * A slug contains only lowercase letters, numbers, and hyphens.
+ *
+ * @param {string} text The string to convert.
+ * @returns {string} The resulting slug.
+ */
+function vgseConvertToSlug(text) {
+  if (typeof text !== 'string') {
+    return '';
+  }
+
+  return text
+    .toLowerCase()                     // 1. Convert to lowercase
+    .replace(/\s+/g, '-')              // 2. Replace spaces with a hyphen
+    .replace(/[^\w\-]+/g, '')          // 3. Remove all non-word chars except hyphens
+    .replace(/\-\-+/g, '-')            // 4. Replace multiple hyphens with a single one
+    .replace(/^-+/, '')                // 5. Trim hyphens from the start
+    .replace(/-+$/, '');               // 6. Trim hyphens from the end
+}
+
 
 //  A formatted version of a popular md5 implementation.
 //  Original copyright (c) Paul Johnston & Greg Holt.
@@ -815,7 +811,8 @@ function vgseMd5(inputString) {
 }
 
 function vgseGetFiltersJson() {
-	return jQuery('body').data('be-filters') ? JSON.stringify(jQuery('body').data('be-filters')) : '';
+	const filters = Alpine.store('vgseFilters').activeFilters;
+	return (filters && Object.keys(filters).length) ? JSON.stringify(filters) : '';
 }
 
 function beSetSaveButtonStatus(status) {
@@ -857,6 +854,7 @@ function beSetSaveButtonStatus(status) {
 			$saveStatusIndicator.text($saveStatusIndicator.data('saved-changes'));
 		}
 	}
+	wp.hooks.doAction('vgSheetEditor_saveButtonStatusChanged', status);
 }
 
 /**
@@ -1227,11 +1225,12 @@ function vgAddRowsToSheet(data, method, removeExisting) {
 }
 
 /**
- * This is required because the table lazy loads the rows, causing the table to height a different height than 
+ * This is required because the table lazy loads the rows, causing the table to have a different height than 
  * the visible rows, so the content below the table might appear on top of the final rows.
  */
 function vgseUpdateTableWrapperMinHeight() {
-	jQuery('#post-data').css('min-height', jQuery('#vgse-wrapper .handsontable .ht_master tbody tr:last-child').height() * hot.countRows());
+	// Update: No longer needed since we're recalculating using the afterRender hook
+	// jQuery('#post-data').css('min-height', jQuery('#vgse-wrapper .handsontable .ht_master tbody tr:last-child').height() * hot.countRows());
 }
 /**
  * save image in local cache
@@ -1287,7 +1286,7 @@ function vgseInitSelect2($selects) {
 						output_format: jQuery(this).data('output-format'),
 						taxonomies: jQuery(this).data('taxonomies'),
 						post_type: jQuery(this).data('post-type') || jQuery('#post-data').data('post-type'),
-						nonce: jQuery('#vgse-wrapper').data('nonce'),
+						nonce: vgse_global_data.nonce,
 					}
 
 					if (jQuery(this).data('extra_ajax_parameters')) {
@@ -1352,11 +1351,11 @@ function vgseReloadSpreadsheet(safeReload, notificationText, paged) {
 		fullData = beGetModifiedItems(fullData, window.beOriginalData);
 		if (fullData.length) {
 			alert(notificationText);
-			return true;
+			return false;
 		}
 	}
 
-	var nonce = jQuery('.remodal-bg').data('nonce');
+	var nonce = vgse_global_data.nonce;
 	var $container = jQuery("#post-data");
 
 	// Reset internal cache, used to find the modified cells for saving        
@@ -1364,11 +1363,12 @@ function vgseReloadSpreadsheet(safeReload, notificationText, paged) {
 	// Reset spreadsheet
 	hot.loadData([]);
 
-	beLoadPosts({
+	const out = beLoadPosts({
 		post_type: $container.data('post-type'),
 		nonce: nonce,
 		paged: paged || 1
 	});
+	return out;
 }
 
 function vgseAddFoundRowsCount(total) {
@@ -1394,9 +1394,9 @@ function vgseInputToFormattedColumnField(selectedField, $fields, valueFieldSelec
 		if (!$value || (!$value.is('input') && !$value.is('textarea')) || ($value.attr('type') && $value.attr('type') !== 'text')) {
 			return true;
 		}
-		var alpineModel = $value.attr('x-model') ? ' x-model="'+$value.attr('x-model')+'"' : '';
+		var alpineModel = $value.attr('x-model') ? ' x-model="' + $value.attr('x-model') + '"' : '';
 		if (typeof columnSettings.formatted.editor !== 'undefined' && columnSettings.formatted.editor === 'select') {
-			$value.replaceWith('<select class="' + valueClasses + '" name="' + valueName + '" '+alpineModel+'><option value="">(' + vgse_editor_settings.texts.empty + ')</option></select>');
+			$value.replaceWith('<select class="' + valueClasses + '" name="' + valueName + '" ' + alpineModel + '><option value="">(' + vgse_editor_settings.texts.empty + ')</option></select>');
 			var $newValue = $fields.find('select' + valueFieldSelector);
 
 			$newValue.each(function () {
@@ -1412,7 +1412,7 @@ function vgseInputToFormattedColumnField(selectedField, $fields, valueFieldSelec
 				});
 			});
 		} else if (typeof columnSettings.formatted.type !== 'undefined' && columnSettings.formatted.type === 'autocomplete' && typeof columnSettings.formatted.source === 'string' && columnSettings.formatted.source === "searchUsers") {
-			$value.replaceWith('<input class="' + valueClasses + '" name="' + valueName + '" '+alpineModel+' list="wpse-bulk-edit-users-list-' + selectedField + '" type="text"><datalist class="' + valueClasses + '" id="wpse-bulk-edit-users-list-' + selectedField + '"></datalist>');
+			$value.replaceWith('<input class="' + valueClasses + '" name="' + valueName + '" ' + alpineModel + ' list="wpse-bulk-edit-users-list-' + selectedField + '" type="text"><datalist class="' + valueClasses + '" id="wpse-bulk-edit-users-list-' + selectedField + '"></datalist>');
 
 			$fields.find('input[list="wpse-bulk-edit-users-list-' + selectedField + '"]').keyup(_throttle(function (e) {
 				var query = jQuery(this).val();
@@ -1424,7 +1424,7 @@ function vgseInputToFormattedColumnField(selectedField, $fields, valueFieldSelec
 					return true;
 				}
 				$input.data('last-query', query);
-				var nonce = jQuery('.remodal-bg').data('nonce');
+				var nonce = vgse_global_data.nonce;
 				var post_type = vgse_editor_settings.post_type;
 				var $list = $fields.find('datalist#wpse-bulk-edit-users-list-' + selectedField);
 
@@ -1455,7 +1455,7 @@ function vgseInputToFormattedColumnField(selectedField, $fields, valueFieldSelec
 				trailing: true
 			}));
 		} else if (typeof columnSettings.formatted.type !== 'undefined' && columnSettings.formatted.type === 'autocomplete' && typeof columnSettings.formatted.source === 'object') {
-			$value.replaceWith('<select class="' + valueClasses + '" name="' + valueName + '" '+alpineModel+'><option value="">(' + vgse_editor_settings.texts.empty + ')</option></select>');
+			$value.replaceWith('<select class="' + valueClasses + '" name="' + valueName + '" ' + alpineModel + '><option value="">(' + vgse_editor_settings.texts.empty + ')</option></select>');
 			var $newValue = $fields.find('select' + valueFieldSelector);
 
 			$newValue.each(function () {
@@ -1471,7 +1471,7 @@ function vgseInputToFormattedColumnField(selectedField, $fields, valueFieldSelec
 			$value.replaceWith('<input type="checkbox" class="' + valueClasses + '">');
 
 			var $newValue = $fields.find('input' + valueFieldSelector + ':checkbox');
-			$newValue.after('<input type="hidden" name="' + valueName + '" '+alpineModel+' class="wpse-hidden-value ' + valueClasses + '" />');
+			$newValue.after('<input type="hidden" name="' + valueName + '" ' + alpineModel + ' class="wpse-hidden-value ' + valueClasses + '" />');
 
 			$newValue.on('change', function () {
 				if (jQuery(this).is(':checked')) {
@@ -1483,9 +1483,9 @@ function vgseInputToFormattedColumnField(selectedField, $fields, valueFieldSelec
 					jQuery(this).data('unchecked-value', columnSettings.formatted.uncheckedTemplate);
 					$fields.find('.wpse-hidden-value').val(columnSettings.formatted.uncheckedTemplate);
 				}
-				
+
 				// Alpine.js requires this manual trigger to update the model, since it doesn't detect programmatic field value updates
-				if(alpineModel) {
+				if (alpineModel) {
 					$fields.find('.wpse-hidden-value').get(0).dispatchEvent(new Event('input'))
 				}
 			});
@@ -1497,7 +1497,7 @@ function vgseInputToFormattedColumnField(selectedField, $fields, valueFieldSelec
 				$value.replaceWith('<input type="date" class="' + valueClasses + '">');
 			}
 			var $newValue = $fields.find('input' + valueFieldSelector);
-			$newValue.after('<input type="hidden" name="' + valueName + '" '+alpineModel+' class="wpse-hidden-value ' + valueClasses + '" />');
+			$newValue.after('<input type="hidden" name="' + valueName + '" ' + alpineModel + ' class="wpse-hidden-value ' + valueClasses + '" />');
 			$newValue.on('change', function () {
 				var value = jQuery(this).val();
 				if (value) {
@@ -1517,20 +1517,12 @@ function vgseInputToFormattedColumnField(selectedField, $fields, valueFieldSelec
 				$fields.find('.wpse-hidden-value').val(dateToSave).attr('value', dateToSave);
 
 				// Alpine.js requires this manual trigger to update the model, since it doesn't detect programmatic field value updates
-				if(alpineModel) {
+				if (alpineModel) {
 					$fields.find('.wpse-hidden-value').get(0).dispatchEvent(new Event('input'))
 				}
 			});
 			$newValue.trigger('change');
 		}
-	}
-}
-
-function vgseRemoveAllFilters(reloadSpreadsheet) {
-	jQuery('body').data('be-filters', {});
-	jQuery('.vgse-current-filters .button').remove();
-	if (reloadSpreadsheet) {
-		vgseReloadSpreadsheet();
 	}
 }
 
@@ -1554,7 +1546,7 @@ function vgseLazySelect($select, key, lazy_loaded_select_options) {
 	if ($select.attr('multiple')) {
 		return true;
 	}
-	if(!lazy_loaded_select_options){
+	if (!lazy_loaded_select_options) {
 		var lazy_loaded_select_options = vgse_editor_settings.lazy_loaded_select_options;
 	}
 	if (!lazy_loaded_select_options) {
@@ -1574,6 +1566,7 @@ function vgseLazySelect($select, key, lazy_loaded_select_options) {
 			}
 		});
 		lazy_loaded_select_options[key] = options;
+		vgse_editor_settings.lazy_loaded_select_options[key] = options;
 	};
 	var removeUnselectedElements = function () {
 		var $selectedElement = $select.find('option:selected');
@@ -1629,7 +1622,7 @@ function vgseLazySelect($select, key, lazy_loaded_select_options) {
 function vgseSetSettings(data, reloadAfterSuccess, silentAction) {
 	data.push({
 		name: 'nonce',
-		value: jQuery('#vgse-wrapper').data('nonce')
+		value: vgse_global_data.nonce
 	});
 	data.push({
 		name: 'action',
@@ -1646,9 +1639,9 @@ function vgseSetSettings(data, reloadAfterSuccess, silentAction) {
 			if (!silentAction) {
 				loading_ajax(false);
 			}
-			// Remove the hash from the url so it doesn't open the settings popup again after reload
-			window.location.hash = '';
 			if (response.success && reloadAfterSuccess) {
+				// Remove the hash from the url so it doesn't open the settings popup again after reload
+				window.location.hash = '';
 				window.location.reload();
 			}
 		}
@@ -1660,10 +1653,6 @@ function vgseGetSelectedRowsCount($container) {
 	var foundRowsToEdit = window.beFoundRows;
 	if ($container.find('.wpse-select-rows-options').val() === 'selected') {
 		var selectedIds = vgseGetSelectedIds();
-		foundRowsToEdit = selectedIds.length;
-	}
-	if ($container.find('.wpse-select-rows-options').val() === 'previously_selected') {
-		var selectedIds = window.wpsePreviouslySelectedIds || [];
 		foundRowsToEdit = selectedIds.length;
 	}
 	return foundRowsToEdit;
@@ -1684,12 +1673,13 @@ function vgseGetSelectedIds() {
 
 	return selectedIds;
 }
-function vgseDeleteRowsById(rowIds) {
+function vgseDeleteRowsById(rowIds, createCheckpoint) {
 	loading_ajax(true);
 	jQuery.post(vgse_global_data.ajax_url, {
 		action: 'vgse_delete_row_ids',
-		nonce: jQuery('#vgse-wrapper').data('nonce'),
+		nonce: vgse_global_data.nonce,
 		post_type: vgse_editor_settings.post_type,
+		create_checkpoint: createCheckpoint,
 		ids: rowIds
 	}, function (response) {
 		loading_ajax(false);
@@ -1702,10 +1692,88 @@ function vgseDeleteRowsById(rowIds) {
 	});
 }
 function vgseDecodeHtmlEntities(encodedString) {
-    var parser = new DOMParser();
-    var doc = parser.parseFromString('<div>' + encodedString + '</div>', 'text/html');
-    return doc.body.firstChild.textContent;
+	var parser = new DOMParser();
+	var doc = parser.parseFromString('<div>' + encodedString + '</div>', 'text/html');
+	return doc.body.firstChild.textContent;
 }
+function vgseConvertLocalDateToUTC(localDate) {
+	return localDate ? new Date(localDate).toISOString().replace('T', ' ').replace(/\.\d+Z$/, '') : '';
+}
+function vgseGetLocalFormattedDateTime() {
+  const now = new Date();
+
+  // Get date components
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+  const day = String(now.getDate()).padStart(2, '0');
+
+  // Get time components
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+
+  // Combine into the desired format
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+function vgseConvertUTCToLocalDate(utcDate) {
+	if (!utcDate) return '';
+
+	var utcDateString = utcDate + ' GMT';
+	var dateObj = new Date(utcDateString);
+
+	var year = dateObj.getFullYear();
+	var month = ('0' + (dateObj.getMonth() + 1)).slice(-2);
+	var day = ('0' + dateObj.getDate()).slice(-2);
+	var hour = ('0' + dateObj.getHours()).slice(-2);
+	var minute = ('0' + dateObj.getMinutes()).slice(-2);
+	var second = ('0' + dateObj.getSeconds()).slice(-2);
+
+	return year + '-' + month + '-' + day + 'T' + hour + ':' + minute + ':' + second;
+}
+
+function vgseConvertLogDatesToLocal(inputString) {
+	// Regular expression to match the date pattern
+	const regex = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\.?\d*( \(UTC\))/g;
+
+	return inputString.replace(regex, (match, p1, p2) => {
+		// Convert the matched date to local date
+		const localDate = vgseConvertUTCToLocalDate(p1).replace('T', ' ');
+		return `${localDate} (Local timezone)`;
+	});
+}
+window.vgseActiveAjaxCount = 0;
+function vgseIsOurRequest(ajaxOptions) {
+	var url = ajaxOptions.url;
+	var data = ajaxOptions.data;
+
+	var isOurRequest = (url && (url.indexOf('sheet-editor') > -1 || url.indexOf('vgse_') > -1)) ||
+		(data && (
+			(typeof data === 'string' && data.indexOf('vgse_') > -1 && data.indexOf('vgse_track_viewer') < 0 ) ||
+			(typeof data === 'object' && JSON.stringify(data).indexOf('vgse_') > -1 && data.indexOf('vgse_track_viewer') < 0)
+		));
+	return isOurRequest;
+}
+jQuery(document).on('ajaxSend', function (event, jqXHR, ajaxOptions) {
+
+	if (vgseIsOurRequest(ajaxOptions)) {
+		window.vgseActiveAjaxCount++;
+	}
+});
+
+jQuery.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+    // Check if this is "our" request based on your custom logic
+    var isOurRequest = vgseIsOurRequest(options);
+
+    if (isOurRequest) {
+        // We use .always() to handle both success and error scenarios.
+        // Because this is attached inside the prefilter, it runs BEFORE
+        // the success/error/complete callbacks defined in the $.ajax call.
+        jqXHR.always(function() {
+            window.vgseActiveAjaxCount = Math.max(0, window.vgseActiveAjaxCount - 1);
+        });
+    }
+});
 // Prevent undefined $ errors
 if (typeof window.$ === 'undefined') {
 	window.$ = jQuery;
@@ -1744,6 +1812,12 @@ jQuery(document).ready(function (e) {
 			jQuery(this).get(0).dispatchEvent(new Event('input'));
 		}
 	});
+
+	// Initialize select2 on selects
+
+	setTimeout(function () {
+		vgseInitSelect2();
+	}, 2000);
 
 	if (!jQuery('.be-spreadsheet-wrapper').length) {
 		return true;
@@ -1988,7 +2062,7 @@ jQuery(document).ready(function (e) {
 				var urlsForMimeCheck = urls.indexOf(window.location.protocol + '//' + window.location.host) === 0 ? urls.replace(/\?.+/, '') : urls;
 				var urlParts = urlsForMimeCheck.split('.');
 				var fileExtension = urlParts[urlParts.length - 1].toLowerCase();
-				if (urls.indexOf('http') > -1 && ['png', 'jpg', 'jpeg', 'gif', 'webp'].indexOf(fileExtension) > -1) {
+				if (urls.indexOf('http') > -1 && ['png', 'jpg', 'jpeg', 'gif', 'webp', 'avif'].indexOf(fileExtension) > -1) {
 					var previewHtml = vgse_editor_settings.media_cell_preview_template.replace('{url}', urls);
 				}
 			}
@@ -2228,7 +2302,7 @@ jQuery(document).ready(function (e) {
 		// Reset the text variable so we don't ask for a review again in the same session
 		vgse_editor_settings.texts.ask_review = '';
 		jQuery(this).parent('.review-tip').remove();
-		var nonce = jQuery('.remodal-bg').data('nonce');
+		var nonce = vgse_global_data.nonce;
 
 		// Don't request reviews on future sessions
 		jQuery.ajax({
@@ -2329,13 +2403,8 @@ jQuery(document).ready(function (e) {
 		format = true;
 	}
 
-	// Initialize select2 on selects
-
-	setTimeout(function () {
-		vgseInitSelect2();
-	}, 2000);
-
 	// Handsontable settings
+	let lastTableHeight = 0;
 	var handsontableArgs = {
 		comments: vgse_editor_settings.allow_cell_comments,
 		colWidths: vgObjectToArray(vgse_editor_settings.colWidths),
@@ -2346,7 +2415,9 @@ jQuery(document).ready(function (e) {
 		startCols: vgse_editor_settings.startCols, //Cantidad de columnas
 		currentRowClassName: 'currentRow',
 		currentColClassName: 'currentCol',
-		fillHandle: false,
+		fillHandle: {
+			autoInsertRow: false
+		},
 		columnSorting: true,
 		manualColumnFreeze: true,
 		manualColumnMove: true,
@@ -2484,12 +2555,12 @@ jQuery(document).ready(function (e) {
 
 						let firstUrl = null;
 						rowIndex.forEach(function (index) {
-							if(!firstUrl){
+							if (!firstUrl) {
 								firstUrl = hot.getDataAtRowProp(index, 'view_post');
 							}
 						});
 
-						if(firstUrl){
+						if (firstUrl) {
 							window.open(firstUrl, '_blank');
 						}
 					}
@@ -2511,8 +2582,25 @@ jQuery(document).ready(function (e) {
 			rowsLimit: 999999, // maximum number of rows that can be copied
 			columnsLimit: 999999, // maximum number of columns that can be copied
 		},
+		afterRender: _debounce(function (isForced) {// 'this' refers to the Handsontable instance
+			const tableHolder = this.rootElement.querySelector('.wtHolder');
+
+			if (!tableHolder) {
+				return;
+			}
+
+			// Use scrollHeight to get the full height of the content, including overflow
+			const currentContentHeight = tableHolder.scrollHeight;
+
+			// Only run your logic if the height has actually changed
+			if (currentContentHeight !== lastTableHeight) {
+				jQuery('#post-data').css('min-height', currentContentHeight);
+
+				// Update the last known height
+				lastTableHeight = currentContentHeight;
+			}
+		}, 1500),
 		afterChange: _throttle(function (changes) {
-			console.log('Change detected, enabled saving: ', new Date(), '. changes: ', changes);
 			var hasChanged = false;
 
 			if (changes && changes.length) {
@@ -2527,12 +2615,24 @@ jQuery(document).ready(function (e) {
 				});
 			}
 			if (hasChanged) {
-				beSetSaveButtonStatus(true);
+				console.log('Change detected, enabled saving: ', new Date(), '. changes: ', changes);
+				beSetSaveButtonStatus(beGetModifiedItems().length > 0);
 			}
 		}, 3000, {
 			leading: true,
 			trailing: true
 		}),
+		// When we paste rows in a position that exceeds the existing rows in the table, exclude the rows that exceed the table size
+		beforePaste: function (inputArray, copyableRanges) {
+			const rowsPasted = inputArray.length;
+			const endRow = copyableRanges[0].startRow + rowsPasted;
+			const totalExistingRows = hot.countRows();
+			if (endRow > totalExistingRows) {
+				const rowsExceedingLimit = endRow - totalExistingRows;
+				inputArray.splice(rowsPasted - rowsExceedingLimit, rowsExceedingLimit);
+			}
+			return inputArray;
+		},
 		beforeCopy: function (data, coords) {
 			// data -> [[1, 2, 3], [4, 5, 6]]
 			// coords -> [{startRow: 0, startCol: 0, endRow: 1, endCol: 2}]
@@ -2546,8 +2646,49 @@ jQuery(document).ready(function (e) {
 			});
 			return data;
 		},
+		afterSelection: (row, column, row2, column2, preventScrolling, selectionLayerLevel) => {
+			// After a cell is selected, make sure the cells is visible (not underneath the sticky toolbar), otherwise auto scroll to make it visible
+			setTimeout(() => {
+				let $selectedRow = jQuery('#post-data .currentRow:first');
+				if ($selectedRow.length) {
+					// Get element's position relative to the document
+					let offset = $selectedRow.offset();
+
+					// Get current window scroll position
+					let scrollTop = $(window).scrollTop();
+
+					// Calculate position relative to the window
+					let yRelativeToWindow = offset.top - scrollTop;
+					if (yRelativeToWindow < jQuery('#vg-header-toolbar').height()) {
+						jQuery(window).scrollTop($selectedRow.offset().top - jQuery('#vg-header-toolbar').height() - jQuery('.ht__highlight.currentCol:first').height());
+					}
+				}
+			}, 50);
+		},
 		afterDocumentKeyDown: function (e) {
 			var stopPropagation = false;
+			if (e.key === 'PageDown') {
+				var selected = hot.getSelected();
+				if (selected && selected[0][0]) {
+					let newRow = selected[0][0] + 22;
+					if ((newRow + 1) > hot.countRows()) {
+						newRow = hot.countRows() - 1;
+					}
+					hot.selectCell(newRow, selected[0][1], newRow, selected[0][1]);
+					stopPropagation = true;
+				}
+			}
+			if (e.key === 'PageUp') {
+				var selected = hot.getSelected();
+				if (selected) {
+					let newRow = selected[0][0] - 22;
+					if (newRow < 0) {
+						newRow = 0;
+					}
+					hot.selectCell(newRow, selected[0][1], newRow, selected[0][1]);
+					stopPropagation = true;
+				}
+			}
 			if (e.key === 'ArrowDown') {
 				var selected = hot.getSelected();
 				var maxRowIndex = hot.countRows() - 1;
@@ -2584,6 +2725,39 @@ jQuery(document).ready(function (e) {
 				e.preventDefault();
 				// We must return the event object. If we return false, Handsontable will run its callbacks and unset the last cell value
 				return e;
+			}
+		},
+		afterColumnMove: function (movedColumns, finalIndex) {
+			// Update column widths
+			var currentColWidths = hot.getSettings().colWidths;
+			if (Array.isArray(currentColWidths)) {
+				var newColWidths = Array.from(currentColWidths);
+				var columnsToMove = [];
+
+				// Extract the widths of the moved columns
+				for (let i = 0; i < movedColumns.length; i++) {
+					columnsToMove.push(currentColWidths[movedColumns[i]]);
+				}
+
+				// Remove the moved columns from their original positions
+				// Iterate backwards to avoid issues with changing indices
+				for (let i = movedColumns.length - 1; i >= 0; i--) {
+					newColWidths.splice(movedColumns[i], 1);
+				}
+
+				// Insert the columns at the new finalIndex
+				newColWidths.splice(finalIndex, 0, ...columnsToMove);
+
+				hot.updateSettings({
+					colWidths: newColWidths
+				});
+				// Update order in columns manager
+				if (typeof Alpine !== 'undefined' && document.querySelector('[x-data="vgseColumnsManager"]')) {
+					const columnsManager = Alpine.$data(document.querySelector('[x-data="vgseColumnsManager"]'));
+					if (columnsManager) {
+						columnsManager.syncColumnOrderFromHot();
+					}
+				}
 			}
 		}
 	};
@@ -2623,8 +2797,9 @@ jQuery(document).ready(function (e) {
 	jQuery('.confirm-bulk-delete-rows-modal input').on('keyup', function (event) {
 		event.preventDefault();
 		var $input = jQuery(this);
-		if (event.keyCode === 13 && $input.val() && $input.val().toLowerCase() === 'delete' && jQuery('.confirm-bulk-delete-rows-modal').data('rowIds')) {
-			vgseDeleteRowsById(jQuery('.confirm-bulk-delete-rows-modal').data('rowIds'));
+		var requiredWord = vgse_editor_settings.texts.delete_word_uppercase;
+		if (event.keyCode === 13 && $input.val() && $input.val().toLowerCase() === requiredWord.toLowerCase() && jQuery('.confirm-bulk-delete-rows-modal').data('rowIds')) {
+			vgseDeleteRowsById(jQuery('.confirm-bulk-delete-rows-modal').data('rowIds'), jQuery('.confirm-bulk-delete-rows-modal input[name="create_checkpoint"]').prop('checked'));
 			$input.val('');
 			jQuery('.confirm-bulk-delete-rows-modal').data('rowIds', false);
 			jQuery('.confirm-bulk-delete-rows-modal').remodal().close();
@@ -2634,13 +2809,14 @@ jQuery(document).ready(function (e) {
 	jQuery(document).on('opened', '.confirm-bulk-delete-rows-modal', function (e) {
 		var rowIds = jQuery(this).data('rowIds');
 		jQuery(this).find('.contains-variable span').text(rowIds.length);
+		jQuery('.confirm-bulk-delete-rows-modal input[name="create_checkpoint"]').prop('checked', false);
 	});
 
 	/**
 	 * Load initial posts
 	 */
 	$parent.find('button[name=load]').on('click', function () {
-		var nonce = jQuery('.remodal-bg').data('nonce');
+		var nonce = vgse_global_data.nonce;
 
 		beLoadPosts({
 			post_type: $container.data('post-type'),
@@ -2651,10 +2827,10 @@ jQuery(document).ready(function (e) {
 
 	// Load rows after 400ms to give time to other plugins to hook into the loading process
 	if (!vgse_editor_settings.disable_automatic_loading_rows) {
-		setTimeout(function () {
-			jQuery('body').trigger('vgSheetEditor/beforeIntialLoadingRows');
-			$parent.find('button[name=load]').click();
-		}, 400);
+		document.addEventListener('alpine:init', () => {
+			jQuery('body').trigger('vgSheetEditor/beforeInitialLoadingRows');
+			$parent.find('button[name=load]').trigger('click');
+		});
 	}
 
 	/*
@@ -2662,7 +2838,6 @@ jQuery(document).ready(function (e) {
 	 */
 	jQuery('body').on('vgSheetEditor:beforeRowsInsert', function (event, response) {
 		console.log('beforeRowsInsert');
-		console.log(response);
 
 		if (!response.success) {
 			vgseCustomTooltip(jQuery('.sheet-header .add_rows-container'), vgse_editor_settings.texts.add_posts_here, null, false, 'success');
@@ -2696,16 +2871,15 @@ jQuery(document).ready(function (e) {
 	jQuery('.bulk-save.remodal').find('.remodal-cancel').on('click', function (e) {
 		var modalInstance = jQuery('[data-remodal-id="bulk-save"]').remodal();
 		modalInstance.close();
-		jQuery('html,body').scrollLeft(0)
 	});
 	/**
 	 * Change from "saving" state to "confirm before saving" state after closing the modal
 	 */
-	jQuery('.bulk-save.remodal .bulk-saving-screen').find('.remodal-cancel').on('click', function (e) {
+	jQuery(document).on('closed', '[data-remodal-id="bulk-save"]', function () {
 		jQuery('html,body').scrollLeft(0)
 
-		var $button = jQuery(this);
-		var $modal = $button.parents('.remodal');
+		var $modal = jQuery(this);
+		var $button = $modal.find('.bulk-saving-screen .remodal-cancel');
 
 		$modal.find('.be-saving-warning').show();
 		$modal.find('.bulk-saving-screen').hide();
@@ -2717,7 +2891,9 @@ jQuery(document).ready(function (e) {
 	 * Change from "confirm before saving" state to "saving" on save modal
 	 */
 	jQuery(document).on('opening', '[data-remodal-id="bulk-save"]', function () {
-		if (vgse_editor_settings.user_has_saved_sheet) {
+		const canSaveDirectly = wp.hooks.applyFilters('vgse_can_save_directly', vgse_editor_settings.user_has_saved_sheet);
+
+		if (canSaveDirectly) {
 			jQuery('body').find('.be-start-saving').click();
 		}
 	});
@@ -2809,7 +2985,7 @@ jQuery(document).ready(function (e) {
 		}
 
 
-		var nonce = jQuery('.remodal-bg').data('nonce');
+		var nonce = vgse_global_data.nonce;
 
 
 		// Init progress bar
@@ -2848,7 +3024,9 @@ jQuery(document).ready(function (e) {
 				'action': 'vgse_save_data',
 				'nonce': nonce,
 				'filters': beGetRowsFilters(),
-				'wpse_source_suffix': vgse_editor_settings.wpse_source_suffix || ''
+				'create_checkpoint': jQuery('.bulk-save .create-checkpoint-save').is(':checked') ? 1 : 0,
+				'wpse_source_suffix': vgse_editor_settings.wpse_source_suffix || '',
+				'wpse_job_id': vgseGuidGenerator()
 			},
 			prepareData: function (data, settings) {
 				var dataParts = fullData.chunk(parseInt(vgse_editor_settings.save_posts_per_page));
@@ -3374,7 +3552,7 @@ jQuery(document).ready(function (e) {
 		} else {
 			format = false;
 		}
-		var nonce = jQuery('.remodal-bg').data('nonce');
+		var nonce = vgse_global_data.nonce;
 
 		// If pagination is activated, we reload the spreadsheet starting from a specific page
 		if (jQuery(this).data('pagination')) {
@@ -3426,7 +3604,6 @@ jQuery(document).ready(function (e) {
 		});
 		sectionObserver.observe(document.querySelector(".load-more"));
 		function callBackFunction(entries) {
-			console.log(entries);
 			if (entries[0].isIntersecting) {
 				var tableHeight = jQuery('.ht_master').height() - 250;
 				jQuery('#post-data').css('min-height', tableHeight);
@@ -3525,7 +3702,7 @@ jQuery(document).ready(function (e) {
 	}
 
 	function searchUsers(query, process) {
-		var nonce = jQuery('.remodal-bg').data('nonce');
+		var nonce = vgse_global_data.nonce;
 		var post_type = vgse_editor_settings.post_type;
 
 		jQuery.ajax({
@@ -3554,7 +3731,7 @@ jQuery(document).ready(function (e) {
 		if (!query) {
 			return process([]);
 		}
-		var nonce = jQuery('.remodal-bg').data('nonce');
+		var nonce = vgse_global_data.nonce;
 		var post_type = searchPostType || jQuery('#post_type_new_row').val();
 
 		jQuery.ajax({
@@ -3582,7 +3759,7 @@ jQuery(document).ready(function (e) {
 
 	}
 	function loadTaxonomyTerms(query, process) {
-		var nonce = jQuery('.remodal-bg').data('nonce');
+		var nonce = vgse_global_data.nonce;
 		var post_type = jQuery('#post_type_new_row').val();
 		var columnKey = hot.colToProp(hot.getSelected()[0][1]);
 		var taxonomyKey = vgse_editor_settings.columnsFormat[columnKey].taxonomy_key || columnKey;
@@ -3653,10 +3830,10 @@ jQuery(document).ready(function (e) {
 	 * Add new rows to spreadsheet
 	 */
 	jQuery("#addrow").on('click', function () {
-		var nonce = jQuery('.remodal-bg').data('nonce');
+		var nonce = vgse_global_data.nonce;
 		var post_type = jQuery('#post_type_new_row').val();
 		var rows = (jQuery(this).next('.number_rows').length && jQuery(this).next('.number_rows').val()) ? parseInt(jQuery(this).next('.number_rows').val()) : 1;
-		var extra_data = typeof window.wpseAddRowExtraData !== 'undefined' ? window.wpseAddRowExtraData : null;
+		var extra_data = null;
 		loading_ajax(true);
 
 		// Create posts as drafts
@@ -3835,6 +4012,9 @@ var vgseAllowToClosePageWithoutWarning = function (allow) {
 };
 
 jQuery(window).on("beforeunload", function () {
+	if (window.vgseActiveAjaxCount) {
+		return vgse_editor_settings.texts.save_changes_on_leave;
+	}
 	if (jQuery('.be-spreadsheet-wrapper').length) {
 		var modifiedData = beGetModifiedItems(hot.getSourceData(), window.beOriginalData);
 	} else {
@@ -3936,7 +4116,6 @@ jQuery(document).ready(function () {
 
 	// Disable infinite scroll when opening modals
 	jQuery(document).on('opened', '.remodal', function (e) {
-		console.log('Modal is opened');
 		// Save the existing scroll position, and disable infinite scroll to
 		// avoid loosing the scroll position and loading more posts while it´s opened.
 		var scrollTop = jQuery(document).scrollTop();
@@ -3947,6 +4126,13 @@ jQuery(document).ready(function () {
 
 		var scrollLeft = jQuery('html,body').scrollLeft();
 		jQuery('body').data('temp-scrollleft', scrollLeft);
+
+
+		// Save Handsontable selection before deselecting ---
+		var selection = hot.getSelected();
+		if (selection && selection.length > 0) {
+			jQuery('body').data('temp-selection', selection);
+		}
 
 		// Deselect cells when we open the popups, so it doesn't edit cells in the background when we type in the popups
 		hot.deselectCell();
@@ -3965,6 +4151,17 @@ jQuery(document).ready(function () {
 		}
 		if (scrollInfinito) {
 			jQuery('#infinito').prop('checked', scrollInfinito);
+		}
+
+		// Retrieve the saved selection from the body's data
+		var savedSelection = jQuery('body').data('temp-selection');
+
+		// If a selection was saved, re-apply it
+		if (savedSelection && savedSelection.length > 0) {
+			hot.selectCells(savedSelection);
+
+			// Clean up the data attribute to prevent re-selecting accidentally later
+			jQuery('body').removeData('temp-selection');
 		}
 	});
 
@@ -4207,7 +4404,7 @@ jQuery(document).ready(function () {
 	jQuery('body').on('click', '.custom-modal-editor .save-changes-handsontable', function (e) {
 		var $button = jQuery(this);
 		var $modal = $button.parents('.custom-modal-editor');
-		var nonce = jQuery('.remodal-bg').data('nonce');
+		var nonce = vgse_global_data.nonce;
 		var data = window.vgseWCAttsCurrent;
 
 		loading_ajax(true);
@@ -4327,7 +4524,7 @@ jQuery(document).ready(function () {
 
 		// Get data for the spreadsheet if necessary
 		if (data.modalSettings.edit_modal_get_action) {
-			var nonce = jQuery('.remodal-bg').data('nonce');
+			var nonce = vgse_global_data.nonce;
 			jQuery.get(vgse_global_data.ajax_url, {
 				action: data.modalSettings.edit_modal_get_action,
 				nonce: nonce,
@@ -4353,51 +4550,6 @@ jQuery(document).ready(function () {
 		}
 	});
 
-});
-
-jQuery(document).ready(function () {
-	jQuery('.vgse-current-filters').on('click', '.button', function (e) {
-		e.preventDefault();
-		var $button = jQuery(this);
-
-
-		var fullData = hot.getSourceData();
-		fullData = beGetModifiedItems(fullData, window.beOriginalData);
-		if (fullData.length) {
-			alert(vgse_editor_settings.texts.save_changes_before_remove_filter);
-			return true;
-		}
-
-		var filtersToRemove = [];
-		if ($button.hasClass('remove-all-filters')) {
-			jQuery('.vgse-current-filters .button:not(.remove-all-filters)').each(function () {
-				filtersToRemove.push(jQuery(this).data('filter-key'));
-			});
-			jQuery('.vgse-current-filters .button').remove();
-			jQuery('body').data('be-filters', {});
-		} else {
-			filtersToRemove.push($button.data('filter-key'));
-			$button.remove();
-		}
-
-		filtersToRemove.forEach(function (toRemove) {
-
-			if (toRemove) {
-				// Clear field in the search form
-				jQuery('#be-filters').find('input,select,textarea').filter(function () {
-					return jQuery(this).attr('name') === toRemove && (jQuery(this).attr('type') !== 'checkbox');
-				}).val('').trigger('change');
-				jQuery('#be-filters').find('input:checkbox').filter(function () {
-					return jQuery(this).attr('name') === toRemove;
-				}).prop('checked', false).trigger('change');
-
-				beAddRowsFilter(toRemove + '=');
-			}
-		});
-
-		vgseReloadSpreadsheet();
-
-	});
 });
 
 /* Post type setup wizard */
@@ -4452,7 +4604,7 @@ jQuery(document).ready(function () {
 		jQuery.post(vgse_global_data.ajax_url, {
 			post_type: postType,
 			action: 'vgse_delete_post_type',
-			nonce: jQuery('.post-type-setup-wizard').data('nonce'),
+			nonce: vgse_global_data.nonce,
 		}, function (response) {
 			if (response.success) {
 				notification({ mensaje: response.data.message, tipo: 'success', tiempo: 3000 });
@@ -4479,7 +4631,7 @@ function vgsePostTypeSetupPostTypesSaved(data) {
 	if ($next.hasClass('setup_columns')) {
 		jQuery.get(vgse_global_data.ajax_url, {
 			action: 'vgse_post_type_setup_columns_visibility',
-			nonce: jQuery('.post-type-setup-wizard').data('nonce'),
+			nonce: vgse_global_data.nonce,
 			post_type: jQuery('.post-types-form input:radio:checked').val(),
 		}, function (response) {
 			$next.append(response.data.html);
@@ -4492,25 +4644,16 @@ function vgsePostTypeSetupPostTypesSaved(data) {
 	}
 }
 
-function vgsePostTypeSetupColumnSaved(data) {
-	jQuery('#vgse-columns-enabled').append('<li><span class="handle">::</span> ' + data.response.data.label + ' <input type="hidden" name="columns[]" class="js-column-key" value="' + data.response.data.key + '"><input type="hidden" name="columns_names[]" class="js-column-title" value="' + data.response.data.label + '"></li>');
-}
 function vgsePostTypeSetupColumnsVisibilitySaved(data) {
 	window.location.href = data.response.data.post_type_editor_url;
 }
 jQuery(document).ready(function () {
-
-	var $postTypesAvailable = jQuery('.quick-setup-page-content .post-type-field input');
-
-	if (!$postTypesAvailable.length) {
-		return false;
-	}
-
-	var $postTypesEnabled = jQuery('.quick-setup-page-content .post-types-enabled');
-	$postTypesAvailable.on('change', function (e) {
+	jQuery('body').on('change', '.quick-setup-page-content .post-type-field input', function (e) {
 		console.log('test: ', jQuery(this));
+		var $postTypesEnabled = jQuery('.quick-setup-page-content .post-types-enabled');
 		$postTypesEnabled.empty();
 
+		var $postTypesAvailable = jQuery('.quick-setup-page-content .post-type-field input');
 		$postTypesAvailable.each(function () {
 			var postTypeKey = jQuery(this).val();
 
@@ -4522,7 +4665,6 @@ jQuery(document).ready(function () {
 				$postTypesEnabled.append(html);
 			}
 		});
-
 	});
 });
 
@@ -4545,7 +4687,7 @@ jQuery(document).ready(function () {
 			value: value,
 		}], reloadAfterSuccess, silentAction);
 	});
-	jQuery('body').on('click', 'a.wpse-set-settings', function (e) {
+	jQuery('body').on('click', 'a.wpse-set-settings, button.wpse-set-settings', function (e) {
 		e.preventDefault();
 
 		var name = jQuery(this).data('name');
@@ -4569,23 +4711,96 @@ jQuery(document).ready(function () {
 		vgseSetSettings(jQuery(this).serializeArray(), reloadAfterSuccess, silentAction);
 		return false;
 	});
+});
 
-	// Settings tabs
-	jQuery('.tabs-links a').on('click', function (e) {
-		e.preventDefault();
-		jQuery('.tabs-links a').removeClass('tab-active');
-		jQuery(this).addClass('tab-active');
+/**
+ * Alpine.js component for the WP Sheet Editor advanced settings form.
+ *
+ * This component manages the state for searching and tab navigation.
+ */
+function wpseSettingsComponent(firstTabKey) {
+	return {
+		// --- DATA PROPERTIES ---
+		search: '',
+		activeTab: 'tab' + firstTabKey,
+		tabContents: {},
 
-		var id = jQuery(this).attr('href').replace('#', '');
-		var $links = jQuery(this).parents('.tabs-links');
-		var $content = $links.next().find('.' + id);
+		// --- METHODS ---
 
-		$links.next().find('.tab-content').hide();
-		$content.show();
-	});
-	jQuery('.tabs-links').each(function () {
-		jQuery(this).find('a').first().click();
-	});
+		/**
+		 * Checks if a specific tab link should be visible based on the search term.
+		 * @param {string} tabId The ID of the tab (e.g., 'tab-general').
+		 * @returns {boolean}
+		 */
+		isTabVisible(tabId) {
+			if (!this.search) return true;
+			const content = this.tabContents[tabId] || '';
+			return content.includes(this.search.toLowerCase());
+		},
+
+		/**
+		 * Checks if a specific field wrapper should be visible based on the search term.
+		 * @param {HTMLElement} el The field wrapper element.
+		 * @returns {boolean}
+		 */
+		isFieldVisible(el) {
+			if (!this.search) return true;
+			const out = this.getTextWithoutOptions(el).toLowerCase().includes(this.search.toLowerCase());
+			if (out) {
+				el.parentElement.style.display = 'block';
+			}
+			return out;
+		},
+
+		/**
+		 * Helper function to get an element's text content, excluding any <option> tags.
+		 * This is useful for creating a clean string for searching.
+		 * @param {HTMLElement} element The element to get text from.
+		 * @returns {string}
+		 */
+		getTextWithoutOptions(element) {
+			if (!element) return '';
+			const clone = element.cloneNode(true);
+			clone.querySelectorAll('option').forEach(option => option.remove());
+			return clone.textContent;
+		},
+
+		/**
+		 * Initializes the component.
+		 * This runs once when the component is loaded on the page.
+		 */
+		init() {
+			// 1. Cache the searchable text content of each tab panel.
+			this.$nextTick(() => {
+				this.$el.querySelectorAll('.tab-content[id^=tab]').forEach(tab => {
+					this.tabContents[tab.id] = this.getTextWithoutOptions(tab).toLowerCase();
+				});
+			});
+
+			// 2. Watch for changes to the 'search' property.
+			this.$watch('search', (value) => {
+				// We use a double $nextTick to ensure Alpine has fully updated the
+				// visibility of the tab links before we check which one is first.
+				this.$nextTick(() => {
+					this.$nextTick(() => {
+						this.$nextTick(() => {
+							const firstVisibleLink = this.$el.querySelector('.tabs-links a:not([style*=\'display: none\'])');
+							if (firstVisibleLink) {
+								this.activeTab = firstVisibleLink.getAttribute('href').substring(1);
+							} else if (value) {
+								this.activeTab = ''; // No results found
+							}
+						});
+					});
+				});
+			});
+		}
+	};
+}
+
+// Register the component with Alpine so we can use it in our HTML.
+document.addEventListener('alpine:init', () => {
+	Alpine.data('wpseSettingsComponent', wpseSettingsComponent);
 });
 
 // Helper functionality for tools with saved items
@@ -4594,13 +4809,13 @@ jQuery(document).ready(function () {
 		return;
 	}
 	// Allow to delete saved search
-	var $buttons = jQuery('.toolbar-submenu [data-saved-item]');
+	var $buttons = jQuery('.toolbar-submenu [data-saved-item]:not([data-saved-type="search"])');
 	$buttons.each(function () {
 		var $button = jQuery(this);
-		$button.after('<button type="button" class="wpse-delete-saved-item wpse-delete-saved-search">x</button>');
+		$button.after('<button type="button" class="wpse-delete-saved-item">x</button>');
 	});
 
-	jQuery('body').on('click', '.wpse-delete-saved-item', function (e) {
+	jQuery('body').on('click', '.wpse-delete-saved-item:not(.wpse-delete-saved-search)', function (e) {
 		e.preventDefault();
 		var $button = jQuery(this);
 		var confirmationTextKey = 'confirm_delete_' + $button.prev().data('saved-type') + '_item';
@@ -4609,7 +4824,7 @@ jQuery(document).ready(function () {
 		}
 
 		var requestArgs = {
-			nonce: jQuery('#vgse-wrapper').data('nonce'),
+			nonce: vgse_global_data.nonce,
 			post_type: jQuery('#post-data').data('post-type'),
 			action: 'vgse_delete_saved_' + $button.prev().data('saved-type'),
 			search_name: $button.prev().data('item-name')
@@ -4647,7 +4862,144 @@ jQuery(document).ready(function () {
 	vgseInitLazySelects();
 });
 
+jQuery(document).ready(function ($) {
+
+	if (typeof vgse_editor_settings === 'undefined') {
+		return true;
+	}
+	// Define the buttons' HTML
+	const dockButtonHTML = $('<button class="remodal-dock-toggle"><i class="fa fa-chevron-right"></i></button>');
+	const undockButtonHTML = $('<button class="remodal-undock-toggle" style="display:none;"><i class="fa fa-chevron-left"></i></button>');
+
+	dockButtonHTML.attr('title', vgse_editor_settings.texts.dock_right);
+	undockButtonHTML.attr('title', vgse_editor_settings.texts.restore_regular_modal);
+
+	// 1. Initialize by adding buttons to all '.remodal-fixed' instances
+	$('.remodal-fixed').each(function () {
+		$(this).prepend(undockButtonHTML.clone());
+		$(this).prepend(dockButtonHTML.clone());
+	});
+
+	// 2. Handle the "dock right" button click
+	$(document).on('click', '.remodal-dock-toggle', function (e) {
+		e.preventDefault();
+		const $modal = $(this).closest('.remodal');
+		dockModal($modal);
+	});
+
+	// 3. Handle the "undock" button click
+	$(document).on('click', '.remodal-undock-toggle', function (e) {
+		e.preventDefault();
+		const $modal = $(this).closest('.remodal');
+		undockModal($modal, true);
+	});
+
+	// 4. Check localStorage when a remodal opens
+	$(document).on('closed', '.remodal.remodal-fixed', function () {
+		updateHotSize();
+		$('html').removeClass('remodal-is-docked-body');
+	});
+	// Undock any docked modal when a regular modal is opened
+	$(document).on('opening', '.remodal:not(.remodal-fixed)', function () {
+		if ($('html.remodal-is-docked-body').length) {
+			undockModal($('.remodal-fixed.remodal-is-docked.remodal-is-closed'));
+		}
+	});
+
+	function updateHotSize() {
+		if ($('html.remodal-is-docked-body.remodal-is-locked').length) {
+			// Adjust width of the page wrapper based on the table width, so other elements are positioned correctly
+			jQuery('#vgse-wrapper').css('min-width', '');
+
+			// Shrink the table to not be underneath the docked remodal		
+			hot.updateSettings({
+				width: jQuery(window).width() - jQuery('#adminmenuwrap').width() - (jQuery(window).width() / 5) - 20,
+				height: $(window).height() - $('.sheet-header').height() - 220,
+			});
+
+		} else {
+
+			// Adjust width of the page wrapper based on the table width, so other elements are positioned correctly
+			jQuery('#vgse-wrapper').css('min-width', jQuery('#post-data .wtHider').width());
+			// Shrink the table to not be underneath the docked remodal		
+			hot.updateSettings({
+				width: null,
+				height: null
+			});
+			// Manually force Handsontable to re-evaluate and re-bind scroll listeners. Otherwise the scroll doesn't work in the table's frozen columns
+			hot.view.wt.wtOverlays.updateMainScrollableElements();
+		}
+		vgseUpdateTableWrapperMinHeight();
+		hot.render();
+	}
+	$(document).on('opening', '.remodal', function () {
+		const $modal = $(this);
+		const modalId = $modal.data('remodal-id');
+		const isDocked = localStorage.getItem(`remodal-docked-${modalId}`);
+
+		if (isDocked === 'true') {
+			// Apply docked state immediately without animation
+			$modal.css('transition', 'none'); // Disable transition for instant open
+			dockModal($modal, false); // false = don't save width again
+			setTimeout(() => {
+				$modal.css('transition', ''); // Re-enable transition
+			}, 10);
+		}
+	});
+
+	/**
+	 * Docks the modal to the right side of the screen.
+	 * @param {jQuery} $modal - The modal element to dock.
+	 * @param {boolean} [saveWidth=true] - Whether to capture and save the current width.
+	 */
+	function dockModal($modal, saveWidth = true) {
+		const modalId = $modal.data('remodal-id');
+
+		// Add classes to apply CSS and allow body scrolling
+		$modal.addClass('remodal-is-docked');
+		$modal.parent().addClass('remodal-child-is-docked');
+		$('html').addClass('remodal-is-docked-body');
+
+		// Swap button visibility
+		$modal.find('.remodal-dock-toggle').hide();
+		$modal.find('.remodal-undock-toggle').show();
+
+		// Save state to localStorage
+		localStorage.setItem(`remodal-docked-${modalId}`, 'true');
+		updateHotSize();
+
+		// Auto scroll horizontally to the far left
+		jQuery(window).scrollLeft(0);
+	}
+
+	/**
+	 * Undocks the modal, returning it to its default centered state.
+	 * @param {jQuery} $modal - The modal element to undock.
+	 */
+	function undockModal($modal, persist) {
+		const modalId = $modal.data('remodal-id');
+
+		// Remove classes to revert CSS
+		$modal.removeClass('remodal-is-docked');
+		$modal.parent().removeClass('remodal-child-is-docked');
+		$('html').removeClass('remodal-is-docked-body');
+
+		// Swap button visibility
+		$modal.find('.remodal-undock-toggle').hide();
+		$modal.find('.remodal-dock-toggle').show();
+
+		// Remove state from localStorage
+		if (persist) {
+			localStorage.removeItem(`remodal-docked-${modalId}`);
+		}
+		updateHotSize();
+	}
+});
+
 jQuery(document).ready(function () {
+	// Make draggable all the remodals that are not medium/extra-large
+	jQuery('.remodal[data-remodal-id]:not(.remodal-draggable):not(.remodal-medium):not(.remodal-extra-large)').addClass('remodal-draggable');
+
 	// Draggable modals work on desktop only
 	if (jQuery(window).width() < 768) {
 		return true;
@@ -4663,9 +5015,7 @@ jQuery(document).ready(function () {
 		dragElement($modal.find('.drag-modal')[0], $modal[0]);
 	});
 
-
-	jQuery(document).on('opened vgseAfterModalContentLoaded', '.remodal', function (e) {
-		var $modal = jQuery(this);
+	function centerModal($modal) {
 		if ($modal.hasClass('remodal-draggable')) {
 			// Get the viewport dimensions
 			var viewportWidth = jQuery(window).width();
@@ -4677,7 +5027,7 @@ jQuery(document).ready(function () {
 
 			// Calculate the new position for vertical and horizontal centering
 			var leftPosition = (viewportWidth - modalWidth) / 2;
-			var topPosition = (viewportHeight - modalHeight) / 2;
+			var topPosition = ((viewportHeight - modalHeight) / 2) - 150;
 			if (topPosition < 0) {
 				topPosition = 0;
 			}
@@ -4689,6 +5039,31 @@ jQuery(document).ready(function () {
 				'top': topPosition
 			});
 		}
+	}
+	document.addEventListener('alpine:init', () => {
+		const $modals = jQuery('.remodal.remodal-draggable');
+		if ($modals.length) {
+			setTimeout(() => {
+				$modals.each(function () {
+					var $modal = jQuery(this);
+					centerModal($modal);
+				});
+			}, 100);
+		}
+	});
+
+	// Center opened remodals every 5 seconds
+	// Update: Removed because it was too annoying that the modals kept moving when we're filling out forms
+	// setInterval(function () {
+	// 	jQuery('.remodal.remodal-draggable.remodal-is-opened').each(function () {
+	// 		var $modal = jQuery(this);
+	// 		centerModal($modal);
+	// 	});
+	// }, 5000);
+
+
+	jQuery(document).on('opened vgseAfterModalContentLoaded', '.remodal', function (e) {
+		centerModal(jQuery(this));
 	});
 	jQuery(document).on('closed', '.remodal', function (e) {
 		var $modal = jQuery(this);
@@ -4769,10 +5144,30 @@ jQuery(document).ready(function () {
 		}
 	});
 
+	document.addEventListener('visibilitychange', () => {
+		const $modal = jQuery('.remodal[data-ajax-action][data-live-refresh]:visible');
+		if (!$modal.length) {
+			return;
+		}
+
+		const intervalId = parseInt($modal.data('intervalId'));
+
+		if (document.hidden) {
+			if (intervalId) {
+				clearInterval(intervalId);
+				// We don't clear the intervalId from data because we need it to know
+				// that we should resume it when the tab becomes visible again.
+			}
+		} else if (intervalId) {
+			// When the tab becomes visible, restart the interval.
+			startAjaxContentInterval($modal);
+		}
+	});
+
 	function getAjaxContent($modal) {
 		$.get(vgse_global_data.ajax_url, {
 			action: $modal.data('ajax-action'),
-			nonce: jQuery('.remodal-bg').data('nonce'),
+			nonce: vgse_global_data.nonce,
 			postType: vgse_editor_settings.post_type,
 			post_type: vgse_editor_settings.post_type,
 			is_editor_page: true
@@ -4785,17 +5180,189 @@ jQuery(document).ready(function () {
 				$modal.removeClass('lazy-modal-content');
 				$modal.trigger('vgSheetEditor:remodal:ajaxContentInserted', response);
 				$('body').trigger('vgSheetEditor:remodal:ajaxContentInserted', response);
-				if ($modal.data('live-refresh') && !$modal.data('intervalId')) {
-					var intervalId = setInterval(function () {
-						if (!$modal.data('pauseAutoReload')) {
-							getAjaxContent($modal);
-						}
-					}, parseInt($modal.data('live-refresh')) * 1000);
-					$modal.data('intervalId', intervalId);
-				}
+				startAjaxContentInterval($modal);
 			}
 		});
 	}
+
+	function startAjaxContentInterval($modal) {
+		if (!$modal.data('live-refresh') || $modal.data('intervalId')) return;
+
+		const intervalId = setInterval(() => {
+			if (!$modal.data('pauseAutoReload')) getAjaxContent($modal);
+		}, parseInt($modal.data('live-refresh')) * 1000);
+		$modal.data('intervalId', intervalId);
+	}
+});
+
+if (typeof wp.hooks !== 'undefined') {
+	// The alpine.js app must have the properties:
+	// progressLines: {},
+	// 	isProcessPaused: false,
+	// 	ajaxLoop: null,
+	function vgseGlobalAlpineHelpers(app) {
+		app.nanobar = null;
+		app.showNanobar = false;
+
+		app.pauseJob = () => {
+			app.isProcessPaused = true;
+			app.progressLines.paused = vgse_editor_settings.texts.bulk_edit_paused;
+			if (app.ajaxLoop) {
+				app.ajaxLoop.pause();
+			}
+		};
+		app.initializeTinymce = (prop, element) => {
+
+			app.$nextTick(() => {
+				wp.editor.initialize(
+					element.id,
+					{
+						tinymce: {
+							wpautop: true,
+							plugins: 'charmap colorpicker compat3x directionality fullscreen hr image lists media paste tabfocus textcolor wordpress wpautoresize wpdialogs wpeditimage wpemoji wpgallery wplink wptextpattern wpview',
+							toolbar1: 'bold italic underline strikethrough | bullist numlist | blockquote hr wp_more | alignleft aligncenter alignright | link unlink | fullscreen | wp_adv',
+							toolbar2: 'formatselect alignjustify forecolor | pastetext removeformat charmap | outdent indent | undo redo | wp_help',
+							setup: (editor) => {
+								editor.on("change", (e) => {
+									app.setToValue(app, wp.editor.getContent(element.id), prop);
+								});
+							}
+						},
+						quicktags: {
+							"buttons": "strong,em,link,ul,li,code"
+						},
+						mediaButtons: true,
+					}
+				);
+			});
+		};
+		app.openMediaLibrary = (prop, element, multiple) => {
+			var scrollLeft = jQuery('body').scrollLeft();
+			var scrollTop = jQuery(document).scrollTop();
+			var currentInfiniteScrollStatus = jQuery('#infinito').prop('checked');
+			let media_uploader = wp.media({
+				frame: "post",
+				state: "insert",
+				multiple: multiple
+			});
+			media_uploader.state('embed').on('select', () => {
+				var state = media_uploader.state(),
+					type = state.get('type'),
+					embed = state.props.toJSON();
+				embed.url = embed.url || '';
+				console.log(embed);
+				console.log(type);
+				console.log(state);
+				if (type === 'image' && embed.url) {
+					app.setToValue(app, embed.url, prop);
+				}
+			});
+			media_uploader.on('close', () => {
+				jQuery('body').scrollLeft(scrollLeft);
+				jQuery(window).scrollTop(scrollTop);
+				jQuery('#infinito').prop('checked', currentInfiniteScrollStatus);
+			});
+			media_uploader.on("insert", () => {
+				jQuery('body').scrollLeft(scrollLeft);
+				var selection = media_uploader.state().get("selection");
+				var length = selection.length;
+				var images = selection.models;
+
+				console.log(images);
+				if (!images.length) {
+					return true;
+				}
+				var gallery = [];
+				for (var iii = 0; iii < length; iii++) {
+					file = images[iii].toJSON();
+					console.log(file);
+					gallery.push(file.url);
+				}
+				app.setToValue(app, gallery.join(','), prop);
+			});
+			media_uploader.open();
+		};
+		app.resumeJob = () => {
+			app.isProcessPaused = false;
+			delete app.progressLines.paused;
+			if (app.ajaxLoop) {
+				app.ajaxLoop.resume();
+			}
+		};
+		app.initNanobar = (id) => {
+			// Don't double initialize
+			if (app.nanobar) {
+				// We start progress bar with 1% so it doesn't look completely empty
+				app.nanobar.go(1);
+				return;
+			}
+			app.showNanobar = true;
+			var options = {
+				classname: 'be-progress-bar',
+				target: document.getElementById(id)
+			};
+			app.nanobar = new Nanobar(options);
+			// We start progress bar with 1% so it doesn't look completely empty
+			app.nanobar.go(1);
+		},
+			app.removeNanobar = () => {
+				app.showNanobar = false;
+			};
+		app.initSelect2 = (el) => {
+			vgseInitSelect2(el);
+			setTimeout(() => {
+				$(el).trigger('change');
+			}, 250);
+			app.fixSelect2(el);
+		};
+		/**
+		 * This will detect when the select2 values change, update the props; and update the select2 values when the props change
+		 */
+		app.fixSelect2 = (el) => {
+			el.classList.add('wpse-select2-fix');
+			let $select2 = $(el);
+			let prop = el.getAttribute('data-full-model-path') || el.getAttribute('x-model');
+			let propPath = prop.replace('[', '.').replace(']', '');
+
+			app.$watch(prop, (value) => {
+				$select2.val(value).trigger("change");
+			});
+			$select2.on("select2:select select2:unselect", (event) => {
+				var selectedValues = Array.from(event.target.selectedOptions).map((option) => {
+					return option.value;
+				});
+				if (!el.hasAttribute('multiple')) {
+					var selectedValues = selectedValues.length ? selectedValues[0] : null;
+				}
+				// FIX. For some reason, this[prop] is not reactive here, so we need to use Alpine.$data
+				// Check if Alpine initialized correctly before using setToValue
+				app.setToValue(app, selectedValues, propPath);
+			});
+		};
+		app.setToValue = (obj, value, path) => {
+			var i;
+			path = path.replace('[', '.').replace(']', '').split('.');
+			for (i = 0; i < path.length - 1; i++) {
+				const pathPart = $.isNumeric(path[i]) ? parseInt(path[i]) : path[i];
+				obj = obj[pathPart];
+			}
+
+			obj[path[i]] = value;
+		};
+	}
+}
+
+document.addEventListener('alpine:init', () => {
+	Alpine.data('vgseSettingsToolbar', () => ({
+		toggleDarkMode($el) {
+			jQuery('html').toggleClass('vgse-dark-mode', $el.checked);
+
+			vgseSetSettings([{
+				name: 'settings[color_mode]',
+				value: $el.checked ? 'dark' : 'light',
+			}], false, true);
+		}
+	}));
 });
 jQuery(document).ready(function () {
 
@@ -4978,7 +5545,7 @@ jQuery(document).ready(function () {
             window.wpseChosenTerms = {};
         }
         if (this.options.ajaxParams) {
-            this.options.ajaxParams.nonce = jQuery('.remodal-bg').data('nonce');
+            this.options.ajaxParams.nonce = vgse_global_data.nonce;
             this.options.ajaxParams.columnKey = self.prop;
             this.options.ajaxParams.wpse_source = 'chosen_column';
             this.options.ajaxParams.post_type = vgse_editor_settings.post_type;

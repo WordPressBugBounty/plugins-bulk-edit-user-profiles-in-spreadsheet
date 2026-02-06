@@ -7,7 +7,7 @@ if (!class_exists('WP_Sheet_Editor_Users_Teaser')) {
 	 */
 	class WP_Sheet_Editor_Users_Teaser {
 
-		static private $instance = false;
+		private static $instance = false;
 
 		private function __construct() {
 			
@@ -16,6 +16,9 @@ if (!class_exists('WP_Sheet_Editor_Users_Teaser')) {
 		function init() {
 
 			if (class_exists('WP_Sheet_Editor_Users') || !is_admin()) {
+				return;
+			}
+			if(VGSE()->get_option('be_disable_extension_offerings')){
 				return;
 			}
 			add_action('admin_notices', array($this, 'render_notice'));
@@ -29,9 +32,9 @@ if (!class_exists('WP_Sheet_Editor_Users_Teaser')) {
 			$install_url = VGSE()->get_plugin_install_url('Bulk Edit and Create User Profiles - WP Sheet Editor');
 			$sheets['user'] = array(
 				'key' => 'user',
-				'label' => __('Users'),
+				'label' => esc_html__('Users', 'default'),
 				'is_disabled' => true,
-				'description' => '<small><a href="' . esc_url($install_url) . '" target="_blank">' . __('(Install free extension)', 'vg_sheet_editor' ) . '</a></small>',
+				'description' => '<small><a href="' . esc_url($install_url) . '" target="_blank">' . esc_html__('(Install free extension)', 'vg_sheet_editor' ) . '</a></small>',
 			);
 			return $sheets;
 		}
@@ -48,7 +51,9 @@ if (!class_exists('WP_Sheet_Editor_Users_Teaser')) {
 			$nonce = wp_create_nonce('bep-nonce');
 			?>
 			<div class="notice notice-success is-dismissible wpse-notice" data-key="<?php echo esc_attr($notice_key); ?>">
-				<p><?php printf(__('<b>Tip from WP Sheet Editor:</b> You can view all the users in a table, view thousands of full profiles, edit hundreds of users at once without crashing your server, view all shipping/billing/buddypress information. Make advanced searches, create hundreds of users, and more. <a href="%s" target="_blank">Download Plugin</a>', 'vg_sheet_editor' ), 'https://wpsheeteditor.com/extensions/edit-users-spreadsheet/?utm_source=wp-admin&utm_medium=admin-notice&utm_campaign=users'); ?></p>
+				<p><b><?php esc_html_e('Tip from WP Sheet Editor:', 'vg_sheet_editor'); ?></b> 
+				<?php esc_html_e('You can view all the users in a table, view thousands of full profiles, edit hundreds of users at once without crashing your server, view all shipping/billing/buddypress information. Make advanced searches, create hundreds of users, and more.', 'vg_sheet_editor'); ?> 
+				<a href="https://wpsheeteditor.com/extensions/edit-users-spreadsheet/?utm_source=wp-admin&utm_medium=admin-notice&utm_campaign=users" target="_blank"><?php esc_html_e('Download Plugin', 'vg_sheet_editor'); ?></a></p>
 			</div>
 			<script>
 				jQuery(window).on('load', function () {
@@ -91,7 +96,7 @@ if (!class_exists('WP_Sheet_Editor_Users_Teaser')) {
 }
 
 
-add_action('vg_sheet_editor/initialized', 'vgse_init_users_teaser');
+add_action('vg_sheet_editor/after_init', 'vgse_init_users_teaser');
 
 if (!function_exists('vgse_init_users_teaser')) {
 

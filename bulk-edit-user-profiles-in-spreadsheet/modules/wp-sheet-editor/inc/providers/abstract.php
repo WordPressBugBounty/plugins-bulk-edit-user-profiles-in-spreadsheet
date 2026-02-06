@@ -1,19 +1,18 @@
 <?php defined( 'ABSPATH' ) || exit;
 
-if (!class_exists('VGSE_Provider_Abstract')) {
+if ( ! class_exists( 'VGSE_Provider_Abstract' ) ) {
 
 	abstract class VGSE_Provider_Abstract {
 
-		static private $instance = false;
-		var $key = null;
-		var $is_post_type = true;
-		static $data_store = array();
+		private static $instance = false;
+		public $key              = null;
+		public $is_post_type     = true;
+		static $data_store       = array();
 
 		private function __construct() {
-			
 		}
 
-		function filter_rows_before_edit($data, $post_type) {
+		function filter_rows_before_edit( $data, $post_type ) {
 			return $data;
 		}
 
@@ -24,35 +23,35 @@ if (!class_exists('VGSE_Provider_Abstract')) {
 		 * @return void
 		 */
 		function update_modified_date( $ids ) {
-			do_action('vg_sheet_editor/provider/' . $this->key . '/update_modified_date', $ids );
+			do_action( 'vg_sheet_editor/provider/' . $this->key . '/update_modified_date', $ids );
 		}
 
-		function get_random_string($length, $spChars = false) {
-			$alpha = 'abcdefghijklmnopqrstwvxyz';
-			$alphaUp = strtoupper($alpha);
-			$num = '12345678901234567890';
-			$sp = '@/+.*-\$#!)[';
-			$thread = $alpha . $alphaUp . $num;
-			if ($spChars) {
+		function get_random_string( $length, $spChars = false ) {
+			$alpha   = 'abcdefghijklmnopqrstwvxyz';
+			$alphaUp = strtoupper( $alpha );
+			$num     = '12345678901234567890';
+			$sp      = '@/+.*-\$#!)[';
+			$thread  = $alpha . $alphaUp . $num;
+			if ( $spChars ) {
 				$thread .= $sp;
 			}
 			$str = '';
-			for ($i = 0; $i < $length; $i++) {
-				$str .= $thread[mt_rand(0, strlen($thread) - 1)];
+			for ( $i = 0; $i < $length; $i++ ) {
+				$str .= $thread[ wp_rand( 0, strlen( $thread ) - 1 ) ];
 			}
 			return $str;
 		}
 
-		abstract function get_provider_read_capability($post_type_key);
+		abstract function get_provider_read_capability( $post_type_key );
 
-		abstract function delete_meta_key($old_key, $post_type);
+		abstract function delete_meta_key( $old_key, $post_type );
 
-		abstract function rename_meta_key($old_key, $new_key, $post_type);
+		abstract function rename_meta_key( $old_key, $new_key, $post_type );
 
-		abstract function get_provider_edit_capability($post_type_key);
+		abstract function get_provider_edit_capability( $post_type_key );
 
-		function get_provider_delete_capability($post_type_key) {
-			return $this->get_provider_edit_capability($post_type_key);
+		function get_provider_delete_capability( $post_type_key ) {
+			return $this->get_provider_edit_capability( $post_type_key );
 		}
 
 		abstract function init();
@@ -63,37 +62,37 @@ if (!class_exists('VGSE_Provider_Abstract')) {
 		 * @return  Foo A single instance of this class.
 		 */
 		static function get_instance() {
-			if (null == self::$instance) {
+			if ( null == self::$instance ) {
 				self::$instance = new self();
 				self::$instance->init();
 			}
 			return self::$instance;
 		}
 
-		abstract function get_post_data_table_id_key($post_type = null);
+		abstract function get_post_data_table_id_key( $post_type = null );
 
-		abstract function get_meta_table_post_id_key($post_type = null);
+		abstract function get_meta_table_post_id_key( $post_type = null );
 
-		abstract function get_meta_table_name($post_type = null);
+		abstract function get_meta_table_name( $post_type = null );
 
-		abstract function prefetch_data($post_ids, $post_type, $spreadsheet_columns);
+		abstract function prefetch_data( $post_ids, $post_type, $spreadsheet_columns );
 
-		abstract function get_item_terms($post_id, $taxonomy);
+		abstract function get_item_terms( $post_id, $taxonomy );
 
 		abstract function get_statuses();
 
-		abstract function get_items($query_args);
+		abstract function get_items( $query_args );
 
-		abstract function get_item($id, $format = null);
+		abstract function get_item( $id, $format = null );
 
-		abstract function get_item_meta($post_id, $key, $single, $context = 'save', $bypass_cache = false);
+		abstract function get_item_meta( $post_id, $key, $single, $context = 'save', $bypass_cache = false );
 
-		abstract function get_item_data($id, $key);
+		abstract function get_item_data( $id, $key );
 
-		abstract function update_item_data($values, $wp_error = false);
+		abstract function update_item_data( $values, $wp_error = false );
 
-		function delete_item_meta($id, $key) {
-			$this->update_item_meta($id, $key, '');
+		function delete_item_meta( $id, $key ) {
+			$this->update_item_meta( $id, $key, '' );
 		}
 
 		/**
@@ -105,28 +104,52 @@ if (!class_exists('VGSE_Provider_Abstract')) {
 		 * @return array|false
 		 */
 		function get_meta_query_sql( $table_name, $meta_table_name, $filters ) {
-
 		}
 
-		abstract function update_item_meta($id, $key, $value);
+		abstract function update_item_meta( $id, $key, $value );
 
-		abstract function get_object_taxonomies($post_type);
+		abstract function get_object_taxonomies( $post_type );
 
-		abstract function set_object_terms($post_id, $terms_saved, $key);
+		abstract function set_object_terms( $post_id, $terms_saved, $key );
 
-		abstract function get_total($current_post);
+		abstract function get_total( $current_post );
 
-		abstract function create_item($values);
+		abstract function create_item( $values );
 
-		abstract function get_item_ids_by_keyword($keyword, $post_type, $operator = 'LIKE');
+		abstract function get_item_ids_by_keyword( $keyword, $post_type, $operator = 'LIKE' );
 
-		abstract function get_meta_object_id_field($field_key, $column_settings);
+		abstract function get_meta_object_id_field( $field_key, $column_settings );
 
-		abstract function get_table_name_for_field($field_key, $column_settings);
+		abstract function get_table_name_for_field( $field_key, $column_settings );
 
-		abstract function get_meta_field_unique_values($meta_key, $post_type = 'post');
+		function _get_meta_value_column_key( $post_type ) {
+			return VGSE()->helpers->sanitize_table_key( apply_filters( 'vg_sheet_editor/provider/' . $this->key . '/meta_value_column_key', 'meta_value', $post_type ) );
+		}
 
-		abstract function get_all_meta_fields($post_type = 'post');
+		function _get_meta_key_column_key( $post_type ) {
+			return VGSE()->helpers->sanitize_table_key( apply_filters( 'vg_sheet_editor/provider/' . $this->key . '/meta_key_column_key', 'meta_key', $post_type ) );
+		}
+
+
+		/**
+		 * Get unique values for multiple meta fields, handling large lists by running queries in safe batches.
+		 *
+		 * @param array  $meta_keys  List of meta keys to query.
+		 * @param string $post_type  The post type to search within.
+		 * @param int    $batch_size The number of meta keys to process in a single query.
+		 * @return array Associative array of results, e.g., ['meta_key' => ['value1', 'value2']].
+		 */
+		function get_meta_field_unique_values_in_bulk( $meta_keys, $post_type, $batch_size = 1000 ) {
+			$out = array();
+			foreach ( $meta_keys as $meta_key ) {
+				$out[ $meta_key ] = $this->get_meta_field_unique_values( $meta_key, $post_type );
+			}
+			return $out;
+		}
+
+		abstract function get_meta_field_unique_values( $meta_key, $post_type = 'post' );
+
+		abstract function get_all_meta_fields( $post_type = 'post' );
 	}
 
 }

@@ -7,8 +7,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 	class WP_Sheet_Editor_Filters {
 
 		private static $instance = null;
-		var $plugin_url          = null;
-		var $plugin_dir          = null;
+		public $plugin_url       = null;
+		public $plugin_dir       = null;
 
 		private function __construct() {
 		}
@@ -20,6 +20,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 
 			add_action( 'vg_sheet_editor/editor/before_init', array( $this, 'register_toolbar_locate' ), 80 );
 			add_action( 'vg_sheet_editor/editor/before_init', array( $this, 'register_toolbar_search' ), 8 );
+			add_action( 'vg_sheet_editor/editor/before_init', array( $this, 'register_toolbar_quick_search' ), 15 );
 			add_action( 'vg_sheet_editor/after_enqueue_assets', array( $this, 'register_assets' ) );
 			add_filter( 'vg_sheet_editor/load_rows/wp_query_args', array( $this, 'filter_posts' ), 10, 2 );
 			add_action( 'vg_sheet_editor/load_rows/after_processing', array( $this, 'save_session_filters' ), 10, 4 );
@@ -28,37 +29,91 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 			add_filter( 'posts_clauses', array( $this, 'search_by_keyword' ), 10, 2 );
 			add_filter( 'vg_sheet_editor/js_data', array( $this, 'set_initial_filters' ), 10, 2 );
 			add_filter( 'vg_sheet_editor/load_rows/wp_query_args', array( $this, 'add_session_query_vars_from_session_id' ), 10, 2 );
-			add_action( 'vg_sheet_editor/editor_page/after_editor_page', array( $this, 'init_session_parameters_from_url' ) );
+			add_action( 'vg_sheet_editor/editor_page/after_editor_page', array( $this, 'maybe_auto_export' ) );
+
+			add_action( 'load-edit.php', array( $this, 'handle_bulk_actions' ) );
+			add_action( 'current_screen', array( $this, 'add_bulk_actions_hook' ) );
 		}
 
-		function init_session_parameters_from_url( $post_type ) {
-
-			$filters = array_filter(
-				array(
-					'wpse_session_query' => ! empty( $_GET['wpse_session_query'] ) ? sanitize_text_field( $_GET['wpse_session_query'] ) : '',
-					'wpse_auto_export'   => ! empty( $_GET['wpse_auto_export'] ) ? 1 : 0,
-				)
-			);
+		function maybe_auto_export( $post_type ) {
+			if ( empty( $_GET['wpse_auto_export']) || empty( $_GET['wpse_custom_filters_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['wpse_custom_filters_nonce'] ) ), 'bep-nonce' ) ) {
+				return;
+			}
 			?>
 			<script>
-				jQuery(document).ready(function () {
-			<?php if ( ! empty( $filters ) ) { ?>
-						jQuery('body').data('be-filters', <?php echo json_encode( $filters ); ?>);
-			<?php } ?>
-
-
+				document.addEventListener('alpine:init', () => {
 					// Start auto export if the URL contains wpse_auto_export=1
 					jQuery('body').on('vgSheetEditor:afterRowsInsert', function (event, data) {
 						if (data.length && window.location.href.indexOf('wpse_auto_export=1') > -1) {
-							jQuery('[data-remodal-target="export-csv-modal"]').click();
-							jQuery('.export-csv-modal .export-columns option').prop('selected', true).trigger('change');
-							jQuery('.export-csv-modal .use-search-query-container input').prop('checked', true);
-							jQuery('.export-csv-modal .vgse-trigger-export').click();
+							jQuery(document).on('opened', '.export-csv-modal', () => {
+								if(window.vgseAutoExportDone){
+									return;
+								}
+								window.vgseAutoExportDone = true;
+								const app = Alpine.$data(document.querySelector('[x-data="vgseExport"]'));
+								app.selectColumns('active');
+								app.taskArgs.rowsSelectionType = 'current_search';
+								app.$nextTick(() => {									
+									app.submit();
+								});
+							});					
+							jQuery('[data-remodal-id="export-csv-modal"]').remodal().open();
 						}
 					});
 				});
 			</script>
 			<?php
+		}
+
+		function add_bulk_actions_hook( $screen ) {
+			if ( $screen->base === 'edit' && ! empty( $screen->post_type ) && VGSE()->helpers->is_post_type_allowed( $screen->post_type ) ) {
+				add_filter( "bulk_actions-{$screen->id}", array( $this, 'add_bulk_actions' ), 10, 1 );
+			}
+		}
+
+		function add_bulk_actions( $bulk_actions ) {
+			$bulk_actions['wpse_view'] = esc_html__( 'View in WP Sheet Editor', 'vg_sheet_editor' );
+			return $bulk_actions;
+		}
+
+		function handle_bulk_actions() {
+			if ( ! isset( $_REQUEST['post_type'] ) ) {
+				return;
+			}
+			// 1. get the action
+			$wp_list_table = _get_list_table( 'WP_Posts_List_Table' );
+			$action        = $wp_list_table->current_action();
+
+			$allowed_actions = array( 'wpse_view' );
+			if ( ! in_array( $action, $allowed_actions, true ) ) {
+				return;
+			}
+
+			// 2. security check
+			check_admin_referer( 'bulk-posts' );
+
+			// 3. get the post ids
+			if ( isset( $_REQUEST['post'] ) ) {
+				$post_ids = array_map( 'intval', $_REQUEST['post'] );
+			}
+
+			if ( empty( $post_ids ) ) {
+				return;
+			}
+
+			// 4. build the URL and redirect
+			$post_type = VGSE()->helpers->sanitize_table_key( $_REQUEST['post_type'] );
+			$url       = VGSE()->helpers->get_editor_url( $post_type );
+
+			$filters = array(
+				'post__in' => implode( ',', $post_ids ),
+			);
+
+			$url = add_query_arg( 'wpse_custom_filters', urlencode_deep( $filters ), $url );
+			$url = add_query_arg( 'wpse_custom_filters_nonce', wp_create_nonce( 'bep-nonce' ), $url );
+
+			wp_safe_redirect( $url );
+			exit();
 		}
 
 		function add_session_query_vars_from_session_id( $wp_query, $settings ) {
@@ -113,6 +168,11 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 				if ( empty( $sheet_sessions ) || ! is_array( $sheet_sessions ) ) {
 					$sheet_sessions = array();
 				}
+				// Don't save the search name, otherwise it will keep resaving the search each time, even after the search was manually deleted
+				if ( isset( $filters['search_name'] ) ) {
+					unset( $filters['search_name'] );
+				}
+
 				if ( empty( $rows ) ) {
 					$sheet_sessions[ $provider ] = array();
 				} else {
@@ -163,6 +223,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 				$all_checks = implode( ' AND ', $phrase_checks );
 				$checks     = apply_filters( 'vg_sheet_editor/filters/search_by_keyword_clauses/keyword_check', $all_checks, $phrase, $clauses, $raw_keywords, $operator, $internal_join );
 			}
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$checks            = $wpdb->prepare( $checks, $prepared_values );
 			$clauses['where'] .= ' AND ( ( ' . $checks . ' ) ) ';
 			return apply_filters( 'vg_sheet_editor/filteres/search_by_keyword_clauses', $clauses, $raw_keywords, $operator, $internal_join );
@@ -177,7 +238,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 		 * Register frontend assets
 		 */
 		function register_assets() {
-			wp_enqueue_script( 'filters_js', $this->plugin_url . 'assets/js/init.js', array(), VGSE()->version, false );
+			wp_enqueue_script( 'filters_js', $this->plugin_url . 'assets/js/init.js', array(), filemtime( __DIR__ . '/assets/js/init.js' ), false );
 		}
 
 		/**
@@ -192,9 +253,9 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 					'cell_locator',
 					array(
 						'type'         => 'html',
-						'help_tooltip' => __( 'Use the Search tool to search among all items. Use this to locate and highlight one value in the loaded rows in the spreadsheet. I.e. highlight a SKU or email or title.', 'vg_sheet_editor' ),
-						'content'      => '<input type="search" id="cell-locator-input" placeholder="' . __( 'Locate cell', 'vg_sheet_editor' ) . '"/>',
-						'label'        => __( 'Locate cell.', 'vg_sheet_editor' ),
+						'help_tooltip' => esc_html__( 'Use the Search tool to search among all items. Use this to locate and highlight one value in the loaded rows in the spreadsheet. I.e. highlight a SKU or email or title.', 'vg_sheet_editor' ),
+						'content'      => '<input type="search" id="cell-locator-input" placeholder="' . esc_attr__( 'Locate cell', 'vg_sheet_editor' ) . '"/>',
+						'label'        => esc_html__( 'Locate cell.', 'vg_sheet_editor' ),
 					),
 					$post_type
 				);
@@ -202,9 +263,9 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 					'column_locator',
 					array(
 						'type'             => 'html',
-						'help_tooltip'     => __( 'Enter a word and we will find the first matching column. You will avoid scrolling through dozens of columns to find the one you need.', 'vg_sheet_editor' ),
-						'content'          => '<input type="search" id="column-locator-input" list="column-locator-dropdown" placeholder="' . __( 'Locate column', 'vg_sheet_editor' ) . '"/>',
-						'label'            => __( 'Locate column', 'vg_sheet_editor' ),
+						'help_tooltip'     => esc_html__( 'Enter a word and we will find the first matching column. You will avoid scrolling through dozens of columns to find the one you need.', 'vg_sheet_editor' ),
+						'content'          => '<input type="search" id="column-locator-input" list="column-locator-dropdown" placeholder="' . esc_attr__( 'Locate column', 'vg_sheet_editor' ) . '"/>',
+						'label'            => esc_html__( 'Locate column', 'vg_sheet_editor' ),
 						'tooltip_position' => 'right',
 					),
 					$post_type
@@ -219,26 +280,46 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 				$editor->args['toolbars']->register_item(
 					'run_filters',
 					array(
-						'type'                  => 'button',
-						'content'               => __( 'Search', 'vg_sheet_editor' ),
-						'icon'                  => 'fa fa-search',
-						'extra_html_attributes' => 'data-remodal-target="modal-filters"',
-						'footer_callback'       => array( $this, 'render_filters_form' ),
+						'type'                       => 'button',
+						'content'                    => esc_html__( 'Search', 'vg_sheet_editor' ),
+						'icon'                       => 'fa fa-search',
+						'extra_html_attributes'      => 'data-remodal-target="modal-filters"',
+						'footer_callback'            => array( $this, 'render_filters_form' ),
+						'footer_callback_cache'      => true,
+						// The search toolbar also uses the Alpine.js app to manage quick search fields and saved searches. Each instance of x-data="vgseFiltersApp" has its own isolated state, with only the properties linked to the store sharing state between instances
+						'container_extra_attributes' => 'x-data="vgseFiltersApp"',
 					),
 					$post_type
 				);
+			}
+		}
 
+		// Register separately with priority 15, so it appears below the saved searches
+		function register_toolbar_quick_search( $editor ) {
+
+			$post_types = $editor->args['enabled_post_types'];
+			foreach ( $post_types as $post_type ) {
 				$editor->args['toolbars']->register_item(
 					'quick_search',
 					array(
 						'type'              => 'html', // html | switch | button
-						'content'           => __( 'Quick search', 'vg_sheet_editor' ) . '<input type="search" name="keyword" class="wpse-quick-search" placeholder="' . __( 'Enter a keyword', 'vg_sheet_editor' ) . '"/><button type="button" class="wpse-start-quick-search">' . __( 'Search', 'vg_sheet_editor' ) . '</button>',
+						'content'           => array( $this, 'get_quick_search_html' ),
 						'allow_in_frontend' => true,
 						'parent'            => 'run_filters',
 					),
 					$post_type
 				);
 			}
+		}
+
+		function get_quick_search_html( $toolbar_item, $post_type ) {
+			ob_start();
+			?>
+			<?php esc_html_e( 'Quick search', 'vg_sheet_editor' ); ?>
+			<input type="search" name="keyword" @keyup.escape.window="restoreHoverEffectOnSubmenu()" @keyup.enter.prevent="startQuickSearch()" x-model="activeFilters.keyword" class="wpse-quick-search" placeholder="<?php esc_attr_e( 'Enter a keyword', 'vg_sheet_editor' ); ?>"/>
+			<button type="button" @click="startQuickSearch()" class="wpse-start-quick-search"><?php esc_html_e( 'Search', 'vg_sheet_editor' ); ?></button>
+			<?php
+			return ob_get_clean();
 		}
 
 		function _get_allowed_operators() {
@@ -253,10 +334,12 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 				'LIKE',
 				'NOT LIKE',
 				'starts_with',
+				'not_starts_with',
 				'ends_with',
 				'length_less',
 				'length_higher',
 				'REGEXP',
+				'NOT REGEXP',
 				'last_hours',
 				'last_days',
 				'last_weeks',
@@ -265,6 +348,9 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 				'older_than_days',
 				'older_than_weeks',
 				'older_than_months',
+				'contains_duplicate_values',
+				'word_count_less',
+				'word_count_greater',
 			);
 		}
 
@@ -400,9 +486,13 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 		}
 		function get_raw_filters( $data = array() ) {
 			$raw_filters = null;
+			// The filters are unslashed, decoded, and sanitized in _get_raw_filters.
+			// Not using nonce because the nonce is checked earlier in the ajax handler before this method is used.
 			if ( isset( $_REQUEST['filters'] ) ) {
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended WordPress.Security.ValidatedSanitizedInput.MissingUnslash 	WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 				$raw_filters = $_REQUEST['filters'];
 			} elseif ( isset( $_REQUEST['raw_form_data']['filters'] ) ) {
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended WordPress.Security.ValidatedSanitizedInput.MissingUnslash 	WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 				$raw_filters = $_REQUEST['raw_form_data']['filters'];
 			}
 
@@ -442,11 +532,13 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 		function set_initial_filters( $all_settings, $current_provider_in_page ) {
 
 			// If we received custom filters from the URL or post body (wpse_custom_filters query string), don't apply the previous session filters
-			if ( VGSE()->helpers->user_can_edit_post_type( $current_provider_in_page ) && ! empty( $_REQUEST['wpse_custom_filters'] ) && is_array( $_REQUEST['wpse_custom_filters'] ) ) {
+			if ( VGSE()->helpers->user_can_edit_post_type( $current_provider_in_page ) && ! empty( $_REQUEST['wpse_custom_filters'] ) && is_array( $_REQUEST['wpse_custom_filters'] ) && ! empty( $_REQUEST['wpse_custom_filters_nonce'] ) && wp_verify_nonce( wp_unslash( $_REQUEST['wpse_custom_filters_nonce'] ), 'bep-nonce' ) ) {
 				$last_session_filters = $this->_sanitize_filters( $_REQUEST['wpse_custom_filters'] );
-			} elseif ( ! empty( $_REQUEST['wpse_session_query'] ) ) {
+			} elseif ( ! empty( $_REQUEST['wpse_session_query'] ) && ! empty( $_REQUEST['wpse_custom_filters_nonce'] ) && wp_verify_nonce( wp_unslash( $_REQUEST['wpse_custom_filters_nonce'] ), 'bep-nonce' ) ) {
 				// If the request has wpse_session_query filter, it means that we're loading a spreadsheet with a pre-saved full query so we don't want to apply the previous session filters
-				$last_session_filters = array();
+				$last_session_filters = array(
+					'wpse_session_query' => sanitize_text_field( wp_unslash( $_REQUEST['wpse_session_query'] ) )
+				);
 			} else {
 				$last_session_filters = $this->get_last_session_filters( $current_provider_in_page );
 			}
@@ -454,7 +546,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 
 			// We remove the wpse_session_query and auto export filters, we don't want to show them to the user
 			if ( ! empty( $all_settings['last_session_filters'] ) ) {
-				if ( isset( $all_settings['last_session_filters']['wpse_session_query'] ) ) {
+				if ( isset( $all_settings['last_session_filters']['wpse_session_query'] ) && empty( $_REQUEST['wpse_session_query'] ) ) {
 					unset( $all_settings['last_session_filters']['wpse_session_query'] );
 				}
 				if ( isset( $all_settings['last_session_filters']['wpse_auto_export'] ) ) {
@@ -507,8 +599,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 
 			$fields = array(
 				'keyword' => array(
-					'label'       => __( 'Contains keyword', 'vg_sheet_editor' ),
-					'description' => __( 'It searches in the post title and post content. Search by multiple keywords separating keywords with a semicolon (;)' ),
+					'label'       => esc_html__( 'Contains keyword', 'vg_sheet_editor' ),
+					'description' => esc_html__( 'It searches in the post title and post content. Search by multiple keywords separating keywords with a semicolon (;)', 'vg_sheet_editor' ),
 				),
 			);
 
@@ -517,14 +609,14 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 					$fields,
 					array(
 						'post_status' => array(
-							'label'       => __( 'Status', 'vg_sheet_editor' ),
+							'label'       => esc_html__( 'Status', 'vg_sheet_editor' ),
 							'description' => '',
 						),
 					)
 				);
 				if ( WP_Sheet_Editor_Helpers::current_user_can( 'edit_others_posts' ) ) {
 					$fields['post_author'] = array(
-						'label'       => __( 'Author', 'vg_sheet_editor' ),
+						'label'       => esc_html__( 'Author', 'vg_sheet_editor' ),
 						'description' => '',
 					);
 				}
@@ -533,11 +625,11 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 			?>
 
 
-			<div class="remodal remodal8 remodal-draggable" data-remodal-id="modal-filters" data-remodal-options="closeOnOutsideClick: false">
+			<div class="remodal remodal-fixed remodal8 remodal-draggable" data-remodal-id="modal-filters" data-remodal-options="closeOnOutsideClick: false">
 
 				<div class="modal-content">
-					<form action="<?php echo esc_url( admin_url() ); ?>" method="GET" id="be-filters" >
-						<h3><?php _e( 'Search', 'vg_sheet_editor' ); ?></h3>
+					<form action="<?php echo esc_url( admin_url() ); ?>" method="GET" id="be-filters" x-data="vgseFiltersApp" @submit.prevent="runSearch">
+						<h3><?php esc_html_e( 'Search', 'vg_sheet_editor' ); ?></h3>
 
 						<?php do_action( 'vg_sheet_editor/filters/above_form_fields', $filters, $current_post_type ); ?>
 
@@ -547,7 +639,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 									<label><?php echo wp_kses_post( $filters['keyword']['label'] ); ?> <?php
 									if ( ! empty( $filters['keyword']['description'] ) ) {
 										?>
-										<a href="#" data-wpse-tooltip="right" aria-label="<?php echo esc_attr( $filters['keyword']['description'] ); ?>">( ? )</a><?php } ?></label><input type="text" name="keyword" />
+										<a href="#" data-wpse-tooltip="right" aria-label="<?php echo esc_attr( $filters['keyword']['description'] ); ?>">( ? )</a><?php } ?></label><input type="text" name="keyword" x-model="activeFilters.keyword" />
 								</li>
 							<?php } ?>
 							<?php if ( isset( $filters['post_status'] ) ) { ?>
@@ -556,7 +648,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 									if ( ! empty( $filters['post_status']['description'] ) ) {
 										?>
 										<a href="#" data-wpse-tooltip="right" aria-label="<?php echo esc_attr( $filters['post_status']['description'] ); ?>">( ? )</a><?php } ?></label>
-									<select name="post_status[]" multiple data-placeholder="<?php _e( 'Select...', 'vg_sheet_editor' ); ?>" class="select2">
+									<select name="post_status[]" multiple data-placeholder="<?php esc_html_e( 'Select...', 'vg_sheet_editor' ); ?>" class="select2" x-init="initSelect2($el)" x-model="activeFilters.post_status">
 										<?php
 										$statuses = VGSE()->helpers->get_data_provider( $current_post_type )->get_statuses();
 										if ( ! empty( $statuses ) && is_array( $statuses ) ) {
@@ -575,7 +667,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 									if ( ! empty( $filters['post_author']['description'] ) ) {
 										?>
 										<a href="#" data-wpse-tooltip="right" aria-label="<?php echo esc_attr( $filters['post_author']['description'] ); ?>">( ? )</a><?php } ?></label>										
-									<select data-placeholder="<?php _e( 'Enter a username or email...', 'vg_sheet_editor' ); ?>" name="post_author[]" class="select2"  multiple data-remote="true" data-action="vgse_find_users_by_keyword_for_select2" data-min-input-length="4">
+									<select data-placeholder="<?php esc_html_e( 'Enter a username or email...', 'vg_sheet_editor' ); ?>" name="post_author[]" class="select2"  multiple data-remote="true" data-action="vgse_find_users_by_keyword_for_select2" x-init="initSelect2($el)" data-min-input-length="4" x-model="activeFilters.post_author">
 									</select>
 								</li>
 							<?php } ?>
@@ -588,8 +680,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 						<?php
 						do_action( 'vg_sheet_editor/filters/before_form_closing', $current_post_type, $filters );
 						?>
-						<button type="submit" class="remodal-confirm"><?php _e( 'Run search', 'vg_sheet_editor' ); ?></button>
-						<button data-remodal-action="confirm" class="remodal-cancel"><?php _e( 'Close', 'vg_sheet_editor' ); ?></button>
+						<button type="submit" class="remodal-confirm"><?php esc_html_e( 'Run search', 'vg_sheet_editor' ); ?></button>
+						<button data-remodal-action="confirm" class="remodal-cancel"><?php esc_html_e( 'Close', 'vg_sheet_editor' ); ?></button>
 						<?php
 						do_action( 'vg_sheet_editor/filters/after_form_closing', $current_post_type, $filters );
 						?>

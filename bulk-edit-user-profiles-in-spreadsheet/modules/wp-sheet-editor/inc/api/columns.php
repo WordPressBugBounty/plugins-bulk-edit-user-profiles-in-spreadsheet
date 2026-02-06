@@ -79,7 +79,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 			if ( isset( self::$blacklisted_patterns[ $provider ] ) ) {
 				return self::$blacklisted_patterns[ $provider ];
 			}
-			$blacklisted_keys = apply_filters( 'vg_sheet_editor/columns/blacklisted_columns', array( 'nxs_snap', '_edit_lock', '_edit_last', '_wp_old_slug', '_wpcom_is_markdown', 'vgse_column_sizes', 'wxr_import', '^_oembed', '^\d+_\d+_\d+$', '_user_wished_', '_user_wished_user', '_rehub_views_date', '-wpfoof-', '^_transient_tribe', '_learndash_memberpress_enrolled_courses_access', 'course_\d+_access_from', 'ld_sent_notification_enroll_course_', 'learndash_last_known_course_', 'learndash_group_users_', '_badgeos_achievements_', 'learndash_group_leaders_', 'course_timer_completed_', 'course_completed_', 'screen_layout_', 'enrolled_courses_access_counter_', '_sfwd-quizzes_', '_uo-course-cert-', 'screen_options_per_page', 'gform_recent_forms_', '^manage.+columnshidden_', '^edit_.+_per_page', 'uo_timer_', '_screen_options_default', '_edd_download_limit_override', '_wcj_product_input_fields', 'seopress_pro_rich_snippets', 'seopress_analysis_data', '[a-zA-Z0-9]{28,}$', '_wvs_product_attributes', 'wcml_sync_hash', 'product_tabel_', '_wp_attachment_backup_sizes', '_wp_attached_file', 'thb_postviews_count_', '_wcct_goaldeal_', 'amazonS3_cache_', '_wcct_product_taxonomy_term_ids', '_eg_gallery_data_gallery', '_user_IP', '_wds_readability', 'kc_data_', '_wds_analysis_checks', '_user_liked_', 'wpsebe', '^snap', 'better-related-', '_count-views_', '_ywcp_component_data_list', '_userwish_IP', '_fv_flowplayer_http', '_heateor_sss_shares_meta', '_wpas_skip_', 'cred_user_notification_data', 'googlesitekit_survey_timeouts_', 'yoast_test_helper_notifications', '_mylisting_stats_cache_', 'wpil_links_inbound_internal_count_data', '_et_builder_module_features_cache' ), $provider, $this );
+			$blacklisted_keys = apply_filters( 'vg_sheet_editor/columns/blacklisted_columns', array( 'nxs_snap', '_edit_lock', '_edit_last', '_wp_old_slug', '_wpcom_is_markdown', 'vgse_column_sizes', 'wxr_import', '^_oembed', '^\d+_\d+_\d+$', '_user_wished_', '_user_wished_user', '_rehub_views_date', '-wpfoof-', '^_transient_tribe', '_learndash_memberpress_enrolled_courses_access', 'course_\d+_access_from', 'ld_sent_notification_enroll_course_', 'learndash_last_known_course_', 'learndash_group_users_', '_badgeos_achievements_', 'learndash_group_leaders_', 'course_timer_completed_', 'course_completed_', 'screen_layout_', 'enrolled_courses_access_counter_', '_sfwd-quizzes_', '_uo-course-cert-', 'screen_options_per_page', 'gform_recent_forms_', '^manage.+columnshidden_', '^edit_.+_per_page', 'uo_timer_', '_screen_options_default', '_edd_download_limit_override', '_wcj_product_input_fields', 'seopress_pro_rich_snippets', 'seopress_analysis_data', '[a-zA-Z0-9]{28,}$', '_wvs_product_attributes', 'wcml_sync_hash', 'product_tabel_', '_wp_attachment_backup_sizes', '_wp_attached_file', 'thb_postviews_count_', '_wcct_goaldeal_', 'amazonS3_cache_', '_wcct_product_taxonomy_term_ids', '_eg_gallery_data_gallery', '_user_IP', '_wds_readability', 'kc_data_', '_wds_analysis_checks', '_user_liked_', 'wpsebe', '^snap', 'better-related-', '_count-views_', '_ywcp_component_data_list', '_userwish_IP', '_fv_flowplayer_http', '_heateor_sss_shares_meta', '_wpas_skip_', 'cred_user_notification_data', 'googlesitekit_survey_timeouts_', 'yoast_test_helper_notifications', '_mylisting_stats_cache_', 'wpil_links_inbound_internal_count_data', '_et_builder_module_features_cache', 'xts-term' ), $provider, $this );
 			if ( ! empty( VGSE()->options['blacklist_columns'] ) ) {
 				$blacklisted_keys = array_merge( $blacklisted_keys, array_map( 'trim', explode( ',', VGSE()->options['blacklist_columns'] ) ) );
 			}
@@ -133,13 +133,22 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 			}
 		}
 
-		function columns_limit_reached( $provider ) {
-			$out = false;
-			if ( ! empty( self::$registered_items[ $provider ] ) && count( self::$registered_items[ $provider ] ) > VGSE()->helpers->get_columns_limit() ) {
-
+		function columns_limit_reached( $provider, $custom_count = null ) {
+			$out   = false;
+			$count = 0;
+			if ( is_int( $custom_count ) ) {
+				$count = $custom_count;
+			} elseif ( ! empty( self::$registered_items[ $provider ] ) ) {
+				$count = count( self::$registered_items[ $provider ] );
+			}
+			if ( $count > VGSE()->helpers->get_columns_limit() ) {
 				$out = true;
 			}
 			return $out;
+		}
+
+		function columns_count( $provider ) {
+			return ! empty( self::$registered_items[ $provider ] ) ? count( self::$registered_items[ $provider ] ) : 0;
 		}
 
 		/**
@@ -162,6 +171,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 				return;
 			}
 
+			// If updating existing column, merge new args with existing args. If column doesn't exist, use the new args only
 			if ( $update_existing && $this->has_item( $key, $provider ) ) {
 				$args = wp_parse_args( $args, $this->get_item( $key, $provider, false, true ) );
 			}
@@ -272,6 +282,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 				'user_capabilities_can_read'               => null,
 				'user_capabilities_can_edit'               => null,
 				'allow_to_prefetch_value'                  => true,
+				'prefetch_meta_key'                        => null, // Use for columns with keys different than the db key
 				'external_button_template'                 => '',
 				'gallery_cell_html_template_readonly'      => null,
 				'gallery_cell_html_template_editable'      => null,
@@ -280,6 +291,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 				'allow_readonly_option_in_columns_manager' => true,
 				'value_type'                               => '', // text, number, email, date, post_terms, boton_gallery, boton_gallery_multiple, view_post, handsontable, metabox
 				'allow_numeric_select_value'               => false, // When we save a friendly select, we allow the user to enter the friendly value and we replace it with the value key to save in the database, we only allow string keys but you can enable this if you want to save int keys as the select value
+				'checkpoint_field_type'                    => '', // Indicate type of field for checkpoints: post_data, meta, terms, user_data, term_data, columns (if custom table sheet)
+				'checkpoint_key'                           => '',
 			);
 
 			$args = wp_parse_args( $args, $defaults );
@@ -332,7 +345,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 					$args['edit_modal_title'] = $args['title'];
 				}
 				if ( empty( $args['edit_button_label'] ) ) {
-					$args['edit_button_label'] = sprintf( __( 'Edit %s', 'vg_sheet_editor' ), esc_html( $args['title'] ) );
+					/* translators: %s: Column label */
+					$args['edit_button_label'] = sprintf( esc_html__( 'Edit %s', 'vg_sheet_editor' ), esc_html( $args['title'] ) );
 				}
 				if ( empty( $args['edit_modal_id'] ) ) {
 					$args['edit_modal_id'] = 'vgse-modal-editor-' . wp_generate_password( 5, false );
@@ -379,6 +393,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 					$args['value_type'] = 'post_terms';
 				} elseif ( ! empty( $args['formatted'] ) && ! empty( $args['formatted']['type'] ) && $args['formatted']['type'] === 'checkbox' ) {
 					$args['value_type'] = 'checkbox';
+				} elseif ( ! empty( $args['formatted'] ) && ! empty( $args['formatted']['type'] ) && $args['formatted']['type'] === 'date' ) {
+					$args['value_type'] = 'date';
 				} else {
 					$args['value_type'] = 'text';
 				}

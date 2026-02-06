@@ -1,4 +1,4 @@
-<h3><?php _e('Advanced Settings', $this->textname); ?></h3>
+<h3><?php esc_html_e('Advanced Settings', $this->textname); ?></h3>
 <div class="wpse-settings-form-wrapper">
 
 	<div class="tabs-links">
@@ -9,8 +9,8 @@
 			<a href="#<?php echo sanitize_html_class( $section_id ); ?>"><?php echo esc_html($section['title']); ?></a>
 		<?php }
 		?>	
-		<a href="#reset-settings"><?php _e('Reset settings', $this->textname); ?></a>
-		<a href="#export-import-settings"><?php _e('Export and import settings', $this->textname); ?></a>
+		<a href="#reset-settings"><?php esc_html_e('Reset settings', $this->textname); ?></a>
+		<a href="#export-import-settings"><?php esc_html_e('Export and import settings', $this->textname); ?></a>
 		<?php do_action('vg_plugin_sdk/settings/' . $this->args['opt_name'] . '/after_tab_links', $this, $sections); ?>
 	</div>
 	<form class="wpse-set-settings tabs-content">
@@ -89,7 +89,7 @@
 							}
 							?>
 							<input id="<?php echo esc_attr($field['id']); ?>" name="<?php echo esc_attr($field['id']); ?>" value="<?php echo esc_attr($value); ?>" type="hidden" class="image-target"/>
-							<button class="button open-image-library" type="button"><?php _e('Upload'); ?></button>
+							<button class="button open-image-library" type="button"><?php esc_html_e('Upload'); ?></button>
 							<?php if (!empty($value)) { ?>
 								<img src="<?php echo esc_url(wp_get_attachment_url($value)); ?>" height="80" />
 							<?php } ?>
@@ -198,30 +198,30 @@
 		?>
 
 		<div class="reset-settings tab-content">
-			<p><?php _e('Click on the button below to delete all the settings from the plugin. Please make a database backup if you want to undo this change later.', $this->textname) ?></p>
+			<p><?php esc_html_e('Click on the button below to delete all the settings from the plugin. Please make a database backup if you want to undo this change later.', $this->textname) ?></p>
 			<?php do_action('vg_plugin_sdk/settings/' . $this->args['opt_name'] . '/before_reset_button', $this, $sections); ?>
-			<a href="<?php echo esc_url(wp_nonce_url(add_query_arg('vgjpsdk_hard_reset', 1), 'vgfpsdk_settings_' . $this->args['opt_name'], 'vgjpsdk_nonce')); ?>" class="button"><?php _e('Reset settings', $this->textname) ?></a>
+			<a href="<?php echo esc_url(wp_nonce_url(add_query_arg('vgjpsdk_hard_reset', 1), 'vgfpsdk_settings_' . $this->args['opt_name'], 'vgjpsdk_nonce')); ?>" class="button"><?php esc_html_e('Reset settings', $this->textname) ?></a>
 		</div>
 
 		<div class="export-import-settings tab-content">
-			<label><b><?php _e('Export settings', $this->textname) ?></b></label>
+			<label><b><?php esc_html_e('Export settings', $this->textname) ?></b></label>
 			<?php do_action('vg_plugin_sdk/settings/' . $this->args['opt_name'] . '/before_export_import_tab_content', $this, $sections); ?>
-			<a target="_blank" href="<?php echo esc_url(wp_nonce_url(add_query_arg('vgjpsdk_export_settings', 1), 'vgfpsdk_settings_' . $this->args['opt_name'], 'vgjpsdk_nonce')); ?>" class="button"><?php _e('Click here to export the settings', $this->textname) ?></a>
+			<a target="_blank" href="<?php echo esc_url(wp_nonce_url(add_query_arg('vgjpsdk_export_settings', 1), 'vgfpsdk_settings_' . $this->args['opt_name'], 'vgjpsdk_nonce')); ?>" class="button"><?php esc_html_e('Click here to export the settings', $this->textname) ?></a>
 			<hr>
-			<label><b><?php _e('Import settings', $this->textname) ?></b></label>
+			<label><b><?php esc_html_e('Import settings', $this->textname) ?></b></label>
 			<ol>
-				<li><?php _e('The import will overwrite existing settings', $this->textname) ?></li>
-				<li><?php _e('Please make a database backup before the import to be safe', $this->textname) ?></li>
-				<li><?php _e('Some settings depend on other plugins. So make sure that both sites use the same plugins.', $this->textname) ?></li>
+				<li><?php esc_html_e('The import will overwrite existing settings', $this->textname) ?></li>
+				<li><?php esc_html_e('Please make a database backup before the import to be safe', $this->textname) ?></li>
+				<li><?php esc_html_e('Some settings depend on other plugins. So make sure that both sites use the same plugins.', $this->textname) ?></li>
 			</ol>
-			<p><?php _e('Paste the settings here (the contents of the exported file).', $this->textname) ?></p>
+			<p><?php esc_html_e('Paste the settings here (the contents of the exported file).', $this->textname) ?></p>
 			<textarea name="vgjpsdk_import_settings" style="min-height: 150px;"></textarea>
 
 		</div>
 		<?php do_action('vg_plugin_sdk/settings/' . $this->args['opt_name'] . '/after_tabs_content', $this, $sections); ?>
 		<br>
 		<div class="actions">
-			<button type="submit" class="button button-primary"><?php _e('Save', $this->textname); ?></button>
+			<button type="submit" class="button button-primary"><?php esc_html_e('Save', $this->textname); ?></button>
 		</div>
 		<?php wp_nonce_field('vgfpsdk_settings_' . $this->args['opt_name'], 'nonce'); ?>
 	</form>

@@ -11,7 +11,7 @@ if ( !class_exists( 'WPSE_Users_Sheet' ) ) {
             parent::__construct( array(
                 'fs_object'                         => beupis_fs(),
                 'post_type'                         => array($this->key),
-                'post_type_label'                   => array(__( 'Users' )),
+                'post_type_label'                   => array(esc_html__( 'Users' )),
                 'serialized_columns'                => array(),
                 'register_default_taxonomy_columns' => false,
                 'bootstrap_class'                   => 'WPSE_Users_Spreadsheet_Bootstrap',
@@ -103,7 +103,7 @@ if ( !class_exists( 'WPSE_Users_Sheet' ) ) {
          * @return array  The modified quick actions.
          */
         public function modify_quick_actions( $quick_actions, $post_type, $editor ) {
-            if ( isset( $quick_actions['delete'] ) ) {
+            if ( isset( $quick_actions['delete'] ) && $post_type === $this->key ) {
                 $quick_actions['delete']['columns'] = array('wpse_status');
                 $quick_actions['delete']['type_of_edit'] = 'delete_user';
                 $quick_actions['delete']['values'] = array();
@@ -117,7 +117,7 @@ if ( !class_exists( 'WPSE_Users_Sheet' ) ) {
             }
             $form_builder_args['columns_actions']['text']['delete_user'] = 'default';
             $form_builder_args['default_actions']['delete_user'] = array(
-                'label'               => __( 'Delete user', 'vg_sheet_editor_users' ),
+                'label'               => esc_html__( 'Delete user', 'vg_sheet_editor_users' ),
                 'description'         => '',
                 'fields_relationship' => 'AND',
                 'jsCallback'          => 'vgseGenerateFakeFormula',
@@ -129,8 +129,8 @@ if ( !class_exists( 'WPSE_Users_Sheet' ) ) {
                         'type' => 'text',
                         ''     => '',
                     ),
-                    'label'       => __( 'Reassign the content to this user', 'vg_sheet_editor' ),
-                    'description' => __( 'Enter a username to transfer the content from the deleted users to this user, or leave blank to not reassign the content.', 'vg_sheet_editor' ),
+                    'label'       => esc_html__( 'Reassign the content to this user', 'vg_sheet_editor' ),
+                    'description' => esc_html__( 'Enter a username to transfer the content from the deleted users to this user, or leave blank to not reassign the content.', 'vg_sheet_editor' ),
                 )),
             );
             return $form_builder_args;
@@ -207,7 +207,7 @@ if ( !class_exists( 'WPSE_Users_Sheet' ) ) {
             if ( $post_type === $this->key ) {
                 $new_fields = array(
                     'keyword' => array(
-                        'label'       => __( 'Search in user email, login, nicename, display name', 'vg_sheet_editor_users' ),
+                        'label'       => esc_html__( 'Search in user email, login, nicename, display name', 'vg_sheet_editor_users' ),
                         'description' => 'If you want to search by first name or last name, use the *advanced filters* option.',
                     ),
                 );
@@ -228,6 +228,7 @@ if ( !class_exists( 'WPSE_Users_Sheet' ) ) {
                 return;
             }
             echo '<span class="wpse-lite-version-message">';
+            /* translators: %s: Allowed user roles */
             printf( __( '. <b>Lite version</b> listing "subscriber" users. <b>Go pro:</b> edit all the roles (%s), custom fields, export, import, and more', 'vg_sheet_editor' ), esc_html( str_replace( ', Subscriber', '', implode( ', ', VGSE_Users_Helpers_Obj()->get_all_the_roles() ) ) ) );
             echo '</span>';
         }

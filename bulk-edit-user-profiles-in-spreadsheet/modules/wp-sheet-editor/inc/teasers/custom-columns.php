@@ -8,8 +8,8 @@ if (!class_exists('WP_Sheet_Editor_Custom_Columns_Teaser')) {
 	 */
 	class WP_Sheet_Editor_Custom_Columns_Teaser {
 
-		static private $instance = false;
-		var $found_columns = array();
+		private static $instance = false;
+		public $found_columns = array();
 
 		private function __construct() {
 			

@@ -1,5 +1,5 @@
 /*
- *  Remodal - v1.0.7
+ *  Remodal - v1.1.1
  *  Responsive, lightweight, fast, synchronized with CSS animations, fully customizable modal window plugin with declarative configuration and hash tracking.
  *  http://vodkabears.github.io/remodal/
  *
@@ -7,770 +7,781 @@
  *  Under MIT License
  */
 
-!(function (root, factory) {
-	if (typeof define === 'function' && define.amd) {
-		define(['jquery'], function ($) {
-			return factory(root, $);
-		});
-	} else if (typeof exports === 'object') {
-		factory(root, require('jquery'));
-	} else {
-		factory(root, root.jQuery || root.Zepto);
-	}
-})(this, function (global, $) {
-
-	'use strict';
-
-	/**
-	 * Name of the plugin
-	 * @private
-	 * @const
-	 * @type {String}
-	 */
-	var PLUGIN_NAME = 'remodal';
-
-	/**
-	 * Namespace for CSS and events
-	 * @private
-	 * @const
-	 * @type {String}
-	 */
-	var NAMESPACE = global.REMODAL_GLOBALS && global.REMODAL_GLOBALS.NAMESPACE || PLUGIN_NAME;
-
-	/**
-	 * Animationstart event with vendor prefixes
-	 * @private
-	 * @const
-	 * @type {String}
-	 */
-	var ANIMATIONSTART_EVENTS = $.map(
-			['animationstart', 'webkitAnimationStart', 'MSAnimationStart', 'oAnimationStart'],
-			function (eventName) {
-				return eventName + '.' + NAMESPACE;
-			}
-
-	).join(' ');
-
-	/**
-	 * Animationend event with vendor prefixes
-	 * @private
-	 * @const
-	 * @type {String}
-	 */
-	var ANIMATIONEND_EVENTS = $.map(
-			['animationend', 'webkitAnimationEnd', 'MSAnimationEnd', 'oAnimationEnd'],
-			function (eventName) {
-				return eventName + '.' + NAMESPACE;
-			}
-
-	).join(' ');
-
-	/**
-	 * Default settings
-	 * @private
-	 * @const
-	 * @type {Object}
-	 */
-	var DEFAULTS = $.extend({
-		hashTracking: true,
-		closeOnConfirm: true,
-		closeOnCancel: true,
-		closeOnEscape: true,
-		closeOnOutsideClick: true,
-		modifier: ''
-	}, global.REMODAL_GLOBALS && global.REMODAL_GLOBALS.DEFAULTS);
-
-	/**
-	 * States of the Remodal
-	 * @private
-	 * @const
-	 * @enum {String}
-	 */
-	var STATES = {
-		CLOSING: 'closing',
-		CLOSED: 'closed',
-		OPENING: 'opening',
-		OPENED: 'opened'
-	};
-
-	/**
-	 * Reasons of the state change.
-	 * @private
-	 * @const
-	 * @enum {String}
-	 */
-	var STATE_CHANGE_REASONS = {
-		CONFIRMATION: 'confirmation',
-		CANCELLATION: 'cancellation'
-	};
-
-	/**
-	 * Is animation supported?
-	 * @private
-	 * @const
-	 * @type {Boolean}
-	 */
-	var IS_ANIMATION = (function () {
-		var style = document.createElement('div').style;
-
-		return style.animationName !== undefined ||
-				style.WebkitAnimationName !== undefined ||
-				style.MozAnimationName !== undefined ||
-				style.msAnimationName !== undefined ||
-				style.OAnimationName !== undefined;
-	})();
-
-	/**
-	 * Is iOS?
-	 * @private
-	 * @const
-	 * @type {Boolean}
-	 */
-	var IS_IOS = /iPad|iPhone|iPod/.test(navigator.platform);
-
-	/**
-	 * Current modal
-	 * @private
-	 * @type {Remodal}
-	 */
-	var current;
-
-	/**
-	 * Scrollbar position
-	 * @private
-	 * @type {Number}
-	 */
-	var scrollTop;
-
-	/**
-	 * Returns an animation duration
-	 * @private
-	 * @param {jQuery} $elem
-	 * @returns {Number}
-	 */
-	function getAnimationDuration($elem) {
-		if (
-				IS_ANIMATION &&
-				$elem.css('animation-name') === 'none' &&
-				$elem.css('-webkit-animation-name') === 'none' &&
-				$elem.css('-moz-animation-name') === 'none' &&
-				$elem.css('-o-animation-name') === 'none' &&
-				$elem.css('-ms-animation-name') === 'none'
-				) {
-			return 0;
-		}
-
-		var duration = $elem.css('animation-duration') ||
-				$elem.css('-webkit-animation-duration') ||
-				$elem.css('-moz-animation-duration') ||
-				$elem.css('-o-animation-duration') ||
-				$elem.css('-ms-animation-duration') ||
-				'0s';
-
-		var delay = $elem.css('animation-delay') ||
-				$elem.css('-webkit-animation-delay') ||
-				$elem.css('-moz-animation-delay') ||
-				$elem.css('-o-animation-delay') ||
-				$elem.css('-ms-animation-delay') ||
-				'0s';
-
-		var iterationCount = $elem.css('animation-iteration-count') ||
-				$elem.css('-webkit-animation-iteration-count') ||
-				$elem.css('-moz-animation-iteration-count') ||
-				$elem.css('-o-animation-iteration-count') ||
-				$elem.css('-ms-animation-iteration-count') ||
-				'1';
-
-		var max;
-		var len;
-		var num;
-		var i;
-
-		duration = duration.split(', ');
-		delay = delay.split(', ');
-		iterationCount = iterationCount.split(', ');
-
-		// The 'duration' size is the same as the 'delay' size
-		for (i = 0, len = duration.length, max = Number.NEGATIVE_INFINITY; i < len; i++) {
-			num = parseFloat(duration[i]) * parseInt(iterationCount[i], 10) + parseFloat(delay[i]);
-
-			if (num > max) {
-				max = num;
-			}
-		}
-
-		return max;
-	}
-
-	/**
-	 * Returns a scrollbar width
-	 * @private
-	 * @returns {Number}
-	 */
-	function getScrollbarWidth() {
-		if ($(document.body).height() <= $(window).height()) {
-			return 0;
-		}
-
-		var outer = document.createElement('div');
-		var inner = document.createElement('div');
-		var widthNoScroll;
-		var widthWithScroll;
-
-		outer.style.visibility = 'hidden';
-		outer.style.width = '100px';
-		document.body.appendChild(outer);
-
-		widthNoScroll = outer.offsetWidth;
-
-		// Force scrollbars
-		outer.style.overflow = 'scroll';
-
-		// Add inner div
-		inner.style.width = '100%';
-		outer.appendChild(inner);
-
-		widthWithScroll = inner.offsetWidth;
-
-		// Remove divs
-		outer.parentNode.removeChild(outer);
-
-		return widthNoScroll - widthWithScroll;
-	}
-
-	/**
-	 * Locks the screen
-	 * @private
-	 */
-	function lockScreen() {
-		if (IS_IOS) {
-			return;
-		}
-
-		var $html = $('html');
-		var lockedClass = namespacify('is-locked');
-		var paddingRight;
-		var $body;
-
-		if (!$html.hasClass(lockedClass)) {
-			$body = $(document.body);
-
-			// Zepto does not support '-=', '+=' in the `css` method
-			paddingRight = parseInt($body.css('padding-right'), 10) + getScrollbarWidth();
-
-			$body.css('padding-right', paddingRight + 'px');
-			$html.addClass(lockedClass);
-		}
-	}
-
-	/**
-	 * Unlocks the screen
-	 * @private
-	 */
-	function unlockScreen() {
-		if (IS_IOS) {
-			return;
-		}
-
-		var $html = $('html');
-		var lockedClass = namespacify('is-locked');
-		var paddingRight;
-		var $body;
-
-		if ($html.hasClass(lockedClass)) {
-			$body = $(document.body);
-
-			// Zepto does not support '-=', '+=' in the `css` method
-			paddingRight = parseInt($body.css('padding-right'), 10) - getScrollbarWidth();
-
-			$body.css('padding-right', paddingRight + 'px');
-			$html.removeClass(lockedClass);
-		}
-	}
-
-	/**
-	 * Sets a state for an instance
-	 * @private
-	 * @param {Remodal} instance
-	 * @param {STATES} state
-	 * @param {Boolean} isSilent If true, Remodal does not trigger events
-	 * @param {String} Reason of a state change.
-	 */
-	function setState(instance, state, isSilent, reason) {
-
-		var newState = namespacify('is', state);
-		var allStates = [namespacify('is', STATES.CLOSING),
-			namespacify('is', STATES.OPENING),
-			namespacify('is', STATES.CLOSED),
-			namespacify('is', STATES.OPENED)].join(' ');
-
-		instance.$bg
-				.removeClass(allStates)
-				.addClass(newState);
-
-		instance.$overlay
-				.removeClass(allStates)
-				.addClass(newState);
-
-		instance.$wrapper
-				.removeClass(allStates)
-				.addClass(newState);
-
-		instance.$modal
-				.removeClass(allStates)
-				.addClass(newState);
-
-		instance.state = state;
-		!isSilent && instance.$modal.trigger({
-			type: state,
-			reason: reason
-		}, [{reason: reason}]);
-	}
-
-	/**
-	 * Synchronizes with the animation
-	 * @param {Function} doBeforeAnimation
-	 * @param {Function} doAfterAnimation
-	 * @param {Remodal} instance
-	 */
-	function syncWithAnimation(doBeforeAnimation, doAfterAnimation, instance) {
-		var runningAnimationsCount = 0;
-
-		var handleAnimationStart = function (e) {
-			if (e.target !== this) {
-				return;
-			}
-
-			runningAnimationsCount++;
-		};
-
-		var handleAnimationEnd = function (e) {
-			if (e.target !== this) {
-				return;
-			}
-
-			if (--runningAnimationsCount === 0) {
-
-				// Remove event listeners
-				$.each(['$bg', '$overlay', '$wrapper', '$modal'], function (index, elemName) {
-					instance[elemName].off(ANIMATIONSTART_EVENTS + ' ' + ANIMATIONEND_EVENTS);
-				});
-
-				doAfterAnimation();
-			}
-		};
-
-		$.each(['$bg', '$overlay', '$wrapper', '$modal'], function (index, elemName) {
-			instance[elemName]
-					.on(ANIMATIONSTART_EVENTS, handleAnimationStart)
-					.on(ANIMATIONEND_EVENTS, handleAnimationEnd);
-		});
-
-		doBeforeAnimation();
-
-		// If the animation is not supported by a browser or its duration is 0
-		if (
-				getAnimationDuration(instance.$bg) === 0 &&
-				getAnimationDuration(instance.$overlay) === 0 &&
-				getAnimationDuration(instance.$wrapper) === 0 &&
-				getAnimationDuration(instance.$modal) === 0
-				) {
-
-			// Remove event listeners
-			$.each(['$bg', '$overlay', '$wrapper', '$modal'], function (index, elemName) {
-				instance[elemName].off(ANIMATIONSTART_EVENTS + ' ' + ANIMATIONEND_EVENTS);
-			});
-
-			doAfterAnimation();
-		}
-	}
-
-	/**
-	 * Closes immediately
-	 * @private
-	 * @param {Remodal} instance
-	 */
-	function halt(instance) {
-		if (instance.state === STATES.CLOSED) {
-			return;
-		}
-
-		$.each(['$bg', '$overlay', '$wrapper', '$modal'], function (index, elemName) {
-			instance[elemName].off(ANIMATIONSTART_EVENTS + ' ' + ANIMATIONEND_EVENTS);
-		});
-
-		instance.$bg.removeClass(instance.settings.modifier);
-		instance.$overlay.removeClass(instance.settings.modifier).hide();
-		instance.$wrapper.hide();
-		unlockScreen();
-		setState(instance, STATES.CLOSED, true);
-	}
-
-	/**
-	 * Parses a string with options
-	 * @private
-	 * @param str
-	 * @returns {Object}
-	 */
-	function parseOptions(str) {
-		var obj = {};
-		var arr;
-		var len;
-		var val;
-		var i;
-
-		// Remove spaces before and after delimiters
-		str = str.replace(/\s*:\s*/g, ':').replace(/\s*,\s*/g, ',');
-
-		// Parse a string
-		arr = str.split(',');
-		for (i = 0, len = arr.length; i < len; i++) {
-			arr[i] = arr[i].split(':');
-			val = arr[i][1];
-
-			// Convert a string value if it is like a boolean
-			if (typeof val === 'string' || val instanceof String) {
-				val = val === 'true' || (val === 'false' ? false : val);
-			}
-
-			// Convert a string value if it is like a number
-			if (typeof val === 'string' || val instanceof String) {
-				val = !isNaN(val) ? +val : val;
-			}
-
-			obj[arr[i][0]] = val;
-		}
-
-		return obj;
-	}
-
-	/**
-	 * Generates a string separated by dashes and prefixed with NAMESPACE
-	 * @private
-	 * @param {...String}
-	 * @returns {String}
-	 */
-	function namespacify() {
-		var result = NAMESPACE;
-
-		for (var i = 0; i < arguments.length; ++i) {
-			result += '-' + arguments[i];
-		}
-
-		return result;
-	}
-
-	/**
-	 * Handles the hashchange event
-	 * @private
-	 * @listens hashchange
-	 */
-	function handleHashChangeEvent() {
-		var id = location.hash.replace('#', '');
-		var instance;
-		var $elem;
-
-		if (!id) {
-
-			// Check if we have currently opened modal and animation was completed
-			if (current && current.state === STATES.OPENED && current.settings.hashTracking) {
-				current.close();
-			}
-		} else {
-
-			// Catch syntax error if your hash is bad
-			try {
-				$elem = $(
-						'[data-' + PLUGIN_NAME + '-id="' + id + '"]'
-						);
-			} catch (err) {
-			}
-
-			if ($elem && $elem.length) {
-				instance = $[PLUGIN_NAME].lookup[$elem.data(PLUGIN_NAME)];
-
-				if (instance && instance.settings.hashTracking) {
-					instance.open();
-				}
-			}
-
-		}
-	}
-
-	/**
-	 * Remodal constructor
-	 * @constructor
-	 * @param {jQuery} $modal
-	 * @param {Object} options
-	 */
-	function Remodal($modal, options) {
-		var $body = $(document.body);
-		var remodal = this;
-
-		remodal.settings = $.extend({}, DEFAULTS, options);
-		remodal.index = $[PLUGIN_NAME].lookup.push(remodal) - 1;
-		remodal.state = STATES.CLOSED;
-
-		remodal.$overlay = $('.' + namespacify('overlay'));
-
-		if (!remodal.$overlay.length) {
-			remodal.$overlay = $('<div>').addClass(namespacify('overlay') + ' ' + namespacify('is', STATES.CLOSED)).hide();
-			$body.append(remodal.$overlay);
-		}
-
-		remodal.$bg = $('.' + namespacify('bg')).addClass(namespacify('is', STATES.CLOSED));
-
-		remodal.$modal = $modal
-				.addClass(
-						NAMESPACE + ' ' +
-						namespacify('is-initialized') + ' ' +
-						remodal.settings.modifier + ' ' +
-						namespacify('is', STATES.CLOSED))
-				.attr('tabindex', '-1');
-
-		remodal.$wrapper = $('<div>')
-				.addClass(
-						namespacify('wrapper') + ' ' +
-						remodal.settings.modifier + ' ' +
-						namespacify('is', STATES.CLOSED))
-				.hide()
-				.append(remodal.$modal);
-		$body.append(remodal.$wrapper);
-
-		// Add the event listener for the close button
-		remodal.$wrapper.on('click.' + NAMESPACE, '[data-' + PLUGIN_NAME + '-action="close"]', function (e) {
-			e.preventDefault();
-
-			remodal.close();
-		});
-
-		// Add the event listener for the cancel button
-		remodal.$wrapper.on('click.' + NAMESPACE, '[data-' + PLUGIN_NAME + '-action="cancel"]', function (e) {
-			e.preventDefault();
-
-			remodal.$modal.trigger(STATE_CHANGE_REASONS.CANCELLATION);
-
-			if (remodal.settings.closeOnCancel) {
-				remodal.close(STATE_CHANGE_REASONS.CANCELLATION);
-			}
-		});
-
-		// Add the event listener for the confirm button
-		remodal.$wrapper.on('click.' + NAMESPACE, '[data-' + PLUGIN_NAME + '-action="confirm"]', function (e) {
-			e.preventDefault();
-
-			remodal.$modal.trigger(STATE_CHANGE_REASONS.CONFIRMATION);
-
-			if (remodal.settings.closeOnConfirm) {
-				remodal.close(STATE_CHANGE_REASONS.CONFIRMATION);
-			}
-		});
-
-		// Add the event listener for the overlay
-		remodal.$wrapper.on('click.' + NAMESPACE, function (e) {
-			var $target = $(e.target);
-
-			if (!$target.hasClass(namespacify('wrapper'))) {
-				return;
-			}
-
-			if (remodal.settings.closeOnOutsideClick) {
-				remodal.close();
-			}
-		});
-	}
-
-	/**
-	 * Opens a modal window
-	 * @public
-	 */
-	Remodal.prototype.open = function () {
-		var remodal = this;
-		var id;
-
-		// Check if the animation was completed
-		if (remodal.state === STATES.OPENING || remodal.state === STATES.CLOSING) {
-			return;
-		}
-
-		id = remodal.$modal.attr('data-' + PLUGIN_NAME + '-id');
-
-		if (id && remodal.settings.hashTracking) {
-			scrollTop = $(window).scrollTop();
-			location.hash = id;
-		}
-
-		if (current && current !== remodal) {
-			halt(current);
-		}
-
-		current = remodal;
-		lockScreen();
-		remodal.$bg.addClass(remodal.settings.modifier);
-		remodal.$overlay.addClass(remodal.settings.modifier).show();
-		remodal.$wrapper.show().scrollTop(0);
-		remodal.$modal.focus();
-
-		syncWithAnimation(
-				function () {
-					setState(remodal, STATES.OPENING);
-				},
-				function () {
-					setState(remodal, STATES.OPENED);
-				},
-				remodal);
-	};
-
-	/**
-	 * Closes a modal window
-	 * @public
-	 * @param {String} reason
-	 */
-	Remodal.prototype.close = function (reason) {
-		var remodal = this;
-
-		// Check if the animation was completed
-		if (remodal.state === STATES.OPENING || remodal.state === STATES.CLOSING) {
-			return;
-		}
-
-		if (
-				remodal.settings.hashTracking &&
-				remodal.$modal.attr('data-' + PLUGIN_NAME + '-id') === location.hash.substr(1)
-				) {
-			location.hash = '';
-			$(window).scrollTop(scrollTop);
-		}
-
-		syncWithAnimation(
-				function () {
-					setState(remodal, STATES.CLOSING, false, reason);
-				},
-				function () {
-					remodal.$bg.removeClass(remodal.settings.modifier);
-					remodal.$overlay.removeClass(remodal.settings.modifier).hide();
-					remodal.$wrapper.hide();
-					unlockScreen();
-
-					setState(remodal, STATES.CLOSED, false, reason);
-				},
-				remodal);
-	};
-
-	/**
-	 * Returns a current state of a modal
-	 * @public
-	 * @returns {STATES}
-	 */
-	Remodal.prototype.getState = function () {
-		return this.state;
-	};
-
-	/**
-	 * Destroys a modal
-	 * @public
-	 */
-	Remodal.prototype.destroy = function () {
-		var lookup = $[PLUGIN_NAME].lookup;
-		var instanceCount;
-
-		halt(this);
-		this.$wrapper.remove();
-
-		delete lookup[this.index];
-		instanceCount = $.grep(lookup, function (instance) {
-			return !!instance;
-		}).length;
-
-		if (instanceCount === 0) {
-			this.$overlay.remove();
-			this.$bg.removeClass(
-					namespacify('is', STATES.CLOSING) + ' ' +
-					namespacify('is', STATES.OPENING) + ' ' +
-					namespacify('is', STATES.CLOSED) + ' ' +
-					namespacify('is', STATES.OPENED));
-		}
-	};
-
-	/**
-	 * Special plugin object for instances
-	 * @public
-	 * @type {Object}
-	 */
-	$[PLUGIN_NAME] = {
-		lookup: []
-	};
-
-	/**
-	 * Plugin constructor
-	 * @constructor
-	 * @param {Object} options
-	 * @returns {JQuery}
-	 */
-	$.fn[PLUGIN_NAME] = function (opts) {
-		var instance;
-		var $elem;
-
-		this.each(function (index, elem) {
-			$elem = $(elem);
-
-			if ($elem.data(PLUGIN_NAME) == null) {
-				instance = new Remodal($elem, opts);
-				$elem.data(PLUGIN_NAME, instance.index);
-
-				if (
-						instance.settings.hashTracking &&
-						$elem.attr('data-' + PLUGIN_NAME + '-id') === location.hash.substr(1)
-						) {
-					instance.open();
-				}
-			} else {
-				instance = $[PLUGIN_NAME].lookup[$elem.data(PLUGIN_NAME)];
-			}
-		});
-
-		return instance;
-	};
-
-	$(document).ready(function () {
-
-		// data-remodal-target opens a modal window with the special Id
-		$(document).on('click', '[data-' + PLUGIN_NAME + '-target]', function (e) {
-			e.preventDefault();
-
-			var elem = e.currentTarget;
-			var id = elem.getAttribute('data-' + PLUGIN_NAME + '-target');
-			var $target = $('[data-' + PLUGIN_NAME + '-id="' + id + '"]');
-
-			$[PLUGIN_NAME].lookup[$target.data(PLUGIN_NAME)].open();
-		});
-
-		// Auto initialization of modal windows
-		// They should have the 'remodal' class attribute
-		// Also you can write the `data-remodal-options` attribute to pass params into the modal
-		$(document).find('.' + NAMESPACE).each(function (i, container) {
-			var $container = $(container);
-			var options = $container.data(PLUGIN_NAME + '-options');
-
-			if (!options) {
-				options = {};
-			} else if (typeof options === 'string' || options instanceof String) {
-				options = parseOptions(options);
-			}
-
-			$container[PLUGIN_NAME](options);
-		});
-
-		// Handles the keydown event
-		$(document).on('keydown.' + NAMESPACE, function (e) {
-			if (current && current.settings.closeOnEscape && current.state === STATES.OPENED && e.keyCode === 27) {
-				current.close();
-			}
-		});
-
-		// Handles the hashchange event
-		$(window).on('hashchange.' + NAMESPACE, handleHashChangeEvent);
-	});
+!(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define(['jquery'], function($) {
+      return factory(root, $);
+    });
+  } else if (typeof exports === 'object') {
+    factory(root, require('jquery'));
+  } else {
+    factory(root, root.jQuery || root.Zepto);
+  }
+})(this, function(global, $) {
+
+  'use strict';
+
+  /**
+   * Name of the plugin
+   * @private
+   * @const
+   * @type {String}
+   */
+  var PLUGIN_NAME = 'remodal';
+
+  /**
+   * Namespace for CSS and events
+   * @private
+   * @const
+   * @type {String}
+   */
+  var NAMESPACE = global.REMODAL_GLOBALS && global.REMODAL_GLOBALS.NAMESPACE || PLUGIN_NAME;
+
+  /**
+   * Animationstart event with vendor prefixes
+   * @private
+   * @const
+   * @type {String}
+   */
+  var ANIMATIONSTART_EVENTS = $.map(
+    ['animationstart', 'webkitAnimationStart', 'MSAnimationStart', 'oAnimationStart'],
+
+    function(eventName) {
+      return eventName + '.' + NAMESPACE;
+    }
+
+  ).join(' ');
+
+  /**
+   * Animationend event with vendor prefixes
+   * @private
+   * @const
+   * @type {String}
+   */
+  var ANIMATIONEND_EVENTS = $.map(
+    ['animationend', 'webkitAnimationEnd', 'MSAnimationEnd', 'oAnimationEnd'],
+
+    function(eventName) {
+      return eventName + '.' + NAMESPACE;
+    }
+
+  ).join(' ');
+
+  /**
+   * Default settings
+   * @private
+   * @const
+   * @type {Object}
+   */
+  var DEFAULTS = $.extend({
+    hashTracking: true,
+    closeOnConfirm: true,
+    closeOnCancel: true,
+    closeOnEscape: true,
+    closeOnOutsideClick: true,
+    modifier: '',
+    appendTo: null
+  }, global.REMODAL_GLOBALS && global.REMODAL_GLOBALS.DEFAULTS);
+
+  /**
+   * States of the Remodal
+   * @private
+   * @const
+   * @enum {String}
+   */
+  var STATES = {
+    CLOSING: 'closing',
+    CLOSED: 'closed',
+    OPENING: 'opening',
+    OPENED: 'opened'
+  };
+
+  /**
+   * Reasons of the state change.
+   * @private
+   * @const
+   * @enum {String}
+   */
+  var STATE_CHANGE_REASONS = {
+    CONFIRMATION: 'confirmation',
+    CANCELLATION: 'cancellation'
+  };
+
+  /**
+   * Is animation supported?
+   * @private
+   * @const
+   * @type {Boolean}
+   */
+  var IS_ANIMATION = (function() {
+    var style = document.createElement('div').style;
+
+    return style.animationName !== undefined ||
+      style.WebkitAnimationName !== undefined ||
+      style.MozAnimationName !== undefined ||
+      style.msAnimationName !== undefined ||
+      style.OAnimationName !== undefined;
+  })();
+
+  /**
+   * Is iOS?
+   * @private
+   * @const
+   * @type {Boolean}
+   */
+  var IS_IOS = /iPad|iPhone|iPod/.test(navigator.platform);
+
+  /**
+   * Current modal
+   * @private
+   * @type {Remodal}
+   */
+  var current;
+
+  /**
+   * Scrollbar position
+   * @private
+   * @type {Number}
+   */
+  var scrollTop;
+
+  /**
+   * Returns an animation duration
+   * @private
+   * @param {jQuery} $elem
+   * @returns {Number}
+   */
+  function getAnimationDuration($elem) {
+    if (
+      IS_ANIMATION &&
+      $elem.css('animation-name') === 'none' &&
+      $elem.css('-webkit-animation-name') === 'none' &&
+      $elem.css('-moz-animation-name') === 'none' &&
+      $elem.css('-o-animation-name') === 'none' &&
+      $elem.css('-ms-animation-name') === 'none'
+    ) {
+      return 0;
+    }
+
+    var duration = $elem.css('animation-duration') ||
+      $elem.css('-webkit-animation-duration') ||
+      $elem.css('-moz-animation-duration') ||
+      $elem.css('-o-animation-duration') ||
+      $elem.css('-ms-animation-duration') ||
+      '0s';
+
+    var delay = $elem.css('animation-delay') ||
+      $elem.css('-webkit-animation-delay') ||
+      $elem.css('-moz-animation-delay') ||
+      $elem.css('-o-animation-delay') ||
+      $elem.css('-ms-animation-delay') ||
+      '0s';
+
+    var iterationCount = $elem.css('animation-iteration-count') ||
+      $elem.css('-webkit-animation-iteration-count') ||
+      $elem.css('-moz-animation-iteration-count') ||
+      $elem.css('-o-animation-iteration-count') ||
+      $elem.css('-ms-animation-iteration-count') ||
+      '1';
+
+    var max;
+    var len;
+    var num;
+    var i;
+
+    duration = duration.split(', ');
+    delay = delay.split(', ');
+    iterationCount = iterationCount.split(', ');
+
+    // The 'duration' size is the same as the 'delay' size
+    for (i = 0, len = duration.length, max = Number.NEGATIVE_INFINITY; i < len; i++) {
+      num = parseFloat(duration[i]) * parseInt(iterationCount[i], 10) + parseFloat(delay[i]);
+
+      if (num > max) {
+        max = num;
+      }
+    }
+
+    return max;
+  }
+
+  /**
+   * Returns a scrollbar width
+   * @private
+   * @returns {Number}
+   */
+  function getScrollbarWidth() {
+    if ($(document).height() <= $(window).height()) {
+      return 0;
+    }
+
+    var outer = document.createElement('div');
+    var inner = document.createElement('div');
+    var widthNoScroll;
+    var widthWithScroll;
+
+    outer.style.visibility = 'hidden';
+    outer.style.width = '100px';
+    document.body.appendChild(outer);
+
+    widthNoScroll = outer.offsetWidth;
+
+    // Force scrollbars
+    outer.style.overflow = 'scroll';
+
+    // Add inner div
+    inner.style.width = '100%';
+    outer.appendChild(inner);
+
+    widthWithScroll = inner.offsetWidth;
+
+    // Remove divs
+    outer.parentNode.removeChild(outer);
+
+    return widthNoScroll - widthWithScroll;
+  }
+
+  /**
+   * Locks the screen
+   * @private
+   */
+  function lockScreen() {
+    if (IS_IOS) {
+      return;
+    }
+
+    var $html = $('html');
+    var lockedClass = namespacify('is-locked');
+    var paddingRight;
+    var $body;
+
+    if (!$html.hasClass(lockedClass)) {
+      $body = $(document.body);
+
+      // Zepto does not support '-=', '+=' in the `css` method
+      paddingRight = parseInt($body.css('padding-right'), 10) + getScrollbarWidth();
+
+      $body.css('padding-right', paddingRight + 'px');
+      $html.addClass(lockedClass);
+    }
+  }
+
+  /**
+   * Unlocks the screen
+   * @private
+   */
+  function unlockScreen() {
+    if (IS_IOS) {
+      return;
+    }
+
+    var $html = $('html');
+    var lockedClass = namespacify('is-locked');
+    var paddingRight;
+    var $body;
+
+    if ($html.hasClass(lockedClass)) {
+      $body = $(document.body);
+
+      // Zepto does not support '-=', '+=' in the `css` method
+      paddingRight = parseInt($body.css('padding-right'), 10) - getScrollbarWidth();
+
+      $body.css('padding-right', paddingRight + 'px');
+      $html.removeClass(lockedClass);
+    }
+  }
+
+  /**
+   * Sets a state for an instance
+   * @private
+   * @param {Remodal} instance
+   * @param {STATES} state
+   * @param {Boolean} isSilent If true, Remodal does not trigger events
+   * @param {String} Reason of a state change.
+   */
+  function setState(instance, state, isSilent, reason) {
+
+    var newState = namespacify('is', state);
+    var allStates = [namespacify('is', STATES.CLOSING),
+                     namespacify('is', STATES.OPENING),
+                     namespacify('is', STATES.CLOSED),
+                     namespacify('is', STATES.OPENED)].join(' ');
+
+    instance.$bg
+      .removeClass(allStates)
+      .addClass(newState);
+
+    instance.$overlay
+      .removeClass(allStates)
+      .addClass(newState);
+
+    instance.$wrapper
+      .removeClass(allStates)
+      .addClass(newState);
+
+    instance.$modal
+      .removeClass(allStates)
+      .addClass(newState);
+
+    instance.state = state;
+    !isSilent && instance.$modal.trigger({
+      type: state,
+      reason: reason
+    }, [{ reason: reason }]);
+  }
+
+  /**
+   * Synchronizes with the animation
+   * @param {Function} doBeforeAnimation
+   * @param {Function} doAfterAnimation
+   * @param {Remodal} instance
+   */
+  function syncWithAnimation(doBeforeAnimation, doAfterAnimation, instance) {
+    var runningAnimationsCount = 0;
+
+    var handleAnimationStart = function(e) {
+      if (e.target !== this) {
+        return;
+      }
+
+      runningAnimationsCount++;
+    };
+
+    var handleAnimationEnd = function(e) {
+      if (e.target !== this) {
+        return;
+      }
+
+      if (--runningAnimationsCount === 0) {
+
+        // Remove event listeners
+        $.each(['$bg', '$overlay', '$wrapper', '$modal'], function(index, elemName) {
+          instance[elemName].off(ANIMATIONSTART_EVENTS + ' ' + ANIMATIONEND_EVENTS);
+        });
+
+        doAfterAnimation();
+      }
+    };
+
+    $.each(['$bg', '$overlay', '$wrapper', '$modal'], function(index, elemName) {
+      instance[elemName]
+        .on(ANIMATIONSTART_EVENTS, handleAnimationStart)
+        .on(ANIMATIONEND_EVENTS, handleAnimationEnd);
+    });
+
+    doBeforeAnimation();
+
+    // If the animation is not supported by a browser or its duration is 0
+    if (
+      getAnimationDuration(instance.$bg) === 0 &&
+      getAnimationDuration(instance.$overlay) === 0 &&
+      getAnimationDuration(instance.$wrapper) === 0 &&
+      getAnimationDuration(instance.$modal) === 0
+    ) {
+
+      // Remove event listeners
+      $.each(['$bg', '$overlay', '$wrapper', '$modal'], function(index, elemName) {
+        instance[elemName].off(ANIMATIONSTART_EVENTS + ' ' + ANIMATIONEND_EVENTS);
+      });
+
+      doAfterAnimation();
+    }
+  }
+
+  /**
+   * Closes immediately
+   * @private
+   * @param {Remodal} instance
+   */
+  function halt(instance) {
+    if (instance.state === STATES.CLOSED) {
+      return;
+    }
+
+    $.each(['$bg', '$overlay', '$wrapper', '$modal'], function(index, elemName) {
+      instance[elemName].off(ANIMATIONSTART_EVENTS + ' ' + ANIMATIONEND_EVENTS);
+    });
+
+    instance.$bg.removeClass(instance.settings.modifier);
+    instance.$overlay.removeClass(instance.settings.modifier).hide();
+    instance.$wrapper.hide();
+    unlockScreen();
+    setState(instance, STATES.CLOSED, true);
+  }
+
+  /**
+   * Parses a string with options
+   * @private
+   * @param str
+   * @returns {Object}
+   */
+  function parseOptions(str) {
+    var obj = {};
+    var arr;
+    var len;
+    var val;
+    var i;
+
+    // Remove spaces before and after delimiters
+    str = str.replace(/\s*:\s*/g, ':').replace(/\s*,\s*/g, ',');
+
+    // Parse a string
+    arr = str.split(',');
+    for (i = 0, len = arr.length; i < len; i++) {
+      arr[i] = arr[i].split(':');
+      val = arr[i][1];
+
+      // Convert a string value if it is like a boolean
+      if (typeof val === 'string' || val instanceof String) {
+        val = val === 'true' || (val === 'false' ? false : val);
+      }
+
+      // Convert a string value if it is like a number
+      if (typeof val === 'string' || val instanceof String) {
+        val = !isNaN(val) ? +val : val;
+      }
+
+      obj[arr[i][0]] = val;
+    }
+
+    return obj;
+  }
+
+  /**
+   * Generates a string separated by dashes and prefixed with NAMESPACE
+   * @private
+   * @param {...String}
+   * @returns {String}
+   */
+  function namespacify() {
+    var result = NAMESPACE;
+
+    for (var i = 0; i < arguments.length; ++i) {
+      result += '-' + arguments[i];
+    }
+
+    return result;
+  }
+
+  /**
+   * Handles the hashchange event
+   * @private
+   * @listens hashchange
+   */
+  function handleHashChangeEvent() {
+    var id = location.hash.replace('#', '');
+    var instance;
+    var $elem;
+
+    if (!id) {
+
+      // Check if we have currently opened modal and animation was completed
+      if (current && current.state === STATES.OPENED && current.settings.hashTracking) {
+        current.close();
+      }
+    } else {
+
+      // Catch syntax error if your hash is bad
+      try {
+        $elem = $(
+          '[data-' + PLUGIN_NAME + '-id="' + id + '"]'
+        );
+      } catch (err) {}
+
+      if ($elem && $elem.length) {
+        instance = $[PLUGIN_NAME].lookup[$elem.data(PLUGIN_NAME)];
+
+        if (instance && instance.settings.hashTracking) {
+          instance.open();
+        }
+      }
+
+    }
+  }
+
+  /**
+   * Remodal constructor
+   * @constructor
+   * @param {jQuery} $modal
+   * @param {Object} options
+   */
+  function Remodal($modal, options) {
+    var $body = $(document.body);
+    var $appendTo = $body;
+    var remodal = this;
+
+    remodal.settings = $.extend({}, DEFAULTS, options);
+    remodal.index = $[PLUGIN_NAME].lookup.push(remodal) - 1;
+    remodal.state = STATES.CLOSED;
+
+    remodal.$overlay = $('.' + namespacify('overlay'));
+
+    if (remodal.settings.appendTo !== null && remodal.settings.appendTo.length) {
+      $appendTo = $(remodal.settings.appendTo);
+    }
+
+    if (!remodal.$overlay.length) {
+      remodal.$overlay = $('<div>').addClass(namespacify('overlay') + ' ' + namespacify('is', STATES.CLOSED)).hide();
+      $appendTo.append(remodal.$overlay);
+    }
+
+    remodal.$bg = $('.' + namespacify('bg')).addClass(namespacify('is', STATES.CLOSED));
+
+    remodal.$modal = $modal
+      .addClass(
+        NAMESPACE + ' ' +
+        namespacify('is-initialized') + ' ' +
+        remodal.settings.modifier + ' ' +
+        namespacify('is', STATES.CLOSED))
+      .attr('tabindex', '-1');
+
+    remodal.$wrapper = $('<div>')
+      .addClass(
+        namespacify('wrapper') + ' ' +
+        remodal.settings.modifier + ' ' +
+        namespacify('is', STATES.CLOSED))
+      .hide()
+      .append(remodal.$modal);
+    $appendTo.append(remodal.$wrapper);
+
+    // Add the event listener for the close button
+    remodal.$wrapper.on('click.' + NAMESPACE, '[data-' + PLUGIN_NAME + '-action="close"]', function(e) {
+      e.preventDefault();
+
+      remodal.close();
+    });
+
+    // Add the event listener for the cancel button
+    remodal.$wrapper.on('click.' + NAMESPACE, '[data-' + PLUGIN_NAME + '-action="cancel"]', function(e) {
+      e.preventDefault();
+
+      remodal.$modal.trigger(STATE_CHANGE_REASONS.CANCELLATION);
+
+      if (remodal.settings.closeOnCancel) {
+        remodal.close(STATE_CHANGE_REASONS.CANCELLATION);
+      }
+    });
+
+    // Add the event listener for the confirm button
+    remodal.$wrapper.on('click.' + NAMESPACE, '[data-' + PLUGIN_NAME + '-action="confirm"]', function(e) {
+      e.preventDefault();
+
+      remodal.$modal.trigger(STATE_CHANGE_REASONS.CONFIRMATION);
+
+      if (remodal.settings.closeOnConfirm) {
+        remodal.close(STATE_CHANGE_REASONS.CONFIRMATION);
+      }
+    });
+
+    // Add the event listener for the overlay
+    remodal.$wrapper.on('click.' + NAMESPACE, function(e) {
+      var $target = $(e.target);
+
+      if (!$target.hasClass(namespacify('wrapper'))) {
+        return;
+      }
+
+      if (remodal.settings.closeOnOutsideClick) {
+        remodal.close();
+      }
+    });
+  }
+
+  /**
+   * Opens a modal window
+   * @public
+   */
+  Remodal.prototype.open = function() {
+    var remodal = this;
+    var id;
+
+    // Check if the animation was completed
+    if (remodal.state === STATES.OPENING || remodal.state === STATES.CLOSING) {
+      return;
+    }
+
+    id = remodal.$modal.attr('data-' + PLUGIN_NAME + '-id');
+
+    if (id && remodal.settings.hashTracking) {
+      scrollTop = $(window).scrollTop();
+      location.hash = id;
+    }
+
+    if (current && current !== remodal) {
+      halt(current);
+    }
+
+    current = remodal;
+    lockScreen();
+    remodal.$bg.addClass(remodal.settings.modifier);
+    remodal.$overlay.addClass(remodal.settings.modifier).show();
+    remodal.$wrapper.show().scrollTop(0);
+    remodal.$modal.focus();
+
+    syncWithAnimation(
+      function() {
+        setState(remodal, STATES.OPENING);
+      },
+
+      function() {
+        setState(remodal, STATES.OPENED);
+      },
+
+      remodal);
+  };
+
+  /**
+   * Closes a modal window
+   * @public
+   * @param {String} reason
+   */
+  Remodal.prototype.close = function(reason) {
+    var remodal = this;
+
+    // Check if the animation was completed
+    if (remodal.state === STATES.OPENING || remodal.state === STATES.CLOSING || remodal.state === STATES.CLOSED) {
+      return;
+    }
+
+    if (
+      remodal.settings.hashTracking &&
+      remodal.$modal.attr('data-' + PLUGIN_NAME + '-id') === location.hash.substr(1)
+    ) {
+      location.hash = '';
+      $(window).scrollTop(scrollTop);
+    }
+
+    syncWithAnimation(
+      function() {
+        setState(remodal, STATES.CLOSING, false, reason);
+      },
+
+      function() {
+        remodal.$bg.removeClass(remodal.settings.modifier);
+        remodal.$overlay.removeClass(remodal.settings.modifier).hide();
+        remodal.$wrapper.hide();
+        unlockScreen();
+
+        setState(remodal, STATES.CLOSED, false, reason);
+      },
+
+      remodal);
+  };
+
+  /**
+   * Returns a current state of a modal
+   * @public
+   * @returns {STATES}
+   */
+  Remodal.prototype.getState = function() {
+    return this.state;
+  };
+
+  /**
+   * Destroys a modal
+   * @public
+   */
+  Remodal.prototype.destroy = function() {
+    var lookup = $[PLUGIN_NAME].lookup;
+    var instanceCount;
+
+    halt(this);
+    this.$wrapper.remove();
+
+    delete lookup[this.index];
+    instanceCount = $.grep(lookup, function(instance) {
+      return !!instance;
+    }).length;
+
+    if (instanceCount === 0) {
+      this.$overlay.remove();
+      this.$bg.removeClass(
+        namespacify('is', STATES.CLOSING) + ' ' +
+        namespacify('is', STATES.OPENING) + ' ' +
+        namespacify('is', STATES.CLOSED) + ' ' +
+        namespacify('is', STATES.OPENED));
+    }
+  };
+
+  /**
+   * Special plugin object for instances
+   * @public
+   * @type {Object}
+   */
+  $[PLUGIN_NAME] = {
+    lookup: []
+  };
+
+  /**
+   * Plugin constructor
+   * @constructor
+   * @param {Object} options
+   * @returns {JQuery}
+   */
+  $.fn[PLUGIN_NAME] = function(opts) {
+    var instance;
+    var $elem;
+
+    this.each(function(index, elem) {
+      $elem = $(elem);
+
+      if ($elem.data(PLUGIN_NAME) == null) {
+        instance = new Remodal($elem, opts);
+        $elem.data(PLUGIN_NAME, instance.index);
+
+        if (
+          instance.settings.hashTracking &&
+          $elem.attr('data-' + PLUGIN_NAME + '-id') === location.hash.substr(1)
+        ) {
+          instance.open();
+        }
+      } else {
+        instance = $[PLUGIN_NAME].lookup[$elem.data(PLUGIN_NAME)];
+      }
+    });
+
+    return instance;
+  };
+
+  $(document).ready(function() {
+
+    // data-remodal-target opens a modal window with the special Id
+    $(document).on('click', '[data-' + PLUGIN_NAME + '-target]', function(e) {
+      e.preventDefault();
+
+      var elem = e.currentTarget;
+      var id = elem.getAttribute('data-' + PLUGIN_NAME + '-target');
+      var $target = $('[data-' + PLUGIN_NAME + '-id="' + id + '"]');
+
+      $[PLUGIN_NAME].lookup[$target.data(PLUGIN_NAME)].open();
+    });
+
+    // Auto initialization of modal windows
+    // They should have the 'remodal' class attribute
+    // Also you can write the `data-remodal-options` attribute to pass params into the modal
+    $(document).find('.' + NAMESPACE).each(function(i, container) {
+      var $container = $(container);
+      var options = $container.data(PLUGIN_NAME + '-options');
+
+      if (!options) {
+        options = {};
+      } else if (typeof options === 'string' || options instanceof String) {
+        options = parseOptions(options);
+      }
+
+      $container[PLUGIN_NAME](options);
+    });
+
+    // Handles the keydown event
+    $(document).on('keydown.' + NAMESPACE, function(e) {
+      if (current && current.settings.closeOnEscape && current.state === STATES.OPENED && e.keyCode === 27) {
+        current.close();
+      }
+    });
+
+    // Handles the hashchange event
+    $(window).on('hashchange.' + NAMESPACE, handleHashChangeEvent);
+  });
 });
 
 /*!
@@ -48334,7 +48345,65 @@ function (_Overlay) {
 
   }, {
     key: "resetFixedPosition",
-    value: function resetFixedPosition() {
+    // Customized: Offset the top overlay (sticky column headers) taking into account the sticky header
+value: function resetFixedPosition() {
+  if (!this.needFullRender || !this.wot.wtTable.holder.parentNode) {
+    // removed from DOM
+    return;
+  }
+
+  var overlayRoot = this.clone.wtTable.holder.parentNode;
+  var headerPosition = 0;
+  var preventOverflow = this.wot.getSetting('preventOverflow');
+
+  if (this.trimmingContainer === window && (!preventOverflow || preventOverflow !== 'vertical')) {
+    var box = this.wot.wtTable.hider.getBoundingClientRect();
+    var top = Math.ceil(box.top);
+    var bottom = Math.ceil(box.bottom);
+    var finalLeft;
+    var finalTop;
+
+    // -- MODIFICATION START --
+
+    // 1. Get the sticky header element and its height.
+    var stickyHeader = document.querySelector('.sheet-header');
+    // 2. If the header exists, use its height as the offset; otherwise, default to 0.
+    var headerOffset = stickyHeader && ! this.wot.getSetting('width') ? stickyHeader.offsetHeight - 75 : 0;
+
+    // -- MODIFICATION END --
+
+    finalLeft = this.wot.wtTable.hider.style.left;
+    finalLeft = finalLeft === '' ? 0 : finalLeft;
+
+    // -- MODIFICATION START --
+
+    // 3. Change the condition to trigger when the table top scrolls under the sticky header.
+    if (top < headerOffset && bottom - overlayRoot.offsetHeight > 0) {
+      // 4. Calculate the new top position by adding the header's height as an offset.
+      // This positions the overlay exactly below your sticky header.
+      finalTop = -top + headerOffset;
+
+    } else {
+      // When the table is scrolled down, apply no transform.
+      finalTop = 0;
+    }
+
+    // -- MODIFICATION END --
+
+    headerPosition = finalTop;
+    finalTop += 'px';
+    (0, _element.setOverlayPosition)(overlayRoot, finalLeft, finalTop);
+
+  } else {
+    headerPosition = this.getScrollPosition();
+    (0, _element.resetCssTransform)(overlayRoot);
+  }
+
+  this.adjustHeaderBordersPosition(headerPosition);
+  this.adjustElementsSize();
+}
+  // Original
+    /*value: function resetFixedPosition() {
       if (!this.needFullRender || !this.wot.wtTable.holder.parentNode) {
         // removed from DOM
         return;
@@ -48369,7 +48438,7 @@ function (_Overlay) {
 
       this.adjustHeaderBordersPosition(headerPosition);
       this.adjustElementsSize();
-    }
+    }*/
     /**
      * Sets the main overlay's vertical scroll position.
      *
@@ -48749,6 +48818,66 @@ function (_Overlay) {
 
   }, {
     key: "resetFixedPosition",
+    // Customized: Offset the top overlay (sticky column headers) taking into account the sticky header
+value: function resetFixedPosition() {
+  this.updateTrimmingContainer();
+
+  if (!this.wot.wtTable.holder.parentNode) {
+    // removed from DOM
+    return;
+  }
+
+  var overlayRoot = this.clone.wtTable.holder.parentNode;
+  var tableHeight = (0, _element.outerHeight)(this.clone.wtTable.TABLE);
+  var tableWidth = (0, _element.outerWidth)(this.clone.wtTable.TABLE);
+  var preventOverflow = this.wot.getSetting('preventOverflow');
+
+  if (this.trimmingContainer === window) {
+    var box = this.wot.wtTable.hider.getBoundingClientRect();
+    var top = Math.ceil(box.top);
+    var left = Math.ceil(box.left);
+    var bottom = Math.ceil(box.bottom);
+    var right = Math.ceil(box.right);
+    var finalLeft = '0';
+    var finalTop = '0';
+
+    // -- MODIFICATION START --
+
+    // 1. Get the sticky header and its height to use as an offset.
+    var stickyHeader = document.querySelector('.sheet-header');
+        var headerOffset = stickyHeader && ! this.wot.getSetting('width') ? stickyHeader.offsetHeight - 75 : 0;
+
+    // -- MODIFICATION END --
+
+    if (!preventOverflow || preventOverflow === 'vertical') {
+      if (left < 0 && right - overlayRoot.offsetWidth > 0) {
+        finalLeft = "".concat(-left, "px");
+      }
+    }
+
+    if (!preventOverflow || preventOverflow === 'horizontal') {
+      // -- MODIFICATION START --
+
+      // 2. Change the condition to trigger when the table scrolls under the custom header.
+      if (top < headerOffset && bottom - overlayRoot.offsetHeight > 0) {
+        // 3. Calculate the new top position by adding the header's offset.
+        var newTop = -top + headerOffset;
+        finalTop = "".concat(newTop, "px");
+      }
+
+      // -- MODIFICATION END --
+    }
+
+    (0, _element.setOverlayPosition)(overlayRoot, finalLeft, finalTop);
+  } else {
+    (0, _element.resetCssTransform)(overlayRoot);
+  }
+
+  overlayRoot.style.height = "".concat(tableHeight === 0 ? tableHeight : tableHeight + 4, "px");
+  overlayRoot.style.width = "".concat(tableWidth === 0 ? tableWidth : tableWidth + 4, "px");
+}
+// Original
+/*
     value: function resetFixedPosition() {
       this.updateTrimmingContainer();
 
@@ -48790,7 +48919,7 @@ function (_Overlay) {
 
       overlayRoot.style.height = "".concat(tableHeight === 0 ? tableHeight : tableHeight + 4, "px");
       overlayRoot.style.width = "".concat(tableWidth === 0 ? tableWidth : tableWidth + 4, "px");
-    }
+    }*/
   }]);
 
   return TopLeftCornerOverlay;
@@ -49267,7 +49396,65 @@ function (_Overlay) {
 
   }, {
     key: "resetFixedPosition",
+    // Customized: Offset the top overlay (sticky column headers) taking into account the sticky header
     value: function resetFixedPosition() {
+      this.updateTrimmingContainer();
+
+      if (!this.wot.wtTable.holder.parentNode) {
+        // removed from DOM
+        return;
+      }
+
+      var overlayRoot = this.clone.wtTable.holder.parentNode;
+      var tableHeight = (0, _element.outerHeight)(this.clone.wtTable.TABLE);
+      var tableWidth = (0, _element.outerWidth)(this.clone.wtTable.TABLE);
+      var preventOverflow = this.wot.getSetting('preventOverflow');
+
+      if (this.trimmingContainer === window) {
+        var box = this.wot.wtTable.hider.getBoundingClientRect();
+        var top = Math.ceil(box.top);
+        var left = Math.ceil(box.left);
+        var bottom = Math.ceil(box.bottom);
+        var right = Math.ceil(box.right);
+        var finalLeft = '0';
+        var finalTop = '0';
+
+        // -- MODIFICATION START --
+
+        // 1. Get the sticky header and its height to use as an offset.
+        var stickyHeader = document.querySelector('.sheet-header');
+        var headerOffset = stickyHeader && ! this.wot.getSetting('width') ? stickyHeader.offsetHeight - 75 : 0;
+
+        // -- MODIFICATION END --
+
+        if (!preventOverflow || preventOverflow === 'vertical') {
+          if (left < 0 && right - overlayRoot.offsetWidth > 0) {
+            finalLeft = "".concat(-left, "px");
+          }
+        }
+
+        if (!preventOverflow || preventOverflow === 'horizontal') {
+          // -- MODIFICATION START --
+
+          // 2. Change the condition to trigger when the table scrolls under the custom header.
+          if (top < headerOffset && bottom - overlayRoot.offsetHeight > 0) {
+            // 3. Calculate the new top position by adding the header's offset.
+            var newTop = -top + headerOffset;
+            finalTop = "".concat(newTop, "px");
+          }
+
+          // -- MODIFICATION END --
+        }
+
+        (0, _element.setOverlayPosition)(overlayRoot, finalLeft, finalTop);
+      } else {
+        (0, _element.resetCssTransform)(overlayRoot);
+      }
+
+      overlayRoot.style.height = "".concat(tableHeight === 0 ? tableHeight : tableHeight + 4, "px");
+      overlayRoot.style.width = "".concat(tableWidth === 0 ? tableWidth : tableWidth + 4, "px");
+    }
+    /*value: function resetFixedPosition() {
       this.updateTrimmingContainer();
 
       if (!this.wot.wtTable.holder.parentNode) {
@@ -49312,7 +49499,7 @@ function (_Overlay) {
 
       overlayRoot.style.height = "".concat(tableHeight === 0 ? tableHeight : tableHeight, "px");
       overlayRoot.style.width = "".concat(tableWidth === 0 ? tableWidth : tableWidth, "px");
-    }
+    }*/
   }]);
 
   return BottomLeftCornerOverlay;
@@ -83207,7 +83394,6 @@ exports.default = _default;
 /* Chosen v1.8.3 | (c) 2011-2018 by Harvest | MIT License, https://github.com/harvesthq/chosen/blob/master/LICENSE.md */
 
 (function(){var t,e,s,i,n=function(t,e){return function(){return t.apply(e,arguments)}},o=function(t,e){function s(){this.constructor=t}for(var i in e)r.call(e,i)&&(t[i]=e[i]);return s.prototype=e.prototype,t.prototype=new s,t.__super__=e.prototype,t},r={}.hasOwnProperty;(i=function(){function t(){this.options_index=0,this.parsed=[]}return t.prototype.add_node=function(t){return"OPTGROUP"===t.nodeName.toUpperCase()?this.add_group(t):this.add_option(t)},t.prototype.add_group=function(t){var e,s,i,n,o,r;for(e=this.parsed.length,this.parsed.push({array_index:e,group:!0,label:t.label,title:t.title?t.title:void 0,children:0,disabled:t.disabled,classes:t.className}),r=[],s=0,i=(o=t.childNodes).length;s<i;s++)n=o[s],r.push(this.add_option(n,e,t.disabled));return r},t.prototype.add_option=function(t,e,s){if("OPTION"===t.nodeName.toUpperCase())return""!==t.text?(null!=e&&(this.parsed[e].children+=1),this.parsed.push({array_index:this.parsed.length,options_index:this.options_index,value:t.value,text:t.text,html:t.innerHTML,title:t.title?t.title:void 0,selected:t.selected,disabled:!0===s?s:t.disabled,group_array_index:e,group_label:null!=e?this.parsed[e].label:null,classes:t.className,style:t.style.cssText})):this.parsed.push({array_index:this.parsed.length,options_index:this.options_index,empty:!0}),this.options_index+=1},t}()).select_to_array=function(t){var e,s,n,o,r;for(o=new i,s=0,n=(r=t.childNodes).length;s<n;s++)e=r[s],o.add_node(e);return o.parsed},e=function(){function t(e,s){this.form_field=e,this.options=null!=s?s:{},this.label_click_handler=n(this.label_click_handler,this),t.browser_is_supported()&&(this.is_multiple=this.form_field.multiple,this.set_default_text(),this.set_default_values(),this.setup(),this.set_up_html(),this.register_observers(),this.on_ready())}return t.prototype.set_default_values=function(){return this.click_test_action=function(t){return function(e){return t.test_active_click(e)}}(this),this.activate_action=function(t){return function(e){return t.activate_field(e)}}(this),this.active_field=!1,this.mouse_on_container=!1,this.results_showing=!1,this.result_highlighted=null,this.is_rtl=this.options.rtl||/\bchosen-rtl\b/.test(this.form_field.className),this.allow_single_deselect=null!=this.options.allow_single_deselect&&null!=this.form_field.options[0]&&""===this.form_field.options[0].text&&this.options.allow_single_deselect,this.disable_search_threshold=this.options.disable_search_threshold||0,this.disable_search=this.options.disable_search||!1,this.enable_split_word_search=null==this.options.enable_split_word_search||this.options.enable_split_word_search,this.group_search=null==this.options.group_search||this.options.group_search,this.search_contains=this.options.search_contains||!1,this.single_backstroke_delete=null==this.options.single_backstroke_delete||this.options.single_backstroke_delete,this.max_selected_options=this.options.max_selected_options||Infinity,this.inherit_select_classes=this.options.inherit_select_classes||!1,this.display_selected_options=null==this.options.display_selected_options||this.options.display_selected_options,this.display_disabled_options=null==this.options.display_disabled_options||this.options.display_disabled_options,this.include_group_label_in_selected=this.options.include_group_label_in_selected||!1,this.max_shown_results=this.options.max_shown_results||Number.POSITIVE_INFINITY,this.case_sensitive_search=this.options.case_sensitive_search||!1,this.hide_results_on_select=null==this.options.hide_results_on_select||this.options.hide_results_on_select,this.create_option=this.options.create_option||!1,this.persistent_create_option=this.options.persistent_create_option||!1,this.skip_no_results=this.options.skip_no_results||!1},t.prototype.set_default_text=function(){return this.form_field.getAttribute("data-placeholder")?this.default_text=this.form_field.getAttribute("data-placeholder"):this.is_multiple?this.default_text=this.options.placeholder_text_multiple||this.options.placeholder_text||t.default_multiple_text:this.default_text=this.options.placeholder_text_single||this.options.placeholder_text||t.default_single_text,this.default_text=this.escape_html(this.default_text),this.results_none_found=this.form_field.getAttribute("data-no_results_text")||this.options.no_results_text||t.default_no_result_text,this.create_option_text=this.form_field.getAttribute("data-create_option_text")||this.options.create_option_text||t.default_create_option_text},t.prototype.choice_label=function(t){return this.include_group_label_in_selected&&null!=t.group_label?"<b class='group-name'>"+t.group_label+"</b>"+t.html:t.html},t.prototype.mouse_enter=function(){return this.mouse_on_container=!0},t.prototype.mouse_leave=function(){return this.mouse_on_container=!1},t.prototype.input_focus=function(t){if(this.is_multiple){if(!this.active_field)return setTimeout(function(t){return function(){return t.container_mousedown()}}(this),50)}else if(!this.active_field)return this.activate_field()},t.prototype.input_blur=function(t){if(!this.mouse_on_container)return this.active_field=!1,setTimeout(function(t){return function(){return t.blur_test()}}(this),100)},t.prototype.label_click_handler=function(t){return this.is_multiple?this.container_mousedown(t):this.activate_field()},t.prototype.results_option_build=function(t){var e,s,i,n,o,r,h;for(e="",h=0,n=0,o=(r=this.results_data).length;n<o&&(s=r[n],i="",""!==(i=s.group?this.result_add_group(s):this.result_add_option(s))&&(h++,e+=i),(null!=t?t.first:void 0)&&(s.selected&&this.is_multiple?this.choice_build(s):s.selected&&!this.is_multiple&&this.single_set_selected_text(this.choice_label(s))),!(h>=this.max_shown_results));n++);return e},t.prototype.result_add_option=function(t){var e,s;return t.search_match&&this.include_option_in_results(t)?(e=[],t.disabled||t.selected&&this.is_multiple||e.push("active-result"),!t.disabled||t.selected&&this.is_multiple||e.push("disabled-result"),t.selected&&e.push("result-selected"),null!=t.group_array_index&&e.push("group-option"),""!==t.classes&&e.push(t.classes),s=document.createElement("li"),s.className=e.join(" "),s.style.cssText=t.style,s.setAttribute("data-option-array-index",t.array_index),s.innerHTML=t.highlighted_html||t.html,t.title&&(s.title=t.title),this.outerHTML(s)):""},t.prototype.result_add_group=function(t){var e,s;return(t.search_match||t.group_match)&&t.active_options>0?((e=[]).push("group-result"),t.classes&&e.push(t.classes),s=document.createElement("li"),s.className=e.join(" "),s.innerHTML=t.highlighted_html||this.escape_html(t.label),t.title&&(s.title=t.title),this.outerHTML(s)):""},t.prototype.append_option=function(t){return this.select_append_option(t)},t.prototype.results_update_field=function(){if(this.set_default_text(),this.is_multiple||this.results_reset_cleanup(),this.result_clear_highlight(),this.results_build(),this.results_showing)return this.winnow_results()},t.prototype.reset_single_select_options=function(){var t,e,s,i,n;for(n=[],t=0,e=(s=this.results_data).length;t<e;t++)(i=s[t]).selected?n.push(i.selected=!1):n.push(void 0);return n},t.prototype.results_toggle=function(){return this.results_showing?this.results_hide():this.results_show()},t.prototype.results_search=function(t){return this.results_showing?this.winnow_results():this.results_show()},t.prototype.winnow_results=function(){var t,e,s,i,n,o,r,h,l,c,_,a,u,d,p,f,g;for(this.no_results_clear(),a=0,s=!1,t=(l=this.get_search_text()).replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"),_=this.get_search_regex(t),e=new RegExp("^"+t+"$"),n=0,o=(c=this.results_data).length;n<o;n++)(r=c[n]).search_match=!1,u=null,d=null,r.highlighted_html="",this.include_option_in_results(r)&&(r.group&&(r.group_match=!1,r.active_options=0),null!=r.group_array_index&&this.results_data[r.group_array_index]&&(0===(u=this.results_data[r.group_array_index]).active_options&&u.search_match&&(a+=1),u.active_options+=1),g=r.group?r.label:r.text,r.group&&!this.group_search||(d=this.search_string_match(g,_),r.search_match=null!=d,r.search_match&&!r.group&&(a+=1),s=s||e.test(r.html),r.search_match?(l.length&&(p=d.index,h=g.slice(0,p),i=g.slice(p,p+l.length),f=g.slice(p+l.length),r.highlighted_html=this.escape_html(h)+"<em>"+this.escape_html(i)+"</em>"+this.escape_html(f)),null!=u&&(u.group_match=!0)):null!=r.group_array_index&&this.results_data[r.group_array_index].search_match&&(r.search_match=!0)));if(this.result_clear_highlight(),a<1&&l.length?(this.update_results_content(""),this.create_option&&this.skip_no_results||this.no_results(l)):(this.update_results_content(this.results_option_build()),this.winnow_results_set_highlight()),this.create_option&&(a<1||!s&&this.persistent_create_option)&&l.length)return this.show_create_option(l)},t.prototype.get_search_regex=function(t){var e,s;return s=this.search_contains?t:"(^|\\s|\\b)"+t+"[^\\s]*",this.enable_split_word_search||this.search_contains||(s="^"+s),e=this.case_sensitive_search?"":"i",new RegExp(s,e)},t.prototype.search_string_match=function(t,e){var s;return s=e.exec(t),!this.search_contains&&(null!=s?s[1]:void 0)&&(s.index+=1),s},t.prototype.choices_count=function(){var t,e,s;if(null!=this.selected_option_count)return this.selected_option_count;for(this.selected_option_count=0,t=0,e=(s=this.form_field.options).length;t<e;t++)s[t].selected&&(this.selected_option_count+=1);return this.selected_option_count},t.prototype.choices_click=function(t){if(t.preventDefault(),this.activate_field(),!this.results_showing&&!this.is_disabled)return this.results_show()},t.prototype.keydown_checker=function(t){var e,s;switch(s=null!=(e=t.which)?e:t.keyCode,this.search_field_scale(),8!==s&&this.pending_backstroke&&this.clear_backstroke(),s){case 8:this.backstroke_length=this.get_search_field_value().length;break;case 9:this.results_showing&&!this.is_multiple&&this.result_select(t),this.mouse_on_container=!1;break;case 13:case 27:this.results_showing&&t.preventDefault();break;case 32:this.disable_search&&t.preventDefault();break;case 38:t.preventDefault(),this.keyup_arrow();break;case 40:t.preventDefault(),this.keydown_arrow()}},t.prototype.keyup_checker=function(t){var e,s;switch(s=null!=(e=t.which)?e:t.keyCode,this.search_field_scale(),s){case 8:this.is_multiple&&this.backstroke_length<1&&this.choices_count()>0?this.keydown_backstroke():this.pending_backstroke||(this.result_clear_highlight(),this.results_search());break;case 13:t.preventDefault(),this.results_showing&&this.result_select(t);break;case 27:this.results_showing&&this.results_hide();break;case 9:case 16:case 17:case 18:case 38:case 40:case 91:break;default:this.results_search()}},t.prototype.clipboard_event_checker=function(t){if(!this.is_disabled)return setTimeout(function(t){return function(){return t.results_search()}}(this),50)},t.prototype.container_width=function(){return null!=this.options.width?this.options.width:this.form_field.offsetWidth+"px"},t.prototype.include_option_in_results=function(t){return!(this.is_multiple&&!this.display_selected_options&&t.selected)&&(!(!this.display_disabled_options&&t.disabled)&&!t.empty)},t.prototype.search_results_touchstart=function(t){return this.touch_started=!0,this.search_results_mouseover(t)},t.prototype.search_results_touchmove=function(t){return this.touch_started=!1,this.search_results_mouseout(t)},t.prototype.search_results_touchend=function(t){if(this.touch_started)return this.search_results_mouseup(t)},t.prototype.outerHTML=function(t){var e;return t.outerHTML?t.outerHTML:((e=document.createElement("div")).appendChild(t),e.innerHTML)},t.prototype.get_single_html=function(){return'<a class="chosen-single chosen-default">\n  <input class="chosen-search-input" type="text" autocomplete="off" />\n  <span>'+this.default_text+'</span>\n  <div><b></b></div>\n</a>\n<div class="chosen-drop">\n  <div class="chosen-search">\n  </div>\n  <ul class="chosen-results"></ul>\n</div>'},t.prototype.get_multi_html=function(){return'<ul class="chosen-choices">\n  <li class="search-field">\n    <input class="chosen-search-input" type="text" autocomplete="off" value="'+this.default_text+'" />\n  </li>\n</ul>\n<div class="chosen-drop">\n  <ul class="chosen-results"></ul>\n</div>'},t.prototype.get_no_results_html=function(t){return'<li class="no-results">\n  '+this.results_none_found+" <span>"+this.escape_html(t)+"</span>\n</li>"},t.browser_is_supported=function(){return true;return"Microsoft Internet Explorer"===window.navigator.appName?document.documentMode>=8:!(/iP(od|hone)/i.test(window.navigator.userAgent)||/IEMobile/i.test(window.navigator.userAgent)||/Windows Phone/i.test(window.navigator.userAgent)||/BlackBerry/i.test(window.navigator.userAgent)||/BB10/i.test(window.navigator.userAgent)||/Android.*Mobile/i.test(window.navigator.userAgent))},t.default_multiple_text="Select Some Options",t.default_single_text="Select an Option",t.default_no_result_text="No results match",t.default_create_option_text="Add Option",t}(),(t=jQuery).fn.extend({chosen:function(i){return e.browser_is_supported()?this.each(function(e){var n,o;o=(n=t(this)).data("chosen"),"destroy"!==i?o instanceof s||n.data("chosen",new s(this,i)):o instanceof s&&o.destroy()}):this}}),s=function(s){function n(){return n.__super__.constructor.apply(this,arguments)}return o(n,e),n.prototype.setup=function(){return this.form_field_jq=t(this.form_field),this.current_selectedIndex=this.form_field.selectedIndex},n.prototype.set_up_html=function(){var e,s;return(e=["chosen-container"]).push("chosen-container-"+(this.is_multiple?"multi":"single")),this.inherit_select_classes&&this.form_field.className&&e.push(this.form_field.className),this.is_rtl&&e.push("chosen-rtl"),s={"class":e.join(" "),title:this.form_field.title},this.form_field.id.length&&(s.id=this.form_field.id.replace(/[^\w]/g,"_")+"_chosen"),this.container=t("<div />",s),this.container.width(this.container_width()),this.is_multiple?this.container.html(this.get_multi_html()):this.container.html(this.get_single_html()),this.form_field_jq.hide().after(this.container),this.dropdown=this.container.find("div.chosen-drop").first(),this.search_field=this.container.find("input").first(),this.search_results=this.container.find("ul.chosen-results").first(),this.search_field_scale(),this.search_no_results=this.container.find("li.no-results").first(),this.is_multiple?(this.search_choices=this.container.find("ul.chosen-choices").first(),this.search_container=this.container.find("li.search-field").first()):(this.search_container=this.container.find("div.chosen-search").first(),this.selected_item=this.container.find(".chosen-single").first()),this.results_build(),this.set_tab_index(),this.set_label_behavior()},n.prototype.on_ready=function(){return this.form_field_jq.trigger("chosen:ready",{chosen:this})},n.prototype.register_observers=function(){return this.container.on("touchstart.chosen",function(t){return function(e){t.container_mousedown(e)}}(this)),this.container.on("touchend.chosen",function(t){return function(e){t.container_mouseup(e)}}(this)),this.container.on("mousedown.chosen",function(t){return function(e){t.container_mousedown(e)}}(this)),this.container.on("mouseup.chosen",function(t){return function(e){t.container_mouseup(e)}}(this)),this.container.on("mouseenter.chosen",function(t){return function(e){t.mouse_enter(e)}}(this)),this.container.on("mouseleave.chosen",function(t){return function(e){t.mouse_leave(e)}}(this)),this.search_results.on("mouseup.chosen",function(t){return function(e){t.search_results_mouseup(e)}}(this)),this.search_results.on("mouseover.chosen",function(t){return function(e){t.search_results_mouseover(e)}}(this)),this.search_results.on("mouseout.chosen",function(t){return function(e){t.search_results_mouseout(e)}}(this)),this.search_results.on("mousewheel.chosen DOMMouseScroll.chosen",function(t){return function(e){t.search_results_mousewheel(e)}}(this)),this.search_results.on("touchstart.chosen",function(t){return function(e){t.search_results_touchstart(e)}}(this)),this.search_results.on("touchmove.chosen",function(t){return function(e){t.search_results_touchmove(e)}}(this)),this.search_results.on("touchend.chosen",function(t){return function(e){t.search_results_touchend(e)}}(this)),this.form_field_jq.on("chosen:updated.chosen",function(t){return function(e){t.results_update_field(e)}}(this)),this.form_field_jq.on("chosen:activate.chosen",function(t){return function(e){t.activate_field(e)}}(this)),this.form_field_jq.on("chosen:open.chosen",function(t){return function(e){t.container_mousedown(e)}}(this)),this.form_field_jq.on("chosen:close.chosen",function(t){return function(e){t.close_field(e)}}(this)),this.search_field.on("blur.chosen",function(t){return function(e){t.input_blur(e)}}(this)),this.search_field.on("keyup.chosen",function(t){return function(e){t.keyup_checker(e)}}(this)),this.search_field.on("keydown.chosen",function(t){return function(e){t.keydown_checker(e)}}(this)),this.search_field.on("focus.chosen",function(t){return function(e){t.input_focus(e)}}(this)),this.search_field.on("cut.chosen",function(t){return function(e){t.clipboard_event_checker(e)}}(this)),this.search_field.on("paste.chosen",function(t){return function(e){t.clipboard_event_checker(e)}}(this)),this.is_multiple?this.search_choices.on("click.chosen",function(t){return function(e){t.choices_click(e)}}(this)):this.container.on("click.chosen",function(t){t.preventDefault()})},n.prototype.destroy=function(){return t(this.container[0].ownerDocument).off("click.chosen",this.click_test_action),this.form_field_label.length>0&&this.form_field_label.off("click.chosen"),this.search_field[0].tabIndex&&(this.form_field_jq[0].tabIndex=this.search_field[0].tabIndex),this.container.remove(),this.form_field_jq.removeData("chosen"),this.form_field_jq.show()},n.prototype.search_field_disabled=function(){return this.is_disabled=this.form_field.disabled||this.form_field_jq.parents("fieldset").is(":disabled"),this.container.toggleClass("chosen-disabled",this.is_disabled),this.search_field[0].disabled=this.is_disabled,this.is_multiple||this.selected_item.off("focus.chosen",this.activate_field),this.is_disabled?this.close_field():this.is_multiple?void 0:this.selected_item.on("focus.chosen",this.activate_field)},n.prototype.container_mousedown=function(e){var s;if(!this.is_disabled)return!e||"mousedown"!==(s=e.type)&&"touchstart"!==s||this.results_showing||e.preventDefault(),null!=e&&t(e.target).hasClass("search-choice-close")?void 0:(this.active_field?this.is_multiple||!e||t(e.target)[0]!==this.selected_item[0]&&!t(e.target).parents("a.chosen-single").length||(e.preventDefault(),this.results_toggle()):(this.is_multiple&&this.search_field.val(""),t(this.container[0].ownerDocument).on("click.chosen",this.click_test_action),this.results_show()),this.activate_field())},n.prototype.container_mouseup=function(t){if("ABBR"===t.target.nodeName&&!this.is_disabled)return this.results_reset(t)},n.prototype.search_results_mousewheel=function(t){var e;if(t.originalEvent&&(e=t.originalEvent.deltaY||-t.originalEvent.wheelDelta||t.originalEvent.detail),null!=e)return t.preventDefault(),"DOMMouseScroll"===t.type&&(e*=40),this.search_results.scrollTop(e+this.search_results.scrollTop())},n.prototype.blur_test=function(t){if(!this.active_field&&this.container.hasClass("chosen-container-active"))return this.close_field()},n.prototype.close_field=function(){return t(this.container[0].ownerDocument).off("click.chosen",this.click_test_action),this.active_field=!1,this.results_hide(),this.container.removeClass("chosen-container-active"),this.clear_backstroke(),this.show_search_field_default(),this.search_field_scale(),this.search_field.blur()},n.prototype.activate_field=function(){if(!this.is_disabled)return this.container.addClass("chosen-container-active"),this.active_field=!0,this.search_field.val(this.search_field.val()),this.search_field.focus()},n.prototype.test_active_click=function(e){var s;return(s=t(e.target).closest(".chosen-container")).length&&this.container[0]===s[0]?this.active_field=!0:this.close_field()},n.prototype.results_build=function(){return this.parsing=!0,this.selected_option_count=null,this.results_data=i.select_to_array(this.form_field),this.is_multiple?this.search_choices.find("li.search-choice").remove():(this.single_set_selected_text(),this.disable_search||this.form_field.options.length<=this.disable_search_threshold&&!this.create_option?(this.search_field[0].readOnly=!0,this.container.addClass("chosen-container-single-nosearch")):(this.search_field[0].readOnly=!1,this.container.removeClass("chosen-container-single-nosearch"))),this.update_results_content(this.results_option_build({first:!0})),this.search_field_disabled(),this.show_search_field_default(),this.search_field_scale(),this.parsing=!1},n.prototype.result_do_highlight=function(t){var e,s,i,n,o;if(t.length){if(this.result_clear_highlight(),this.result_highlight=t,this.result_highlight.addClass("highlighted"),i=parseInt(this.search_results.css("maxHeight"),10),o=this.search_results.scrollTop(),n=i+o,s=this.result_highlight.position().top+this.search_results.scrollTop(),(e=s+this.result_highlight.outerHeight())>=n)return this.search_results.scrollTop(e-i>0?e-i:0);if(s<o)return this.search_results.scrollTop(s)}},n.prototype.result_clear_highlight=function(){return this.result_highlight&&this.result_highlight.removeClass("highlighted"),this.result_highlight=null},n.prototype.results_show=function(){return this.is_multiple&&this.max_selected_options<=this.choices_count()?(this.form_field_jq.trigger("chosen:maxselected",{chosen:this}),!1):(this.is_multiple||this.search_container.append(this.search_field),this.container.addClass("chosen-with-drop"),this.results_showing=!0,this.search_field.focus(),this.search_field.val(this.get_search_field_value()),this.winnow_results(),this.form_field_jq.trigger("chosen:showing_dropdown",{chosen:this}))},n.prototype.update_results_content=function(t){return this.search_results.html(t)},n.prototype.results_hide=function(){return this.results_showing&&(this.result_clear_highlight(),this.is_multiple||(this.selected_item.prepend(this.search_field),this.search_field.focus()),this.container.removeClass("chosen-with-drop"),this.form_field_jq.trigger("chosen:hiding_dropdown",{chosen:this})),this.results_showing=!1},n.prototype.set_tab_index=function(t){var e;if(this.form_field.tabIndex)return e=this.form_field.tabIndex,this.form_field.tabIndex=-1,this.search_field[0].tabIndex=e},n.prototype.set_label_behavior=function(){if(this.form_field_label=this.form_field_jq.parents("label"),!this.form_field_label.length&&this.form_field.id.length&&(this.form_field_label=t("label[for='"+this.form_field.id+"']")),this.form_field_label.length>0)return this.form_field_label.on("click.chosen",this.label_click_handler)},n.prototype.show_search_field_default=function(){return this.is_multiple&&this.choices_count()<1&&!this.active_field?(this.search_field.val(this.default_text),this.search_field.addClass("default")):(this.search_field.val(""),this.search_field.removeClass("default"))},n.prototype.search_results_mouseup=function(e){var s;if((s=t(e.target).hasClass("active-result")?t(e.target):t(e.target).parents(".active-result").first()).length)return this.result_highlight=s,this.result_select(e),this.search_field.focus()},n.prototype.search_results_mouseover=function(e){var s;if(s=t(e.target).hasClass("active-result")?t(e.target):t(e.target).parents(".active-result").first())return this.result_do_highlight(s)},n.prototype.search_results_mouseout=function(e){if(t(e.target).hasClass("active-result")||t(e.target).parents(".active-result").first())return this.result_clear_highlight()},n.prototype.choice_build=function(e){var s,i;return s=t("<li />",{"class":"search-choice"}).html("<span>"+this.choice_label(e)+"</span>"),e.disabled?s.addClass("search-choice-disabled"):((i=t("<a />",{"class":"search-choice-close","data-option-array-index":e.array_index})).on("click.chosen",function(t){return function(e){return t.choice_destroy_link_click(e)}}(this)),s.append(i)),this.search_container.before(s)},n.prototype.choice_destroy_link_click=function(e){if(e.preventDefault(),e.stopPropagation(),!this.is_disabled)return this.choice_destroy(t(e.target))},n.prototype.choice_destroy=function(t){if(this.result_deselect(t[0].getAttribute("data-option-array-index")))return this.active_field?this.search_field.focus():this.show_search_field_default(),this.is_multiple&&this.choices_count()>0&&this.get_search_field_value().length<1&&this.results_hide(),t.parents("li").first().remove(),this.search_field_scale()},n.prototype.results_reset=function(){if(this.reset_single_select_options(),this.form_field.options[0].selected=!0,this.single_set_selected_text(),this.show_search_field_default(),this.results_reset_cleanup(),this.trigger_form_field_change(),this.active_field)return this.results_hide()},n.prototype.results_reset_cleanup=function(){return this.current_selectedIndex=this.form_field.selectedIndex,this.selected_item.find("abbr").remove()},n.prototype.result_select=function(t){var e,s;if(this.result_highlight)return(e=this.result_highlight).hasClass("create-option")?(this.select_create_option(this.search_field.val()),this.results_hide()):(this.result_clear_highlight(),this.is_multiple&&this.max_selected_options<=this.choices_count()?(this.form_field_jq.trigger("chosen:maxselected",{chosen:this}),!1):(this.is_multiple?e.removeClass("active-result"):this.reset_single_select_options(),e.addClass("result-selected"),s=this.results_data[e[0].getAttribute("data-option-array-index")],s.selected=!0,this.form_field.options[s.options_index].selected=!0,this.selected_option_count=null,this.search_field.val(""),this.is_multiple?this.choice_build(s):this.single_set_selected_text(this.choice_label(s)),this.is_multiple&&(!this.hide_results_on_select||t.metaKey||t.ctrlKey)?this.winnow_results():(this.results_hide(),this.show_search_field_default()),(this.is_multiple||this.form_field.selectedIndex!==this.current_selectedIndex)&&this.trigger_form_field_change({selected:this.form_field.options[s.options_index].value}),this.current_selectedIndex=this.form_field.selectedIndex,t.preventDefault(),this.search_field_scale()))},n.prototype.single_set_selected_text=function(t){return null==t&&(t=this.default_text),t===this.default_text?this.selected_item.addClass("chosen-default"):(this.single_deselect_control_build(),this.selected_item.removeClass("chosen-default")),this.selected_item.find("span").html(t)},n.prototype.result_deselect=function(t){var e;return e=this.results_data[t],!this.form_field.options[e.options_index].disabled&&(e.selected=!1,this.form_field.options[e.options_index].selected=!1,this.selected_option_count=null,this.result_clear_highlight(),this.results_showing&&this.winnow_results(),this.trigger_form_field_change({deselected:this.form_field.options[e.options_index].value}),this.search_field_scale(),!0)},n.prototype.single_deselect_control_build=function(){if(this.allow_single_deselect)return this.selected_item.find("abbr").length||this.selected_item.find("span").first().after('<abbr class="search-choice-close"></abbr>'),this.selected_item.addClass("chosen-single-with-deselect")},n.prototype.get_search_field_value=function(){return this.search_field.val()},n.prototype.get_search_text=function(){return t.trim(this.get_search_field_value())},n.prototype.escape_html=function(e){return t("<div/>").text(e).html()},n.prototype.winnow_results_set_highlight=function(){var t,e;if(e=this.is_multiple?[]:this.search_results.find(".result-selected.active-result"),null!=(t=e.length?e.first():this.search_results.find(".active-result").first()))return this.result_do_highlight(t)},n.prototype.no_results=function(t){var e;return e=this.get_no_results_html(t),this.search_results.append(e),this.form_field_jq.trigger("chosen:no_results",{chosen:this})},n.prototype.show_create_option=function(e){var s;return s=t('<li class="create-option active-result"><a>'+this.create_option_text+'</a>: "'+e+'"</li>'),this.search_results.append(s)},n.prototype.create_option_clear=function(){return this.search_results.find(".create-option").remove()},n.prototype.select_create_option=function(e){return t.isFunction(this.create_option)?this.create_option.call(this,e):this.select_append_option({value:e,text:e})},n.prototype.select_append_option=function(e){var s;return s=t("<option />",e).attr("selected","selected"),this.form_field_jq.append(s),this.form_field_jq.trigger("chosen:updated"),this.form_field_jq.trigger("change"),this.search_field.trigger("focus")},n.prototype.no_results_clear=function(){return this.search_results.find(".no-results").remove()},n.prototype.keydown_arrow=function(){var t;return this.results_showing&&this.result_highlight?(t=this.result_highlight.nextAll("li.active-result").first())?this.result_do_highlight(t):void 0:this.results_showing&&this.create_option?this.result_do_highlight(this.search_results.find(".create-option")):this.results_show()},n.prototype.keyup_arrow=function(){var t;return this.results_showing||this.is_multiple?this.result_highlight?(t=this.result_highlight.prevAll("li.active-result")).length?this.result_do_highlight(t.first()):(this.choices_count()>0&&this.results_hide(),this.result_clear_highlight()):void 0:this.results_show()},n.prototype.keydown_backstroke=function(){var t;return this.pending_backstroke?(this.choice_destroy(this.pending_backstroke.find("a").first()),this.clear_backstroke()):(t=this.search_container.siblings("li.search-choice").last()).length&&!t.hasClass("search-choice-disabled")?(this.pending_backstroke=t,this.single_backstroke_delete?this.keydown_backstroke():this.pending_backstroke.addClass("search-choice-focus")):void 0},n.prototype.clear_backstroke=function(){return this.pending_backstroke&&this.pending_backstroke.removeClass("search-choice-focus"),this.pending_backstroke=null},n.prototype.search_field_scale=function(){var e,s,i,n,o,r,h;if(this.is_multiple){for(o={position:"absolute",left:"-1000px",top:"-1000px",display:"none",whiteSpace:"pre"},s=0,i=(r=["fontSize","fontStyle","fontWeight","fontFamily","lineHeight","textTransform","letterSpacing"]).length;s<i;s++)o[n=r[s]]=this.search_field.css(n);return(e=t("<div />").css(o)).text(this.get_search_field_value()),t("body").append(e),h=e.width()+25,e.remove(),this.container.is(":visible")&&(h=Math.min(this.container.outerWidth()-10,h)),this.search_field.width(h)}},n.prototype.trigger_form_field_change=function(t){return this.form_field_jq.trigger("input",t),this.form_field_jq.trigger("change",t)},n}()}).call(this);
-!function(E,t,e){"use strict";var r=function(){if(!(this instanceof r)){var e=new r;return e.init.call(e,Array.prototype.slice.call(arguments))}var o,n=null,l={includeEmptyValuedElements:!1,w3cSuccessfulControlsOnly:!1},i=/[^\[\]]+|\[\]/g,a=null;function f(e){if(e&&"object"==typeof e)return Object.keys(e).filter(function(e){return!isNaN(parseInt(e,10))}).splice(-1)[0]}function c(e){var n=f(e);return"string"==typeof n?parseInt(n,10)+1:0}function s(e){if("object"!=typeof e||null===e)return 0;var n,t=0;if("function"==typeof Object.keys)t=Object.keys(e).length;else for(n in e)e.hasOwnProperty(n)&&t++;return t}function p(e){return"INPUT"===e.nodeName&&"radio"===e.type}function v(e){return"INPUT"===e.nodeName&&"checkbox"===e.type}function d(e){return"SELECT"===e.nodeName&&"select-multiple"===e.type}function y(e){return e.checked}function m(e){if(p(e))return!!y(e)&&e.value;if(v(e))return!!y(e)&&e.value;if("INPUT"===(t=e).nodeName&&"file"===t.type)return!(!a.enctype||"multipart/form-data"!==a.enctype)&&(n=e,E.FileList&&n.files instanceof E.FileList&&0<e.files.length?e.files:!(!e.value||""===e.value)&&e.value);var n,t,r,u;if("TEXTAREA"===e.nodeName)return!(!e.value||""===e.value)&&e.value;if("SELECT"===(r=e).nodeName&&"select-one"===r.type)return e.value&&""!==e.value?e.value:!(!e.options||!e.options.length||""===e.options[0].value)&&e.options[0].value;if(d(e)){if(e.options&&0<e.options.length){var i=[];return function(e,n){if([].forEach)return[].forEach.call(e,n);var t;for(t=0;t<e.length;t++)n.call(e,e[t],t)}(e.options,function(e){e.selected&&i.push(e.value)}),l.includeEmptyValuedElements?i:!!i.length&&i}return!1}return"BUTTON"===(u=e).nodeName&&"submit"===u.type?e.value&&""!==e.value?e.value:!(!e.innerText||""===e.innerText)&&e.innerText:void 0!==e.value&&(l.includeEmptyValuedElements?e.value:""!==e.value&&e.value)}function h(e,n,t,r){var u,i=n[0];if(p(e))return!1!==t?r[i]=t:void 0;if(v(e)){if(!1===t)return;if(u=e.name,1<Array.prototype.filter.call(o,function(e){return e.name===u}).length)return r[i]||(r[i]=[]),r[i].push(t);r[i]=t}if(d(e)){if(!1===t)return;r[i]=t}return r[i]=t}function g(e,n,t,r){var u,i,o=n[0];return 1<n.length?"[]"===o?(r[c(r)]={},g(e,n.splice(1,n.length),t,r[(u=r,i=f(u),"string"==typeof i?parseInt(i,10):0)])):(r[o]&&0<s(r[o])||(r[o]={}),g(e,n.splice(1,n.length),t,r[o])):1===n.length?("[]"===o?r[c(r)]=t:h(e,n,t,r),r):void 0}return{init:function(e){return!(!e||"object"!=typeof e||!e[0])&&(n=e[0],void 0!==e[1]&&0<s(e[1])&&function(e,n){var t;for(t in n)n.hasOwnProperty(t)&&(e[t]=n[t])}(l,e[1]),!!function(){switch(typeof n){case"string":a=t.getElementById(n);break;case"object":(e=n)&&"object"==typeof e&&"nodeType"in e&&1===e.nodeType&&(a=n)}var e;return a}()&&!!(o=a.querySelectorAll("input, textarea, select")).length&&function(){var e,n,t,r=0,u={};for(r=0;r<o.length;r++)!(n=o[r]).name||""===n.name||n.disabled||p(n)&&!y(n)||(!1!==(t=m(n))||l.includeEmptyValuedElements)&&(1===(e=n.name.match(i)).length&&h(n,e,t||"",u),1<e.length&&g(n,e,t||"",u));return 0<s(u)&&u}())}}};"function"==typeof define&&define.amd?define(function(){return r}):"object"==typeof module&&module.exports?module.exports=r:E.formToObject=r}(window,document);
 /*!
  *
  * jQuery TE 1.4.0 , http://jqueryte.com/

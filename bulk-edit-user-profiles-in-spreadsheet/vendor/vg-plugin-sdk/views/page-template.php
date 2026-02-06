@@ -30,7 +30,7 @@ if (empty($page_id)) {
 
 		<?php if (!empty($this->settings['settings_page_url'])) { ?>
 			<hr>
-			<p><a class="button settings-button" href="<?php echo esc_url($this->settings['settings_page_url']); ?>"><i class="fa fa-cog"></i> <?php _e('Settings', $this->textname); ?></a></p>
+			<p><a class="button settings-button" href="<?php echo esc_url($this->settings['settings_page_url']); ?>"><i class="fa fa-cog"></i> <?php esc_html_e('Settings', $this->textname); ?></a></p>
 		<?php } ?>
 
 
@@ -38,7 +38,7 @@ if (empty($page_id)) {
 			<div class="clear"></div>
 			<hr>
 			<?php echo $upgrade_message; ?>
-			<a href="<?php echo esc_url($this->settings['buy_link']); ?>" class="button button-primary button-large" style="margin-bottom: 20px; display: inline-block;"> <?php echo esc_url($this->settings['buy_link_text']); ?> </a>
+			<a href="<?php echo esc_url($this->settings['buy_link']); ?>" class="button button-primary button-large" style="margin-bottom: 20px; display: inline-block;"> <?php echo esc_html($this->settings['buy_link_text']); ?> </a>
 		<?php } ?>
 
 	</div>

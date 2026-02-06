@@ -3,13 +3,13 @@
  * Template used for the spreadsheet editor page in all post types.
  */
 defined( 'ABSPATH' ) || exit;
-
+global $wpdb;
 $nonce = wp_create_nonce( 'bep-nonce' );
 
 if ( empty( $current_post_type ) ) {
 	$current_post_type = VGSE()->helpers->get_provider_from_query_string();
 }
-$editor          = VGSE()->helpers->get_provider_editor( $current_post_type );
+$editor = VGSE()->helpers->get_provider_editor( $current_post_type );
 if ( ! $editor ) {
 	return;
 }
@@ -33,13 +33,17 @@ if ( ! empty( $_GET['wpse_load_rows_main_page'] ) && VGSE_DEBUG && VGSE()->helpe
 	return;
 }
 
-$subtle_lock = in_array( date( 'Y-m-d' ), array( '2019-10-22', '2019-10-24', '2019-10-30' ) ) ? true : false;
+$subtle_lock = in_array( gmdate( 'Y-m-d' ), array( '2019-10-22', '2019-10-24', '2019-10-30' ) ) ? true : false;
 ?>
 <style>
 	/*Hide all the wp-admin notices on the spreadsheet page to make it look cleaner*/
 	/*We place the css here so it loads on the spreadsheet page regardless of the placement (wp-admin or frontend)*/
-	.wp-core-ui .notice.is-dismissible, .wp-core-ui .notice, .woocommerce-message,
-	.notice, div.error, div.updated {
+	.wp-core-ui .notice:not(.wpse-notice).is-dismissible, 
+	.wp-core-ui .notice:not(.wpse-notice), 
+	.woocommerce-message,
+	.notice:not(.wpse-notice), 
+	div.error:not(.wpse-notice), 
+	div.updated:not(.wpse-notice) {
 		display: none !important;
 	}	
 	/*Fix misaligned rows when they set custom image preview heights*/
@@ -108,6 +112,7 @@ if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
 						<div class="vg-header-toolbar-inner">
 
 							<?php
+							 // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 							echo $secondary_toolbar_items_html; // WPCS: XSS ok.
 							do_action( 'vg_sheet_editor/toolbar/after_buttons', $current_post_type, 'secondary' );
 							?>
@@ -129,6 +134,7 @@ if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
 
 					<?php
 					if ( $editor->args['toolbars'] ) {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						echo $editor->args['toolbars']->get_rendered_provider_items( $current_post_type, 'primary' ); // WPCS: XSS ok.
 					}
 					do_action( 'vg_sheet_editor/toolbar/after_buttons', $current_post_type, 'primary' );
@@ -146,11 +152,11 @@ if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
 					<?php
 					$console_items = array(
 						'be-current-sheet' => array(
-							'label' => __( 'Current spreadsheet', 'vg_sheet_editor' ),
+							'label' => esc_html__( 'Current spreadsheet', 'vg_sheet_editor' ),
 							'value' => VGSE()->helpers->get_post_type_label( $current_post_type ),
 						),
 						'be-total-rows'    => array(
-							'label' => __( 'Rows', 'vg_sheet_editor' ),
+							'label' => esc_html__( 'Rows', 'vg_sheet_editor' ),
 							'value' => 0,
 						),
 					);
@@ -160,7 +166,7 @@ if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
 						$spreadsheet_columns             = VGSE()->helpers->get_provider_columns( $current_post_type );
 						$sort_name                       = isset( $spreadsheet_columns[ $custom_order_by ] ) ? $spreadsheet_columns[ $custom_order_by ]['title'] : $custom_order_by;
 						$console_items['be-global-sort'] = array(
-							'label' => __( 'Global sort', 'vg_sheet_editor' ),
+							'label' => esc_html__( 'Global sort', 'vg_sheet_editor' ),
 							'value' => $sort_name . ' (' . $custom_order . ')',
 						);
 					}
@@ -177,18 +183,80 @@ if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
 					?>
 					<?php
 					do_action( 'vg_sheet_editor/editor_page/after_console_text', $current_post_type );
+
+					$post_type_taxonomies = get_object_taxonomies( $current_post_type );
+					if ( post_type_exists( $current_post_type ) && $post_type_taxonomies ) {
+						$term_separator = VGSE()->helpers->get_term_separator();
+						$transient_key  = 'vgse_term_separator_c_' . md5( $term_separator );
+						$term_count     = get_transient( $transient_key );
+						if ( method_exists( VGSE()->helpers, 'can_rescan_db_fields' ) && VGSE()->helpers->can_rescan_db_fields( $current_post_type ) ) {
+							$term_count = false;
+						}
+						if ( false === $term_count ) {
+							$query = $wpdb->prepare(
+								"SELECT COUNT(*) 
+									FROM $wpdb->terms t 
+									INNER JOIN $wpdb->term_taxonomy tt ON t.term_id = tt.term_id
+									WHERE t.name LIKE %s
+									AND tt.taxonomy IN (" . implode( ',', array_fill( 0, count( $post_type_taxonomies ), '%s' ) ) . ')',
+								array_merge(
+									array( '%' . $wpdb->esc_like( $term_separator ) . '%' ),
+									$post_type_taxonomies
+								)
+							);
+
+							$term_count = (int) $wpdb->get_var( $query );
+							set_transient( $transient_key, $term_count, DAY_IN_SECONDS );
+						}
+
+						if ( $term_count ) {
+							echo '<span class="notice-text" style="color: red;">';
+							// translators: 1: term separator
+							echo sprintf( esc_html__( 'Warning: You are using a conflicting taxonomy term separator (%s).', 'vg_sheet_editor' ), $term_separator );
+							echo ' <a href="https://wpsheeteditor.com/fix-taxonomy-term-separator-warning/" target="_blank">' . esc_html__( 'Learn more', 'vg_sheet_editor' ) . '</a>';
+							echo '</span>';
+						}
+					}
 					// WP memory limit.
 					$wp_memory_limit = VGSE()->helpers->let_to_num( WP_MEMORY_LIMIT );
 					if ( function_exists( 'memory_get_usage' ) ) {
 						$wp_memory_limit = max( $wp_memory_limit, VGSE()->helpers->let_to_num( @ini_get( 'memory_limit' ) ) );
 					}
 					if ( $wp_memory_limit > 0 && $wp_memory_limit < 256000000 ) {
-						echo '<span class="notice-text" style="color: red;">' . __( '. We recommend you increase the server memory to at least 256mb to prevent server errors. <a href="https://docs.woocommerce.com/document/increasing-the-wordpress-memory-limit/" target="_blank">Tutorial</a>', 'vg_sheet_editor' ) . '</span>';
+						echo '<span class="notice-text" style="color: red;">' . esc_html__( '. We recommend you increase the server memory to at least 256mb to prevent server errors.', 'vg_sheet_editor' ) . '<a href="https://docs.woocommerce.com/document/increasing-the-wordpress-memory-limit/" target="_blank">' . esc_html__( 'Tutorial', 'vg_sheet_editor' ) . '</a></span>';
 					}
 					?>
 				</div>
-				<div class="vgse-current-filters"><?php esc_html_e( 'Active filters:', 'vg_sheet_editor' ); ?> </div>
-				<div class="clear"></div>
+				<div class="vgse-current-filters" x-data="vgseCurrentFilters" x-show="hasFilters" x-cloak style="display: none;">
+					<?php esc_html_e('Active filters:', 'vg_sheet_editor'); ?>
+					<template x-if="filters.activeFilters">
+						<i class="fa fa-copy" style="cursor: pointer; margin-right: 10px" title="<?php esc_html_e( 'Copy a URL of the spreadsheet with the active filters applied, URL valid for your current WordPress session', 'vg_sheet_editor' ); ?>"  aria-hidden="true" @click.prevent="copyFiltersUrl"></i>
+					</template>
+					<template x-for="(value, key) in filters.activeFilters">
+						<template x-if="key !== 'meta_query' && value && (Array.isArray(value) ? value.length : true)">
+							<a href="#" class="button" @click.prevent="filters.removeFilter(key, null, true)">
+								<i class="fa fa-remove"></i>
+								<span x-text="filters.getFilterLabel(key)"></span>:
+								<span x-text="Array.isArray(value) ? value.join(', ') : String(value).substring(0, 20) + (String(value).length > 20 ? '...' : '')"></span>
+							</a>
+						</template>
+					</template>
+					<template x-if="filters.activeFilters.meta_query && filters.activeFilters.meta_query.length">
+						<template x-for="(filter, index) in filters.activeFilters.meta_query">
+							<template x-if="filter && filter.key">
+								<a href="#" class="button advanced-filter" @click.prevent="filters.removeFilter(null, index, true)">
+									<i class="fa fa-remove"></i>
+									<span x-text="filters.getMetaFilterLabel(filter)"></span>
+								</a>
+							</template>
+						</template>
+					</template>
+					<template x-if="hasMultipleFilters">
+						<a href="#" class="button advanced-filter remove-all-filters" @click.prevent="filters.removeAll(true, true)">
+							<i class="fa fa-remove"></i> <?php esc_html_e('Remove all filters', 'vg_sheet_editor'); ?>
+						</a>
+					</template>
+				</div>				
 			</div>
 
 		</div>
@@ -203,7 +271,14 @@ if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
 					<h3><?php esc_html_e( 'Welcome to WP Sheet Editor', 'vg_sheet_editor' ); ?></h3>
 					<p><?php esc_html_e( 'Please make a search to load the rows and start editing (use the "search" option in the top toolbar).', 'vg_sheet_editor' ); ?></p>
 					<?php if ( VGSE()->helpers->user_can_manage_options() ) { ?>
-						<p><small><?php _e( 'You need to load the rows manually because you deactivated the automatic loading of rows. <a href="#" data-remodal-target="modal-advanced-settings">Change the settings</a>', 'vg_sheet_editor' ); ?></small></p>
+						<p><small>
+						<?php
+						esc_html_e( 'You need to load the rows manually because you deactivated the automatic loading of rows.', 'vg_sheet_editor' );
+						echo ' <a href="#" data-remodal-target="modal-advanced-settings">';
+						esc_html_e( 'Change the settings', 'vg_sheet_editor' );
+						echo '</a>';
+						?>
+						</small></p>
 					<?php } ?>
 				</div>
 				<?php
@@ -261,9 +336,16 @@ if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
 
 		<div class="modal-content">
 			<h3><?php esc_html_e( 'Delete rows', 'vg_sheet_editor' ); ?></h3>
-			<p class="contains-variable"><?php _e( 'You selected <span>0</span> rows to be deleted completely.', 'vg_sheet_editor' ); ?></p>
+			<p class="contains-variable">
+			<?php
+			/* translators: %s is the number of rows selected for deletion */
+			printf( esc_html__( 'You selected %s rows to be deleted completely.', 'vg_sheet_editor' ), '<span>0</span>' );
+			?>
+			</p>
+			<?php do_action( 'vg_sheet_editor/editor_page/confirm_bulk_delete_rows_modal/before_fields', $current_post_type ); ?>
 			<p><?php esc_html_e( 'This will delete the rows from your database completely and the only way to undo this change is to restore a backup. Please make a backup in case you might need to undo this later.', 'vg_sheet_editor' ); ?></p>
 			<p><?php esc_html_e( 'Please type the word DELETE and press enter to proceed:', 'vg_sheet_editor' ); ?> <input type="text" name="confirm_bulk_delete_rows"></p>
+			<?php do_action( 'vg_sheet_editor/editor_page/confirm_bulk_delete_rows_modal/after_fields', $current_post_type ); ?>
 		</div>
 		<br>
 		<button data-remodal-action="confirm" class="remodal-cancel"><?php esc_html_e( 'Cancel', 'vg_sheet_editor' ); ?></button>
@@ -338,8 +420,15 @@ if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
 		<div class="modal-content">
 			<h2><?php esc_html_e( 'Save changes', 'vg_sheet_editor' ); ?></h2>
 
+			<?php 
+			do_action( 'vg_sheet_editor/editor_page/save_rows_modal/before_fields', $current_post_type );
+			?>
+
 			<!--Warning state-->
 			<div class="be-saving-warning">
+				<?php 
+				do_action( 'vg_sheet_editor/editor_page/save_rows_modal/before_warning', $current_post_type );
+				?>
 				<?php if ( is_admin() && VGSE()->helpers->user_can_manage_options() ) { ?>
 					<p><?php esc_html_e( 'The changes about to be made are not reversible. You should backup your database before proceding.', 'vg_sheet_editor' ); ?></p>
 				<?php } else { ?>
@@ -352,7 +441,12 @@ if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
 			<div class="bulk-saving-screen">
 				<p class="saving-now-message"><?php esc_html_e( 'We are saving now. Don\'t close this window until the process has finished.', 'vg_sheet_editor' ); ?></p>
 				<?php if ( is_admin() && VGSE()->helpers->user_can_manage_options() ) { ?>
-					<p class="tip-saving-speed-message"><?php printf( __( '<b>Tip:</b> The saving is too slow? <a href="%1$s" target="_blank">Save <b>more posts</b> per batch</a><br/>Are you getting errors when saving? <a href="%2$s" target="_blank">Save <b>less posts</b> per batch</a>', 'vg_sheet_editor' ), VGSE()->helpers->get_settings_page_url(), VGSE()->helpers->get_settings_page_url() ); ?></p>
+					<p class="tip-saving-speed-message"><b><?php esc_html_e( 'Tip:', 'vg_sheet_editor' ); ?></b> 
+					<?php esc_html_e( 'The saving is too slow?', 'vg_sheet_editor' ); ?>
+					<a href="<?php echo esc_url( VGSE()->helpers->get_settings_page_url() ); ?>" target="_blank"><?php esc_html_e( 'Save more posts per batch', 'vg_sheet_editor' ); ?></a><br> 
+					<?php esc_html_e( 'Are you getting errors when saving?', 'vg_sheet_editor' ); ?>
+					<a href="<?php echo esc_url( VGSE()->helpers->get_settings_page_url() ); ?>" target="_blank"><?php esc_html_e( 'Save less posts per batch', 'vg_sheet_editor' ); ?></a>
+				</p>
 				<?php } ?>
 				<div id="be-nanobar-container"></div>
 
@@ -379,7 +473,13 @@ if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
 	<!--Used for featured image previews-->
 	<div class="vi-preview-wrapper"></div>
 
-	<div class="wpse-stuck-loading"><?php _e( 'The loading is taking too long?<br>1. You can wait until the process finished.<br>2. You can <button class="" type="button">cancel the process.</button>', 'vg_sheet_editor' ); ?></div>
+	<div class="wpse-stuck-loading">
+	<?php esc_html_e( 'The loading is taking too long?', 'vg_sheet_editor' ); ?>
+	<br>
+	<?php esc_html_e( '1. You can wait until the process finished.', 'vg_sheet_editor' ); ?>
+	<br>
+	<?php echo wp_kses_post( __( '2. You can <button type="button">cancel the process.</button>', 'vg_sheet_editor' ) ); ?>
+</div>
 
 	<?php
 	if ( function_exists( 'WPSE_Profiler_Obj' ) ) {

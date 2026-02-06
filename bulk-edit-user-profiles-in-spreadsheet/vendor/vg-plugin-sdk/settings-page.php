@@ -13,7 +13,7 @@ if (!class_exists('VGFP_SDK_Settings_Page')) {
 			$defaults = array(
 				'sections' => array(), // Array containing sections and fields using same redux framework's format
 				'opt_name' => '',
-				'display_name' => __('Settings', $this->textname),
+				'display_name' => esc_html__('Settings', $this->textname),
 				'page_permissions' => 'manage_options',
 				'enable_wpmu_mode' => is_multisite(),
 				'sdk' => null,

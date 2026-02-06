@@ -3,7 +3,7 @@
 <div class="remodal remodal-support" data-remodal-id="modal-support" data-remodal-options="closeOnOutsideClick: false">
 
 	<div class="modal-content">
-		<h3><?php _e('Help', 'vg_sheet_editor' ); ?></h3>
+		<h3><?php esc_html_e('Help', 'vg_sheet_editor' ); ?></h3>
 
 		<?php
 		$support_links = VGSE()->get_support_links(null, '', 'sheet-toolbar-help');
@@ -21,5 +21,5 @@
 
 	</div>
 	<br>
-	<button data-remodal-action="confirm" class="remodal-cancel"><?php _e('Close', 'vg_sheet_editor' ); ?></button>
+	<button data-remodal-action="confirm" class="remodal-cancel"><?php esc_html_e('Close', 'vg_sheet_editor' ); ?></button>
 </div>

@@ -12,8 +12,8 @@ if ( ! class_exists( 'VGSE_Provider_User' ) ) {
 	class VGSE_Provider_User extends VGSE_Provider_Abstract {
 
 		private static $instance = null;
-		var $key                 = 'user';
-		var $is_post_type        = false;
+		public $key                 = 'user';
+		public $is_post_type        = false;
 		static $data_store       = array();
 
 		private function __construct() {
@@ -289,7 +289,8 @@ if ( ! class_exists( 'VGSE_Provider_User' ) ) {
 				$result     = wp_update_user( $data );
 
 				if ( is_wp_error( $result ) ) {
-					throw new Exception( sprintf( __( 'Row ID: %1$d, %2$s. Here are the values that you tried to save: %3$s', 'vg_sheet_editor' ), $user_id, implode( ', ', $result->get_error_messages() ), wp_json_encode( $data ) ), E_USER_ERROR );
+					/* translators: 1: Row ID, 2: Error messages, 3: Data attempted to be saved */
+					throw new Exception( sprintf( esc_html__( 'Row ID: %1$d, %2$s. Here are the values that you tried to save: %3$s', 'vg_sheet_editor' ), $user_id, implode( ', ', $result->get_error_messages() ), wp_json_encode( $data ) ) );
 				}
 
 				if ( isset( $data['user_login'] ) ) {
@@ -396,6 +397,7 @@ if ( ! class_exists( 'VGSE_Provider_User' ) ) {
 			$meta_table = $this->get_meta_table_name( $this->key );
 			$id_key     = $this->get_meta_table_post_id_key( $this->key );
 			$sql        = $wpdb->prepare( "SELECT m.meta_value FROM $wpdb->users p LEFT JOIN $meta_table m ON p.ID = m.$id_key WHERE m.meta_key = %s GROUP BY m.meta_value ORDER BY LENGTH(m.meta_value) DESC LIMIT 4", $meta_key );
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$values     = apply_filters( 'vg_sheet_editor/provider/user/meta_field_unique_values', $wpdb->get_col( $sql ), $meta_key, $post_type );
 			return $values;
 		}

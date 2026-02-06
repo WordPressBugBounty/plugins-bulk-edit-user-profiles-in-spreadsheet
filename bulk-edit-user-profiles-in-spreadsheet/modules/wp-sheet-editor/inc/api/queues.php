@@ -5,8 +5,8 @@ if ( ! class_exists( 'WPSE_Queues' ) ) {
 	class WPSE_Queues {
 
 		private static $instance = null;
-		var $directory           = null;
-		var $secret_key          = null;
+		public $directory           = null;
+		public $secret_key          = null;
 
 		private function __construct() {
 		}
@@ -33,7 +33,7 @@ if ( ! class_exists( 'WPSE_Queues' ) ) {
 			foreach ( $files as $file ) {
 				$expiration_hours = (int) $this->file_expiration_hours();
 				if ( file_exists( $file ) && ( time() - filemtime( $file ) > $expiration_hours * 3600 ) ) {
-					unlink( $file );
+					wp_delete_file( $file );
 				}
 			}
 		}
@@ -118,10 +118,9 @@ if ( ! class_exists( 'WPSE_Queues' ) ) {
 			// We use the secret key to add extra security to the file names
 			$this->secret_key = get_option( 'vgse_secret_key', 'O0oGtcI8Zc' );
 			$this->directory  = apply_filters( 'vg_sheet_editor/queues/directory', WP_CONTENT_DIR . '/uploads/wp-sheet-editor/queues' );
-			do_action( 'wpse_delete_old_csvs', array( $this, 'delete_old_files' ) );
+			add_action( 'wpse_daily_cron', array( $this, 'delete_old_files' ) );
 			if ( is_admin() ) {
 				$this->maybe_create_directories();
-				add_action( 'admin_init', array( $this, 'delete_old_files' ) );
 			}
 		}
 

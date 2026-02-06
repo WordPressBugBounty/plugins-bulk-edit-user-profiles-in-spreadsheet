@@ -18,7 +18,7 @@ if (!class_exists('WPSE_Custom_Tables_Spreadsheet_Bootstrap')) {
 				$this->columns->register_item('ID', $post_type, array(
 					'data_type' => 'post_data', 	
 					'column_width' => 75, 
-					'title' => __('ID', 'vg_sheet_editor' ),
+					'title' => esc_html__('ID', 'vg_sheet_editor' ),
 					'supports_formulas' => false,
 					'allow_to_hide' => false,
 					'allow_to_save' => false,

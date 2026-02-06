@@ -8,12 +8,12 @@
 				<span class="vc_icon_element-icon fa <?php echo esc_attr($extension['icon']); ?>"></span>
 			<?php } ?>
 		</div></div>
-	<div class="wpb_text_column wpb_content_element "><div class="wpb_wrapper"><h3><?php echo esc_html($extension['title']); ?></h3><?php echo wp_kses_post($extension['description']); ?>
+	<div class="wpb_text_column wpb_content_element "><div class="wpb_wrapper"><h3><?php echo esc_html($extension['title']); ?></h3><?php echo wp_kses_post(wpautop( $extension['description'] )); ?>
 
 		</div></div>
 	<div class="addon-status"><?php
 		if ($is_active) {
-			echo '<p><i class="fa fa-check"></i>' . __('Active.', 'vg_sheet_editor' ) . '</p>';
+			echo '<p><i class="fa fa-check"></i>' . esc_html__('Active.', 'vg_sheet_editor' ) . '</p>';
 		}
 
 		echo esc_html($extension['status']);

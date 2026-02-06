@@ -8,11 +8,11 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 	 */
 	class WP_Sheet_Editor_Bootstrap {
 
-		var $enabled_post_types        = array();
-		var $columns                   = null;
-		var $toolbars                  = null;
-		var $quick_access_rendered     = false;
-		var $settings                  = array();
+		public $enabled_post_types     = array();
+		public $columns                = null;
+		public $toolbars               = null;
+		public $quick_access_rendered  = false;
+		public $settings               = array();
 		static $initialized_post_types = array();
 
 		public function __construct( $args = array() ) {
@@ -107,7 +107,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 				$url                         = esc_url(
 					add_query_arg(
 						array(
-							'wpse_session_query' => $transient_key,
+							'wpse_session_query'       => $transient_key,
+							'wpse_custom_filters_nonce' => wp_create_nonce( 'bep-nonce' ),
 						),
 						VGSE()->helpers->get_editor_url( $screen->post_type )
 					)
@@ -116,7 +117,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 				?>
 				<script>jQuery(window).on('load', function () {
 						if (!jQuery('#wpse-quick-access').length) {
-							jQuery('.page-title-action, .fusion-split-page-title-action').last().after('<a href=<?php echo json_encode( esc_url( $url ) ); ?> class="page-title-action" id="wpse-quick-access"><?php _e( 'Open in a Spreadsheet', 'vg_sheet_editor' ); ?></a>');
+							jQuery('.page-title-action, .fusion-split-page-title-action').last().after('<a href=<?php echo json_encode( esc_url( $url ) ); ?> class="page-title-action" id="wpse-quick-access"><?php esc_html_e( 'Open in a Spreadsheet', 'vg_sheet_editor' ); ?></a>');
 						}
 					});</script>
 
@@ -141,7 +142,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 				$required_capability = VGSE()->helpers->get_edit_spreadsheet_capability( $post_type_key );
 				$admin_menu[]        = array(
 					'type'       => 'submenu',
-					'name'       => sprintf( __( 'Edit %s', 'vg_sheet_editor' ), esc_html( $post_type_label ) ),
+					/* translators: %s: Post type label */
+					'name'       => sprintf( esc_html__( 'Edit %s', 'vg_sheet_editor' ), esc_html( $post_type_label ) ),
 					'slug'       => $page_slug,
 					'capability' => $required_capability,
 				);
@@ -155,7 +157,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 				$admin_menu[] = array(
 					'type'         => 'submenu',
 					'parent'       => $parent,
-					'name'         => __( 'Sheet Editor', 'vg_sheet_editor' ),
+					'name'         => esc_html__( 'Sheet Editor', 'vg_sheet_editor' ),
 					'slug'         => 'admin.php?page=' . $page_slug,
 					'treat_as_url' => true,
 					'capability'   => $required_capability,
@@ -190,11 +192,12 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 				$toolbars->register_item(
 					'settings',
 					array(
-						'type'                    => 'button',
-						'content'                 => __( 'Settings', 'vg_sheet_editor' ),
-						'toolbar_key'             => 'secondary',
-						'allow_in_frontend'       => false,
-						'require_click_to_expand' => true,
+						'type'                       => 'button',
+						'content'                    => esc_html__( 'Settings', 'vg_sheet_editor' ),
+						'toolbar_key'                => 'secondary',
+						'allow_in_frontend'          => false,
+						'require_click_to_expand'    => true,
+						'container_extra_attributes' => 'x-data="vgseSettingsToolbar"',
 					),
 					$post_type
 				);
@@ -203,7 +206,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 						'advanced_settings',
 						array(
 							'type'                  => 'button',
-							'content'               => __( 'Advanced settings', 'vg_sheet_editor' ),
+							'content'               => esc_html__( 'Advanced settings', 'vg_sheet_editor' ),
 							'toolbar_key'           => 'secondary',
 							'allow_in_frontend'     => false,
 							'parent'                => 'settings',
@@ -218,7 +221,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 						'support',
 						array(
 							'type'                  => 'button',
-							'content'               => __( 'Help', 'vg_sheet_editor' ),
+							'content'               => esc_html__( 'Help', 'vg_sheet_editor' ),
 							'toolbar_key'           => 'secondary',
 							'extra_html_attributes' => 'data-remodal-target="modal-support"',
 							'footer_callback'       => array( $this, 'render_support_modal' ),
@@ -232,7 +235,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 						'extensions',
 						array(
 							'type'                  => 'button',
-							'content'               => __( 'Extensions', 'vg_sheet_editor' ),
+							'content'               => esc_html__( 'Extensions', 'vg_sheet_editor' ),
 							'toolbar_key'           => 'secondary',
 							'allow_in_frontend'     => false,
 							'extra_html_attributes' => 'data-remodal-target="modal-extensions"',
@@ -246,7 +249,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 						'default_sort',
 						array(
 							'type'                    => 'button',
-							'content'                 => __( 'Global sort', 'vg_sheet_editor' ),
+							'content'                 => esc_html__( 'Global sort', 'vg_sheet_editor' ),
 							'toolbar_key'             => 'secondary',
 							'allow_in_frontend'       => false,
 							'require_click_to_expand' => true,
@@ -258,9 +261,9 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 						array(
 							'parent'       => 'default_sort',
 							'type'         => 'html',
-							'help_tooltip' => __( 'We\'ll reload the spreadsheet when you change this option.', 'vg_sheet_editor' ),
+							'help_tooltip' => esc_html__( 'We\'ll reload the spreadsheet when you change this option.', 'vg_sheet_editor' ),
 							'content'      => array( $this, 'get_default_sort_select' ),
-							'label'        => __( 'Sort', 'vg_sheet_editor' ),
+							'label'        => esc_html__( 'Sort', 'vg_sheet_editor' ),
 						),
 						$post_type
 					);
@@ -271,11 +274,11 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 					'save',
 					array(
 						'allow_to_hide'         => false,
-						'type'                  => 'button', // html | switch | button
-						'icon'                  => 'fa fa-save', // Font awesome icon name , including font awesome prefix: fa fa-XXX. Only for type=button.
-						'content'               => __( 'Save', 'vg_sheet_editor' ), // if type=button : button label | if type=html : html string.
-						'css_class'             => 'primary button-only-icon wpse-save', // .button will be added to all items also.
-						'extra_html_attributes' => 'data-remodal-target="bulk-save"', // useful for adding data attributes
+						'type'                  => 'button',
+						'icon'                  => 'fa fa-save',
+						'content'               => esc_html__( 'Save', 'vg_sheet_editor' ),
+						'css_class'             => 'primary button-only-icon wpse-save',
+						'extra_html_attributes' => 'data-remodal-target="bulk-save" title="Ctrl + s"',
 					),
 					$post_type
 				);
@@ -284,11 +287,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 					$toolbars->register_item(
 						'add_rows',
 						array(
-							'type'         => 'html', // html | switch | button
-							'content'      => '<button name="addrow" id="addrow" class="button button-only-icon"><i class="fa fa-plus"></i> ' . __( 'Add new', 'vg_sheet_editor' ) . '</button><input type="number" min="1" value="1" class="number_rows" /> <input type="hidden" id="post_type_new_row" value="' . $post_type . '" />', // if type=button : button label | if type=html : html string.
-							// The tooltip might be unnecessary
-							// 'help_tooltip' => __( 'You can create new items here', 'vg_sheet_editor' ),
-							'tooltip_size' => 'small',
+							'type'    => 'html',
+							'content' => '<button name="addrow" id="addrow" class="button button-only-icon"><i class="fa fa-plus"></i> ' . esc_html__( 'Add new', 'vg_sheet_editor' ) . '</button><input type="number" min="1" value="1" class="number_rows" /> <input type="hidden" id="post_type_new_row" value="' . $post_type . '" />',
 						),
 						$post_type
 					);
@@ -298,8 +298,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 					'load',
 					array(
 						'allow_to_hide'   => false,
-						'type'            => 'button', // html | switch | button
-						'content'         => __( 'Load', 'vg_sheet_editor' ),
+						'type'            => 'button',
+						'content'         => esc_html__( 'Load', 'vg_sheet_editor' ),
 						'container_class' => 'hidden',
 					),
 					$post_type
@@ -309,8 +309,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 					array(
 						'allow_to_hide'     => false,
 						'icon'              => 'fa fa-remove',
-						'type'              => 'button', // html | switch | button
-						'content'           => __( 'Exit Full Screen', 'vg_sheet_editor' ),
+						'type'              => 'button',
+						'content'           => esc_html__( 'Exit Full Screen', 'vg_sheet_editor' ),
 						'container_class'   => 'right-toolbar-item',
 						'css_class'         => 'wpse-full-screen-toggle',
 						'allow_in_frontend' => false,
@@ -320,13 +320,14 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 				$toolbars->register_item(
 					'cells_format',
 					array(
-						'type'          => 'switch', // html | switch | button
-						'content'       => __( 'Show cells as simple text', 'vg_sheet_editor' ),
-						'id'            => 'formato',
-						'toolbar_key'   => 'secondary',
-						'help_tooltip'  => __( 'By default dates show in a calendar, post content has a text editor option, images show preview, etc. you can enable this option to display everything as plain text and disable the fancy formatting.', 'vg_sheet_editor' ),
-						'default_value' => false,
-						'parent'        => 'settings',
+						'type'             => 'switch',
+						'content'          => esc_html__( 'Show cells as simple text', 'vg_sheet_editor' ),
+						'id'               => 'formato',
+						'toolbar_key'      => 'secondary',
+						'help_tooltip'     => esc_html__( 'By default dates show in a calendar, post content has a text editor option, images show preview, etc. you can enable this option to display everything as plain text and disable the fancy formatting.', 'vg_sheet_editor' ),
+						'tooltip_position' => 'right',
+						'default_value'    => false,
+						'parent'           => 'settings',
 					),
 					$post_type
 				);
@@ -334,29 +335,45 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 					$toolbars->register_item(
 						'infinite_scroll',
 						array(
-							'type'          => 'switch', // html | switch | button
-							'content'       => __( 'Load more on scroll', 'vg_sheet_editor' ),
-							'id'            => 'infinito',
-							'toolbar_key'   => ( defined( 'VGSE_WC_FILE' ) ) ? 'secondary' : 'primary',
-							'help_tooltip'  => __( 'When this is enabled more items will be loaded to the bottom of the spreadsheet when you reach the end of the page', 'vg_sheet_editor' ),
-							'default_value' => VGSE()->options['be_load_items_on_scroll'] == true,
-							'parent'        => 'settings',
+							'type'             => 'switch',
+							'content'          => esc_html__( 'Load more on scroll', 'vg_sheet_editor' ),
+							'id'               => 'infinito',
+							'toolbar_key'      => ( defined( 'VGSE_WC_FILE' ) ) ? 'secondary' : 'primary',
+							'help_tooltip'     => esc_html__( 'When this is enabled more items will be loaded to the bottom of the spreadsheet when you reach the end of the page', 'vg_sheet_editor' ),
+							'tooltip_position' => 'right',
+							'default_value'    => VGSE()->options['be_load_items_on_scroll'] == true,
+							'parent'           => 'settings',
 						),
 						$post_type
 					);
 				}
+				$toolbars->register_item(
+					'toggle_dark_mode',
+					array(
+						'type'                  => 'switch',
+						'content'               => esc_html__( 'Dark mode', 'vg_sheet_editor' ),
+						'id'                    => 'toggle_dark_mode',
+						'toolbar_key'           => 'secondary',
+						'help_tooltip'          => esc_html__( 'Toggle between light mode and dark mode', 'vg_sheet_editor' ),
+						'tooltip_position'      => 'right',
+						'parent'                => 'settings',
+						'extra_html_attributes' => '@change="toggleDarkMode($el)" :checked="jQuery(\'html\').hasClass(\'vgse-dark-mode\')"',
+					),
+					$post_type
+				);
 				if ( VGSE()->helpers->user_can_manage_options() ) {
 					$toolbars->register_item(
 						'rescan_db',
 						array(
 							'type'              => 'button',
-							'content'           => __( 'Scan DB to find fields', 'vg_sheet_editor' ),
+							'content'           => esc_html__( 'Scan DB to find fields', 'vg_sheet_editor' ),
 							'id'                => 'rescan_db',
 							'allow_in_frontend' => false,
 							'toolbar_key'       => 'secondary',
-							'help_tooltip'      => __( 'We can scan the database, find new fields, and create columns automatically for the supported fields.', 'vg_sheet_editor' ),
+							'help_tooltip'      => esc_html__( 'We can scan the database, find new fields, and create columns automatically for the supported fields.', 'vg_sheet_editor' ),
+							'tooltip_position'  => 'right',
 							'parent'            => 'settings',
-							'url'               => esc_url( add_query_arg( 'wpse_rescan_db_fields', VGSE()->helpers->get_provider_from_query_string() ) ),
+							'url'               => esc_url( VGSE()->helpers->get_scandb_url( VGSE()->helpers->get_provider_from_query_string() ) ),
 						),
 						$post_type
 					);
@@ -369,8 +386,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 							'allow_to_hide'   => false,
 							'container_class' => 'right-toolbar-item',
 							'type'            => 'html',
-							'content'         => '<a href="#" data-remodal-target="bulk-save" data-saved-changes="' . esc_attr__( 'All changes saved.', 'vg_sheet_editor' ) . '" data-saving-changes="' . esc_attr__( 'Saving changes, don\'t close this page.', 'vg_sheet_editor' ) . '"  data-unsaved-changes="' . esc_attr__( 'Some changes are not saved yet.', 'vg_sheet_editor' ) . '">' . __( 'All changes saved.', 'vg_sheet_editor' ) . '</a>',
-							'label'           => __( 'All changes saved.', 'vg_sheet_editor' ),
+							'content'         => '<a href="#" data-remodal-target="bulk-save" data-saved-changes="' . esc_attr__( 'All changes saved.', 'vg_sheet_editor' ) . '" data-saving-changes="' . esc_attr__( 'Saving changes, don\'t close this page.', 'vg_sheet_editor' ) . '"  data-unsaved-changes="' . esc_attr__( 'Some changes are not saved yet.', 'vg_sheet_editor' ) . '">' . esc_html__( 'All changes saved.', 'vg_sheet_editor' ) . '</a>',
+							'label'           => esc_html__( 'All changes saved.', 'vg_sheet_editor' ),
 						),
 						$post_type
 					);
@@ -482,7 +499,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 					array(
 						'data_type'         => 'post_data',
 						'column_width'      => 75,
-						'title'             => __( 'ID', 'vg_sheet_editor' ),
+						'title'             => esc_html__( 'ID', 'vg_sheet_editor' ),
 						'type'              => '',
 						'supports_formulas' => false,
 						'allow_to_hide'     => false,
@@ -497,7 +514,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 					array(
 						'data_type'         => 'post_data',
 						'column_width'      => 300,
-						'title'             => __( 'Title', 'vg_sheet_editor' ),
+						'title'             => esc_html__( 'Title', 'vg_sheet_editor' ),
 						'supports_formulas' => true,
 					)
 				);
@@ -507,7 +524,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 					array(
 						'data_type'         => 'post_data',
 						'column_width'      => 300,
-						'title'             => __( 'URL Slug', 'vg_sheet_editor' ),
+						'title'             => esc_html__( 'URL Slug', 'vg_sheet_editor' ),
 						'type'              => '',
 						'supports_formulas' => true,
 						'is_locked'         => true,
@@ -521,7 +538,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 					$post_content_args                    = array(
 						'data_type'                => 'post_data',
 						'column_width'             => 200,
-						'title'                    => __( 'Content', 'vg_sheet_editor' ),
+						'title'                    => esc_html__( 'Content', 'vg_sheet_editor' ),
 						'supports_formulas'        => true,
 						'formatted'                => array(
 							'data'              => 'post_content',
@@ -529,7 +546,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 							'wpse_template_key' => 'gutenberg_cell_template',
 						),
 						'edit_modal_id'            => 'vgse-modal-editor-' . wp_generate_password( 5, false ),
-						'edit_modal_description'   => __( 'Use this editor to edit the content only, other fields like tags and categories should be edited on the spreadsheet.', 'vg_sheet_editor' ),
+						'edit_modal_description'   => esc_html__( 'Use this editor to edit the content only, other fields like tags and categories should be edited on the spreadsheet.', 'vg_sheet_editor' ),
 						'edit_modal_save_action'   => 'js_function_name:vgseGutenbergEditToCell,vgse_save_gutenberg_content',
 						'edit_modal_cancel_action' => 'js_function_name:vgseCancelGutenbergEdit',
 						'metabox_show_selector'    => '#wpcontent',
@@ -544,7 +561,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 							array(
 								'data_type'         => 'post_data',
 								'column_width'      => 200,
-								'title'             => __( 'Content', 'vg_sheet_editor' ),
+								'title'             => esc_html__( 'Content', 'vg_sheet_editor' ),
 								'supports_formulas' => true,
 								'formatted'         => array(
 									'data'              => 'post_content',
@@ -561,7 +578,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 					$post_type,
 					array(
 						'data_type'                => 'post_data',
-						'title'                    => __( 'WP Editor', 'vg_sheet_editor' ),
+						'title'                    => esc_html__( 'WP Editor', 'vg_sheet_editor' ),
 						'type'                     => 'external_button',
 						'supports_formulas'        => false,
 						'allow_to_save'            => false,
@@ -574,7 +591,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 					array(
 						'data_type'                => 'post_data',
 						'column_width'             => 85,
-						'title'                    => __( 'View', 'vg_sheet_editor' ),
+						'title'                    => esc_html__( 'View', 'vg_sheet_editor' ),
 						'type'                     => 'external_button',
 						'supports_formulas'        => false,
 						'allow_to_save'            => false,
@@ -587,7 +604,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 					array(
 						'data_type'             => 'post_data',
 						'column_width'          => 155,
-						'title'                 => __( 'Date', 'vg_sheet_editor' ),
+						'title'                 => esc_html__( 'Date', 'vg_sheet_editor' ),
 						'supports_formulas'     => true,
 						// SQL formulas not supported because we need to automatically save the gmt date too (additional field)
 						'supports_sql_formulas' => false,
@@ -596,12 +613,12 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 							'type'             => 'date',
 							'dateFormatPhp'    => 'Y-m-d H:i:s',
 							'correctFormat'    => true,
-							'defaultDate'      => date( 'Y-m-d H:i:s' ),
+							'defaultDate'      => gmdate( 'Y-m-d H:i:s' ),
 							'datePickerConfig' => array(
 								'firstDay'       => 0,
 								'showWeekNumber' => true,
 								'numberOfMonths' => 1,
-								'yearRange'      => array( 1900, (int) date( 'Y' ) + 20 ),
+								'yearRange'      => array( 1900, (int) gmdate( 'Y' ) + 20 ),
 							),
 						),
 						'value_type'            => 'date',
@@ -613,7 +630,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 					array(
 						'data_type'         => 'post_data',
 						'column_width'      => 212,
-						'title'             => __( 'Modified Date', 'vg_sheet_editor' ),
+						'title'             => esc_html__( 'Modified Date', 'vg_sheet_editor' ),
 						'supports_formulas' => true,
 						'is_locked'         => true,
 						'lock_template_key' => 'enable_lock_cell_template',
@@ -627,7 +644,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 						array(
 							'data_type'         => 'post_data',
 							'column_width'      => 120,
-							'title'             => __( 'Author', 'vg_sheet_editor' ),
+							'title'             => esc_html__( 'Author', 'vg_sheet_editor' ),
 							'supports_formulas' => true,
 							'formatted'         => array(
 								'type'   => 'autocomplete',
@@ -643,7 +660,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 						array(
 							'data_type'         => 'post_data',
 							'column_width'      => 400,
-							'title'             => __( 'Excerpt', 'vg_sheet_editor' ),
+							'title'             => esc_html__( 'Excerpt', 'vg_sheet_editor' ),
 							'supports_formulas' => true,
 							'formatted'         => array( 'data' => 'post_excerpt' ),
 						)
@@ -653,7 +670,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 				$post_statuses = VGSE()->helpers->get_data_provider( $post_type )->get_statuses();
 
 				if ( VGSE()->helpers->get_current_provider()->is_post_type && VGSE()->helpers->user_can_delete_post_type( $post_type ) ) {
-					$post_statuses['delete'] = __( 'Delete completely', 'vg_sheet_editor' );
+					$post_statuses['delete'] = esc_html__( 'Delete completely', 'vg_sheet_editor' );
 				}
 
 				$this->columns->register_item(
@@ -662,7 +679,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 					array(
 						'data_type'         => 'post_data',
 						'column_width'      => 100,
-						'title'             => __( 'Status', 'vg_sheet_editor' ),
+						'title'             => esc_html__( 'Status', 'vg_sheet_editor' ),
 						'supports_formulas' => true,
 						'formatted'         => array(
 							'data'          => 'post_status',
@@ -678,7 +695,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 						array(
 							'data_type'         => 'post_data',
 							'column_width'      => 100,
-							'title'             => __( 'Comments', 'vg_sheet_editor' ),
+							'title'             => esc_html__( 'Comments', 'vg_sheet_editor' ),
 							'supports_formulas' => true,
 							'formatted'         => array(
 								'data'              => 'comment_status',
@@ -708,7 +725,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 						array(
 							'data_type'         => 'post_data',
 							'column_width'      => 210,
-							'title'             => __( 'Page Parent', 'vg_sheet_editor' ),
+							'title'             => esc_html__( 'Page Parent', 'vg_sheet_editor' ),
 							'supports_formulas' => true,
 							'formatted'         => $format,
 						)
@@ -720,7 +737,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 					array(
 						'data_type'         => 'post_data',
 						'column_width'      => 80,
-						'title'             => __( 'Order', 'vg_sheet_editor' ),
+						'title'             => esc_html__( 'Order', 'vg_sheet_editor' ),
 						'supports_formulas' => true,
 					)
 				);
@@ -732,7 +749,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 							'data_type'         => 'meta_data',
 							'column_width'      => 160,
 							'supports_formulas' => true,
-							'title'             => __( 'Featured Image', 'vg_sheet_editor' ),
+							'title'             => esc_html__( 'Featured Image', 'vg_sheet_editor' ),
 							'type'              => 'boton_gallery', //boton_gallery|boton_gallery_multiple (Multiple para galeria)
 							'formatted'         => array( 'data' => '_thumbnail_id' ),
 						)
@@ -740,16 +757,21 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 				}
 
 				if ( $this->settings['register_taxonomy_columns'] ) {
-					$taxonomies = get_object_taxonomies( $post_type, 'objects' );
+					$taxonomies             = get_object_taxonomies( $post_type, 'objects' );
+					$ultra_performance_mode = VGSE()->get_option( 'ultra_performance_mode' );
 
 					if ( ! empty( $taxonomies ) && is_array( $taxonomies ) ) {
-						$term_field = ( ! empty( VGSE()->options['manage_taxonomy_columns_term_slugs'] ) ) ? 'slug' : 'name';
+						$term_field = VGSE()->get_option( 'manage_taxonomy_columns_format', '' );
 						foreach ( $taxonomies as $taxonomy ) {
 
 							if ( ! $taxonomy->show_ui && $taxonomy->name !== 'post_format' ) {
 								continue;
 							}
-							if ( empty( VGSE()->options['be_taxonomy_cell_renderer'] ) ) {
+							if ( $term_field === 'term_id' ) {
+								// Use text column if values are term ids, no dropdown needed
+								$formatted = array();
+							} elseif ( empty( VGSE()->options['be_taxonomy_cell_renderer'] ) && ! $ultra_performance_mode ) {
+								// Use chosen dropdown if values are names or slugs
 								$formatted = array(
 									'data'          => $taxonomy->name,
 									'editor'        => 'wp_chosen',
@@ -764,10 +786,11 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 										'ajaxParams'      => array(
 											'action'       => 'vgse_get_taxonomy_terms',
 											'taxonomy_key' => $taxonomy->name,
+											'term_field'   => $term_field,
 										),
 									),
 								);
-							} else {
+							} elseif ( ! $ultra_performance_mode ) {
 								$hierarchy_tip = is_taxonomy_hierarchical( $taxonomy->name ) ? __( '. Add child categories using this format: Parent > child1 > child2', 'vg_sheet_editor' ) : '';
 								$formatted     = array(
 									'data'   => $taxonomy->name,
@@ -775,7 +798,14 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 									'source' => 'loadTaxonomyTerms',
 								);
 
-								$formatted['comment'] = array( 'value' => sprintf( __( 'Enter multiple terms separated by %s', 'vg_sheet_editor' ), VGSE()->helpers->get_term_separator() ) . $hierarchy_tip );
+								/* translators: %s: Term separator */
+								$formatted['comment'] = array( 'value' => sprintf( esc_html__( 'Enter multiple terms separated by %s', 'vg_sheet_editor' ), VGSE()->helpers->get_term_separator() ) . $hierarchy_tip );
+							} else {
+								$hierarchy_tip = is_taxonomy_hierarchical( $taxonomy->name ) ? __( '. Add child categories using this format: Parent > child1 > child2', 'vg_sheet_editor' ) : '';
+								$formatted     = array();
+
+								/* translators: %s: Term separator */
+								$formatted['comment'] = array( 'value' => sprintf( esc_html__( 'Enter multiple terms separated by %s', 'vg_sheet_editor' ), VGSE()->helpers->get_term_separator() ) . $hierarchy_tip );
 							}
 
 							$this->columns->register_item(
@@ -800,7 +830,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 						array(
 							'data_type'         => 'post_data',
 							'column_width'      => 150,
-							'title'             => __( 'Post type', 'vg_sheet_editor' ),
+							'title'             => esc_html__( 'Post type', 'vg_sheet_editor' ),
 							'supports_formulas' => true,
 							'is_locked'         => true,
 							'lock_template_key' => 'enable_lock_cell_template',
@@ -820,7 +850,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 							array(
 								'data_type'         => 'post_data',
 								'column_width'      => 80,
-								'title'             => __( 'Password', 'vg_sheet_editor' ),
+								'title'             => esc_html__( 'Password', 'vg_sheet_editor' ),
 								'supports_formulas' => true,
 							)
 						);

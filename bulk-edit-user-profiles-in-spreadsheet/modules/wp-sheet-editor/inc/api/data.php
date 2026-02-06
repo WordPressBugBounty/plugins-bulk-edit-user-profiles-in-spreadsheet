@@ -4,9 +4,9 @@ if ( ! class_exists( 'WP_Sheet_Editor_Data' ) ) {
 
 	class WP_Sheet_Editor_Data {
 
-		private static $instance         = false;
-		var $friendly_terms_to_ids_cache = array();
-		public $all_statuses             = array();
+		private static $instance            = false;
+		public $friendly_terms_to_ids_cache = array();
+		public $all_statuses                = array();
 
 		private function __construct() {
 		}
@@ -25,11 +25,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Data' ) ) {
 					$out = $id;
 				} elseif ( $item === 'post_title' ) {
 					$post_title = html_entity_decode( $post->post_title );
-					if ( $post->post_type === 'attachment' && empty( $post_title ) ) {
-						$out = basename( $post->guid );
-					} else {
-						$out = $post_title;
-					}
+					// Allow attachments to display an empty title, WP allows empty attachment titles
+					$out = $post_title;
 				} elseif ( $item === 'post_content' ) {
 					$out = empty( VGSE()->options['be_disable_wpautop'] ) ? wpautop( $post->post_content ) : $post->post_content;
 				} elseif ( $item === 'post_date' ) {
@@ -204,9 +201,11 @@ if ( ! class_exists( 'WP_Sheet_Editor_Data' ) ) {
 			$first_term = current( $current_terms );
 			$separator  = VGSE()->helpers->get_term_separator();
 			$term_ids   = wp_list_pluck( $current_terms, 'term_id' );
-			if ( ! empty( VGSE()->options['manage_taxonomy_columns_term_ids'] ) ) {
+			$term_field = VGSE()->get_option( 'manage_taxonomy_columns_format' );
+
+			if ( $term_field === 'term_id' ) {
 				$names = implode( "$separator ", $term_ids );
-			} elseif ( ! empty( VGSE()->options['manage_taxonomy_columns_term_slugs'] ) ) {
+			} elseif ( $term_field === 'slug' ) {
 				$names = implode( "$separator ", wp_list_pluck( $current_terms, 'slug' ) );
 			} else {
 				$names = $this->format_term_ids( $term_ids, $first_term->taxonomy, $separator );
@@ -215,6 +214,9 @@ if ( ! class_exists( 'WP_Sheet_Editor_Data' ) ) {
 		}
 
 		function get_hierarchy_for_single_term( $term ) {
+			if ( ! $term ) {
+				return '';
+			}
 			$out = $term->name;
 			while ( $term->parent > 0 ) {
 				$term = get_term_by( 'id', $term->parent, $term->taxonomy );
@@ -273,14 +275,14 @@ if ( ! class_exists( 'WP_Sheet_Editor_Data' ) ) {
 				if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
 					$get_hierarchy = false;
 				} else {
-					// Building the hierarchy tree is expensive so we do it only for taxonomies with < 2500 terms
+					// Old: Building the hierarchy tree is expensive so we do it only for taxonomies with < 2500 terms
 					// taxonomies with > 2500 terms get the list of names without hierarchy
 					// $terms_count = wp_count_terms($taxonomy, array(
 					// 	'hide_empty' => false,
 					// ));
 					// $get_hierarchy = $terms_count < 2500;
 					//
-					// Now we always get the hierarchy because if we dont' get hierarchy for big taxonomies,
+					// Current: Now we always get the hierarchy because if we dont' get hierarchy for big taxonomies,
 					// We might get duplicate term names (child categories of different parent categories) which
 					// will certainly save the incorrect term
 					$get_hierarchy = true;
@@ -378,7 +380,7 @@ ORDER BY user_login ASC",
 			// Keep in mind a possible rollback in case users report issues.
 			// The date must always come in Y-m-d format, so we can easily change the format here.
 			$date_timestamp = ( empty( $date ) ) ? current_time( 'timestamp' ) : strtotime( $date );
-			$savedate       = date( 'Y-m-d H:i:s', $date_timestamp );
+			$savedate       = gmdate( 'Y-m-d H:i:s', $date_timestamp );
 			return $savedate;
 		}
 
@@ -426,7 +428,8 @@ ORDER BY user_login ASC",
 			global $wpdb;
 			$statuses                       = array_keys( VGSE()->helpers->get_current_provider()->get_statuses() );
 			$statuses_in_query_placeholders = implode( ', ', array_fill( 0, count( $statuses ), '%s' ) );
-			$results                        = $wpdb->get_results( $wpdb->prepare( "SELECT post_title FROM $wpdb->posts WHERE post_type = %s AND post_status IN ($statuses_in_query_placeholders) ", array_merge( array( $post_type ), $statuses ) ), $output );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$results = $wpdb->get_results( $wpdb->prepare( "SELECT post_title FROM $wpdb->posts WHERE post_type = %s AND post_status IN ($statuses_in_query_placeholders) ", array_merge( array( $post_type ), $statuses ) ), $output );
 
 			if ( $flatten ) {
 				$results = VGSE()->helpers->array_flatten( $results, array() );
@@ -470,7 +473,8 @@ ORDER BY user_login ASC",
 			}
 
 			// Save using ids
-			if ( ! empty( VGSE()->options['manage_taxonomy_columns_term_ids'] ) ) {
+			$term_field = VGSE()->get_option( 'manage_taxonomy_columns_format' );
+			if ( $term_field === 'term_id' ) {
 				foreach ( $row_terms as $term_id ) {
 					if ( is_numeric( $term_id ) ) {
 						$out['term_ids'][] = (int) $term_id;
@@ -511,7 +515,7 @@ ORDER BY user_login ASC",
 						'fields'     => 'ids',
 						'hide_empty' => false,
 					);
-					if ( ! empty( VGSE()->options['manage_taxonomy_columns_term_slugs'] ) ) {
+					if ( $term_field === 'slug' ) {
 						unset( $term_exists_args['name'] );
 						$term_exists_args['slug'] = $_term;
 					}
@@ -579,7 +583,8 @@ ORDER BY user_login ASC",
 			$row_terms     = explode( $separator, $categories );
 			$all_row_terms = implode( '', $row_terms );
 			if ( preg_match( '/^\d+$/', $all_row_terms ) ) {
-				$ids_in_query_placeholders  = implode( ', ', array_fill( 0, count( $row_terms ), '%d' ) );
+				$ids_in_query_placeholders = implode( ', ', array_fill( 0, count( $row_terms ), '%d' ) );
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 				$term_ids_from_number_names = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT term_id FROM $wpdb->termmeta WHERE meta_key = 'wpse_old_platform_id' AND meta_value IN ($ids_in_query_placeholders) GROUP BY meta_value", array_map( 'intval', $row_terms ) ) ) );
 
 				if ( $term_ids_from_number_names ) {
@@ -678,9 +683,11 @@ ORDER BY user_login ASC",
 			}
 
 			if ( ! $post_type ) {
-				$post_type = ( isset( $_REQUEST['post_type'] ) ) ? sanitize_text_field( $_REQUEST['post_type'] ) : 'post';
+				$post_type = ( isset( $_REQUEST['post_type'] ) ) ? VGSE()->helpers->get_provider_from_query_string( false ) : 'post';
 			}
-			$sql     = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type= %s", wp_unslash( html_entity_decode( $page_title ) ), esc_sql( $post_type ) );
+			$sql = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_title = %s AND post_type= %s", wp_unslash( html_entity_decode( $page_title ) ), esc_sql( $post_type ) );
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$post_id = $wpdb->get_var( $sql );
 			if ( $post_id ) {
 				return $post_id;

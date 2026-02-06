@@ -21,7 +21,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			if ($screen->id === 'users' && in_array('user', $this->enabled_post_types)) {
 				?>
 				<script>jQuery(document).ready(function () {
-						jQuery('.page-title-action').last().after('<a href=<?php echo json_encode(esc_url(VGSE()->helpers->get_editor_url('user'))); ?> class="page-title-action"><?php _e('Edit in a Spreadsheet', vgse_users()->textname); ?></a>');
+						jQuery('.page-title-action').last().after('<a href=<?php echo json_encode(esc_url(VGSE()->helpers->get_editor_url('user'))); ?> class="page-title-action"><?php esc_html_e('Edit in a Spreadsheet', vgse_users()->textname); ?></a>');
 					});</script>
 
 				<?php
@@ -40,13 +40,13 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$admin_menu = array(
 				array(
 					'type' => 'submenu',
-					'name' => __('Edit Users', vgse_users()->textname),
+					'name' => esc_html__('Edit Users', vgse_users()->textname),
 					'slug' => $admin_menu_slug,
 					'capability' => $required_capability
 				),
 				array(
 					'type' => 'submenu',
-					'name' => __('Bulk Editor', vgse_users()->textname),
+					'name' => esc_html__('Bulk Editor', vgse_users()->textname),
 					'parent' => $users_submenu_parent,
 					'slug' => 'admin.php?page=' . $admin_menu_slug,
 					'treat_as_url' => true,
@@ -74,7 +74,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('ID', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 75, 
-				'title' => __('ID', vgse_users()->textname),
+				'title' => esc_html__('ID', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => false,
 				'allow_to_hide' => false,
@@ -85,7 +85,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('user_email', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 210, 
-				'title' => __('Email', vgse_users()->textname),
+				'title' => esc_html__('Email', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,
@@ -96,7 +96,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('user_login', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 150, 
-				'title' => __('Login', vgse_users()->textname),
+				'title' => esc_html__('Login', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,
@@ -106,7 +106,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('role', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 150, 
-				'title' => __('Role', vgse_users()->textname),
+				'title' => esc_html__('Role', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'supports_sql_formulas' => false,
@@ -123,7 +123,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('wpse_status', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 150, 
-				'title' => __('Status', vgse_users()->textname),
+				'title' => esc_html__('Status', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,
@@ -139,7 +139,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('first_name', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 150, 
-				'title' => __('First name', vgse_users()->textname),
+				'title' => esc_html__('First name', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,
@@ -149,7 +149,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('last_name', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 150, 
-				'title' => __('Last name', vgse_users()->textname),
+				'title' => esc_html__('Last name', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,
@@ -159,7 +159,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('description', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 310, 
-				'title' => __('Description', vgse_users()->textname),
+				'title' => esc_html__('Description', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,
@@ -169,7 +169,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('user_registered', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 190, 
-				'title' => __('Registration date', vgse_users()->textname),
+				'title' => esc_html__('Registration date', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,
@@ -181,7 +181,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('user_pass', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 150, 
-				'title' => __('New password', vgse_users()->textname),
+				'title' => esc_html__('New password', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,
@@ -192,7 +192,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('user_nicename', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 150, 
-				'title' => __('Nicename', vgse_users()->textname),
+				'title' => esc_html__('Nicename', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,
@@ -202,7 +202,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('user_url', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 150, 
-				'title' => __('Website', vgse_users()->textname),
+				'title' => esc_html__('Website', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,
@@ -212,7 +212,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('display_name', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 150, 
-				'title' => __('Display name', vgse_users()->textname),
+				'title' => esc_html__('Display name', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,
@@ -222,7 +222,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('nickname', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 150, 
-				'title' => __('Nickname', vgse_users()->textname),
+				'title' => esc_html__('Nickname', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,
@@ -232,7 +232,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('rich_editing', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 120, 
-				'title' => __('Rich editing', vgse_users()->textname),
+				'title' => esc_html__('Rich editing', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,
@@ -248,7 +248,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('comment_shortcuts', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 150, 
-				'title' => __('Comment shortcuts', vgse_users()->textname),
+				'title' => esc_html__('Comment shortcuts', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,
@@ -264,7 +264,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('admin_color', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 150, 
-				'title' => __('Color scheme', vgse_users()->textname),
+				'title' => esc_html__('Color scheme', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,
@@ -284,7 +284,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('show_admin_bar_front', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 190, 
-				'title' => __('Show admin bar on frontend', vgse_users()->textname),
+				'title' => esc_html__('Show admin bar on frontend', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,
@@ -308,7 +308,7 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 			$this->columns->register_item('locale', $post_type, array(
 				'data_type' => 'post_data', 	
 				'column_width' => 150, 
-				'title' => __('Language', vgse_users()->textname),
+				'title' => esc_html__('Language', vgse_users()->textname),
 				'type' => '',
 				'supports_formulas' => true,
 				'allow_to_hide' => true,

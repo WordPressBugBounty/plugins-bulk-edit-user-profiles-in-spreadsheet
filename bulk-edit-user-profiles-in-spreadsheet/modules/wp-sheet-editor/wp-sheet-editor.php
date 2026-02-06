@@ -32,7 +32,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 	class WP_Sheet_Editor {
 
 		private $post_type;
-		public $version     = '2.25.19';
+		public $version     = '2.26.1';
 		public $textname    = 'vg_sheet_editor';
 		public $options_key = 'vg_sheet_editor';
 		public $plugin_url  = null;
@@ -106,6 +106,9 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 		 * Plugin init
 		 */
 		function init() {
+			if ( isset( $_GET['wpse_troubleshoot8987'] ) ) {
+				return;
+			}
 			do_action( 'vg_sheet_editor/before_initialized' );
 
 			// Exit if frontend and it\'s not allowed
@@ -122,7 +125,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 			add_filter( 'woocommerce_allow_marketplace_suggestions', '__return_false' );
 
 			$lang_path = str_replace( wp_normalize_path( WP_PLUGIN_DIR ) . '/', '', wp_normalize_path( __DIR__ . '/lang/' ) );
-			load_plugin_textdomain( VGSE()->textname, false, $lang_path );
+			load_plugin_textdomain( 'vg_sheet_editor', false, $lang_path );
 
 			// Init internal APIs
 			$this->data_helpers = WP_Sheet_Editor_Data::get_instance();
@@ -134,14 +137,14 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 				new WPSE_WhatIsSoSlow();
 			}
 
-			if ( ! empty( $_GET['wpse_hard_reset'] ) && ! empty( $_GET['wpse_nonce'] ) && VGSE()->helpers->user_can_manage_options() && wp_verify_nonce( $_GET['wpse_nonce'], 'wpse' ) ) {
-				$this->on_uninstall();
+			if ( ! empty( $_GET['wpse_hard_reset'] ) && ! empty( $_GET['wpse_nonce'] ) && VGSE()->helpers->user_can_manage_options() && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['wpse_nonce'] ) ), 'wpse' ) ) {
+				$this->delete_settings();
 				if ( ! headers_sent() ) {
 					wp_redirect( remove_query_arg( array( 'wpse_hard_reset', 'wpse_nonce' ) ) );
 					exit();
 				}
 			}
-			if ( ! empty( $_GET['wpse_export_settings'] ) && ! empty( $_GET['wpse_nonce'] ) && VGSE()->helpers->user_can_manage_options() && wp_verify_nonce( $_GET['wpse_nonce'], 'wpse' ) ) {
+			if ( ! empty( $_GET['wpse_export_settings'] ) && ! empty( $_GET['wpse_nonce'] ) && VGSE()->helpers->user_can_manage_options() && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['wpse_nonce'] ) ), 'wpse' ) ) {
 				$this->export_settings();
 			}
 
@@ -160,6 +163,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 			);
 			if ( empty( $options ) ) {
 				$options = $default_options;
+				$options['initial_core_version'] = VGSE()->version;
 				update_option( $this->options_key, $options );
 			} else {
 				$options = wp_parse_args( $options, $default_options );
@@ -182,10 +186,10 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 				'vg_sheet_editor/extensions',
 				array(
 					'users_lite'          => array(
-						'title'               => __( 'Edit User Profiles in Spreadsheet - Basic', 'vg_sheet_editor' ),
+						'title'               => esc_html__( 'Edit User Profiles in Spreadsheet - Basic', 'vg_sheet_editor' ),
 						'icon'                => 'fa-users', // fa-search
 						'image'               => '', // fa-search
-						'description'         => __( '<p >Edit WordPress users in spreadsheet, edit only basic profiles and make basic searches.</p>', 'vg_sheet_editor' ), // incluir <p>
+						'description'         => __( 'Edit WordPress users in spreadsheet, edit only basic profiles and make basic searches.', 'vg_sheet_editor' ),
 						'bundle'              => array( 'users' ),
 						'class_function_name' => 'WP_Sheet_Editor_Users',
 						'wp_org_slug'         => 'bulk-edit-user-profiles-in-spreadsheet',
@@ -193,32 +197,32 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 						'extension_id'        => 24,
 					),
 					'users'               => array(
-						'title'               => __( 'Edit User Profiles in Spreadsheet - FULL', 'vg_sheet_editor' ),
+						'title'               => esc_html__( 'Edit User Profiles in Spreadsheet - FULL', 'vg_sheet_editor' ),
 						'icon'                => 'fa-users', // fa-search
 						'image'               => '', // fa-search
-						'description'         => __( '<p >Edit WordPress users in spreadsheet. Edit FULL user profiles, including custom fields. Add new columns to the spreadsheet, Good for ecommerce stores, membership sites, events directories, business directories, user directories</p>', 'vg_sheet_editor' ), // incluir <p>
+						'description'         => __( 'Edit WordPress users in spreadsheet. Edit FULL user profiles, including custom fields. Add new columns to the spreadsheet, Good for ecommerce stores, membership sites, events directories, business directories, user directories', 'vg_sheet_editor' ),
 						'bundle'              => array( 'users' ),
 						'class_function_name' => 'VGSE_USERS_IS_PREMIUM',
 						'post_types'          => array(),
 						'extension_id'        => 24,
 					),
 					'wc_customers'        => array(
-						'title'               => __( 'WooCommerce Customers Spreadsheet', 'vg_sheet_editor' ),
+						'title'               => esc_html__( 'WooCommerce Customers Spreadsheet', 'vg_sheet_editor' ),
 						'icon'                => 'fa-users', // fa-search
 						'image'               => '', // fa-search
-						'description'         => __( '<p >View all your Customers in a Spreadsheet. View full profile, Edit Profiles Quickly, View Billing and Shipping information, Make advanced customer searches, Export Customers to Excel or Google Sheets, Import Customers from External Applications</p>', 'vg_sheet_editor' ), // incluir <p>
+						'description'         => __( 'View all your Customers in a Spreadsheet. View full profile, Edit Profiles Quickly, View Billing and Shipping information, Make advanced customer searches, Export Customers to Excel or Google Sheets, Import Customers from External Applications', 'vg_sheet_editor' ),
 						'bundle'              => array( 'users' ),
 						'class_function_name' => 'VGSE_USERS_IS_PREMIUM',
 						'post_types'          => array(),
 						'extension_id'        => 24,
 					),
 					'media_library'       => array(
-						'title'                 => __( 'Media Library Spreadsheet', 'vg_sheet_editor' ),
+						'title'                 => esc_html__( 'Media Library Spreadsheet', 'vg_sheet_editor' ),
 						'icon'                  => 'fa-image', // fa-search
 						'image'                 => '', // fa-search
-						'description'           => __( '<p >View the image, videos, and all the files from the WP Media library in a spreadsheet. Edit all the file fields, including alt text, image captions, file descriptions, Advanced Search by any field , Auto generate alt text, captions, etc. using the parent post title or categorías, Update thousands of files at once, and more.</p>', 'vg_sheet_editor' ), // incluir <p>
+						'description'           => __( 'View the image, videos, and all the files from the WP Media library in a spreadsheet. Edit all the file fields, including alt text, image captions, file descriptions, Advanced Search by any field , Auto generate alt text, captions, etc. using the parent post title or categorías, Update thousands of files at once, and more.', 'vg_sheet_editor' ),
 						'inactive_action_url'   => 'https://wpsheeteditor.com/go/media-addon?utm_source=wp-admin&utm_medium=extensions-list&utm_campaign=media',
-						'inactive_action_label' => __( 'Buy', 'vg_sheet_editor' ),
+						'inactive_action_label' => esc_html__( 'Buy', 'vg_sheet_editor' ),
 						'freemius_function'     => 'wpseml_freemius',
 						'bundle'                => false,
 						'class_function_name'   => 'VGSE_MEDIA_LIBRARY_IS_PREMIUM',
@@ -227,12 +231,12 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 						'extension_id'          => 78,
 					),
 					'taxonomy_terms'      => array(
-						'title'                 => __( 'Edit categories, tags, attributes in a spreadsheet', 'vg_sheet_editor' ),
+						'title'                 => esc_html__( 'Edit categories, tags, attributes in a spreadsheet', 'vg_sheet_editor' ),
 						'icon'                  => 'fa-tags', // fa-search
 						'image'                 => '', // fa-search
-						'description'           => __( '<p >One spreadsheet for categories, tags, product attributes, event categories, portfolio categories, real state tags, etc. View and edit all the items in one place, copy paste, upload category images quickly, add descriptions, edit SEO, etc.</p>', 'vg_sheet_editor' ), // incluir <p>
+						'description'           => __( 'One spreadsheet for categories, tags, product attributes, event categories, portfolio categories, real state tags, etc. View and edit all the items in one place, copy paste, upload category images quickly, add descriptions, edit SEO, etc.', 'vg_sheet_editor' ),
 						'inactive_action_url'   => 'https://wpsheeteditor.com/go/taxonomy-terms-addon?utm_source=wp-admin&utm_medium=extensions-list&utm_campaign=taxonomy-terms',
-						'inactive_action_label' => __( 'Buy', 'vg_sheet_editor' ),
+						'inactive_action_label' => esc_html__( 'Buy', 'vg_sheet_editor' ),
 						'freemius_function'     => 'wpsett_fs',
 						'bundle'                => false,
 						'class_function_name'   => 'VGSE_TAXONOMY_TERMS_IS_PREMIUM',
@@ -259,12 +263,12 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 						'extension_id'          => 19,
 					),
 					'woocommerce_coupons' => array(
-						'title'                 => __( 'WooCommerce Coupons Spreadsheet', 'vg_sheet_editor' ),
+						'title'                 => esc_html__( 'WooCommerce Coupons Spreadsheet', 'vg_sheet_editor' ),
 						'icon'                  => 'fa-bullhorn', // fa-search
 						'image'                 => '', // fa-search
-						'description'           => __( '<p >View WooCommerce Coupons in a spreadsheet. Edit all coupon fields, Advanced Search by any field , Auto generate hundreds of coupons, Update hundreds of coupons at once, and more.</p>', 'vg_sheet_editor' ), // incluir <p>
+						'description'           => __( 'View WooCommerce Coupons in a spreadsheet. Edit all coupon fields, Advanced Search by any field , Auto generate hundreds of coupons, Update hundreds of coupons at once, and more.', 'vg_sheet_editor' ),
 						'inactive_action_url'   => 'https://wpsheeteditor.com/go/wc-coupons-addon?utm_source=wp-admin&utm_medium=extensions-list&utm_campaign=coupons',
-						'inactive_action_label' => __( 'Buy', 'vg_sheet_editor' ),
+						'inactive_action_label' => esc_html__( 'Buy', 'vg_sheet_editor' ),
 						'freemius_function'     => 'wpsewcc_fs',
 						'bundle'                => false,
 						'class_function_name'   => 'VGSE_WC_COUPONS_IS_PREMIUM',
@@ -273,12 +277,12 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 						'extension_id'          => 21,
 					),
 					'woocommerce_orders'  => array(
-						'title'                 => __( 'WooCommerce Orders Spreadsheet', 'vg_sheet_editor' ),
+						'title'                 => esc_html__( 'WooCommerce Orders Spreadsheet', 'vg_sheet_editor' ),
 						'icon'                  => 'fa-shopping-cart', // fa-search
 						'image'                 => '', // fa-search
-						'description'           => __( '<p >View and dispatch all the Orders quickly. Advanced Search by any field (shipping method, taxes, VAT, payment methods, customers, products, etc), Export orders and customers information including guest customers; edit thousands of orders quickly, and more.</p>', 'vg_sheet_editor' ), // incluir <p>
+						'description'           => __( 'View and dispatch all the Orders quickly. Advanced Search by any field (shipping method, taxes, VAT, payment methods, customers, products, etc), Export orders and customers information including guest customers; edit thousands of orders quickly, and more.', 'vg_sheet_editor' ),
 						'inactive_action_url'   => 'https://wpsheeteditor.com/extensions/woocommerce-orders-spreadsheet/?utm_source=wp-admin&utm_medium=extensions-list&utm_campaign=orders',
-						'inactive_action_label' => __( 'Buy', 'vg_sheet_editor' ),
+						'inactive_action_label' => esc_html__( 'Buy', 'vg_sheet_editor' ),
 						'freemius_function'     => 'wpsewco_fs',
 						'bundle'                => false,
 						'class_function_name'   => 'VGSE_WC_ORDERS_IS_PREMIUM',
@@ -287,12 +291,12 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 						'extension_id'          => 79,
 					),
 					'comments'            => array(
-						'title'                 => __( 'Comments, Reviews, and Order Notes Spreadsheet', 'vg_sheet_editor' ),
+						'title'                 => esc_html__( 'Comments, Reviews, and Order Notes Spreadsheet', 'vg_sheet_editor' ),
 						'icon'                  => 'fa-comments', // fa-search
 						'image'                 => '', // fa-search
-						'description'           => __( '<p >It is the best way to manage your comments, WooCommerce customer reviews, event reviews, testimonials, and order notes in a spreadsheet. You can make advanced searches by any field (keyword, order note, status, find comments by post type, and all the fields). You can bulk edit them, delete all at once, export them to excel or external systems, import comments and reviews from other systems, and more.</p>', 'vg_sheet_editor' ), // incluir <p>
+						'description'           => __( 'It is the best way to manage your comments, WooCommerce customer reviews, event reviews, testimonials, and order notes in a spreadsheet. You can make advanced searches by any field (keyword, order note, status, find comments by post type, and all the fields). You can bulk edit them, delete all at once, export them to excel or external systems, import comments and reviews from other systems, and more.', 'vg_sheet_editor' ),
 						'inactive_action_url'   => 'https://wpsheeteditor.com/go/comments-addon?utm_source=wp-admin&utm_medium=extensions-list&utm_campaign=comments',
-						'inactive_action_label' => __( 'Buy', 'vg_sheet_editor' ),
+						'inactive_action_label' => esc_html__( 'Buy', 'vg_sheet_editor' ),
 						'freemius_function'     => 'wpsecr_fs',
 						'bundle'                => false,
 						'class_function_name'   => 'VGSE_COMMENTS_IS_PREMIUM',
@@ -301,12 +305,12 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 						'extension_id'          => 81,
 					),
 					'custom_tables'       => array(
-						'title'                 => __( 'Custom Database Tables Spreadsheet', 'vg_sheet_editor' ),
+						'title'                 => esc_html__( 'Custom Database Tables Spreadsheet', 'vg_sheet_editor' ),
 						'icon'                  => 'fa-table', // fa-search
 						'image'                 => '', // fa-search
-						'description'           => __( '<p >One Spreadsheet for Every Custom Database Table added by other plugins. Live edit in the cells, Bulk Edit, Make advanced searches by any field, export and import, bulk delete, move information between sites, edit thousands of items, and more.</p>', 'vg_sheet_editor' ), // incluir <p>
+						'description'           => __( 'One Spreadsheet for Every Custom Database Table added by other plugins. Live edit in the cells, Bulk Edit, Make advanced searches by any field, export and import, bulk delete, move information between sites, edit thousands of items, and more.', 'vg_sheet_editor' ),
 						'inactive_action_url'   => 'https://wpsheeteditor.com/extensions/custom-database-tables-spreadsheet/?utm_source=wp-admin&utm_medium=extensions-list&utm_campaign=custom-tables',
-						'inactive_action_label' => __( 'Buy', 'vg_sheet_editor' ),
+						'inactive_action_label' => esc_html__( 'Buy', 'vg_sheet_editor' ),
 						'freemius_function'     => 'wpsect_fs',
 						'bundle'                => false,
 						'class_function_name'   => 'VGSE_CUSTOM_TABLES_IS_PREMIUM',
@@ -316,12 +320,12 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 						'extension_id'          => 95,
 					),
 					'edd'                 => array(
-						'title'                 => __( 'Easy Digital Downloads Spreadsheet', 'vg_sheet_editor' ),
+						'title'                 => esc_html__( 'Easy Digital Downloads Spreadsheet', 'vg_sheet_editor' ),
 						'icon'                  => 'fa-download', // fa-search
 						'image'                 => '', // fa-search
-						'description'           => __( '<p >View all the EDD products in a spreadsheet, create downloads and files in bulk, edit hundreds of products at once using formulas, Advanced searches using multiple fields, etc.</p>', 'vg_sheet_editor' ), // incluir <p>
+						'description'           => __( 'View all the EDD products in a spreadsheet, create downloads and files in bulk, edit hundreds of products at once using formulas, Advanced searches using multiple fields, etc.', 'vg_sheet_editor' ),
 						'inactive_action_url'   => 'https://wpsheeteditor.com/go/edd-downloads-addon?utm_source=wp-admin&utm_medium=extensions-list&utm_campaign=edd',
-						'inactive_action_label' => __( 'Buy', 'vg_sheet_editor' ),
+						'inactive_action_label' => esc_html__( 'Buy', 'vg_sheet_editor' ),
 						'freemius_function'     => 'wpseedd_fs',
 						'bundle'                => false,
 						'class_function_name'   => 'VGSE_EDD_DOWNLOADS_IS_PREMIUM',
@@ -330,12 +334,12 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 						'extension_id'          => 18,
 					),
 					'events'              => array(
-						'title'                 => __( 'Events Spreadsheet', 'vg_sheet_editor' ),
+						'title'                 => esc_html__( 'Events Spreadsheet', 'vg_sheet_editor' ),
 						'icon'                  => 'fa-ticket', // fa-search
 						'image'                 => '', // fa-search
-						'description'           => __( '<p >View all the events in a spreadsheet, create events in bulk, edit hundreds of events at once using formulas, Advanced searches using multiple event fields, etc.</p>', 'vg_sheet_editor' ), // incluir <p>
+						'description'           => __( 'View all the events in a spreadsheet, create events in bulk, edit hundreds of events at once using formulas, Advanced searches using multiple event fields, etc.', 'vg_sheet_editor' ),
 						'inactive_action_url'   => 'https://wpsheeteditor.com/go/events-addon?utm_source=wp-admin&utm_medium=extensions-list&utm_campaign=events',
-						'inactive_action_label' => __( 'Buy', 'vg_sheet_editor' ),
+						'inactive_action_label' => esc_html__( 'Buy', 'vg_sheet_editor' ),
 						'freemius_function'     => 'wpsee_fs',
 						'bundle'                => false,
 						'class_function_name'   => 'VGSE_EVENTS_IS_PREMIUM',
@@ -344,12 +348,12 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 						'extension_id'          => 22,
 					),
 					'give'                => array(
-						'title'                 => __( 'Give Spreadsheet', 'vg_sheet_editor' ),
+						'title'                 => esc_html__( 'Give Spreadsheet', 'vg_sheet_editor' ),
 						'icon'                  => 'fa-gift',
 						'image'                 => '',
-						'description'           => __( '<p>This includes spreadsheets to manage Donation Forms, Donations, and Donors. You can bulk edit, export, import, and quickly manage your donations website created with GiveWP</p>', 'vg_sheet_editor' ), // incluir <p>
+						'description'           => __( 'This includes spreadsheets to manage Donation Forms, Donations, and Donors. You can bulk edit, export, import, and quickly manage your donations website created with GiveWP', 'vg_sheet_editor' ),
 						'inactive_action_url'   => 'https://wpsheeteditor.com/extensions/givewp-donations-spreadsheet/?utm_source=wp-admin&utm_medium=extensions-list&utm_campaign=givewp',
-						'inactive_action_label' => __( 'Buy', 'vg_sheet_editor' ),
+						'inactive_action_label' => esc_html__( 'Buy', 'vg_sheet_editor' ),
 						'freemius_function'     => 'wpsegwf_fs',
 						'bundle'                => false,
 						'class_function_name'   => 'VGSE_GIVEWP_IS_PREMIUM',
@@ -358,12 +362,12 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 						'extension_id'          => 129,
 					),
 					'frontend_editor'     => array(
-						'title'                 => __( 'Display the spreadsheet editor in the frontend', 'vg_sheet_editor' ),
+						'title'                 => esc_html__( 'Display the spreadsheet editor in the frontend', 'vg_sheet_editor' ),
 						'icon'                  => 'fa-rocket', // fa-search
 						'image'                 => '', // fa-search
-						'description'           => __( '<p >Create new spreadsheets with custom columns and Share the Spreadsheets with your Users or Employees on the Frontend. Useful for marketplaces where vendors should edit products in the spreadsheet, allow post or event submissions on the Frontend, events directories, Web Apps, Custom Dashboards, etc.</p>', 'vg_sheet_editor' ), // incluir <p>
+						'description'           => __( 'Create new spreadsheets with custom columns and Share the Spreadsheets with your Users or Employees on the Frontend. Useful for marketplaces where vendors should edit products in the spreadsheet, allow post or event submissions on the Frontend, events directories, Web Apps, Custom Dashboards, etc.', 'vg_sheet_editor' ),
 						'inactive_action_url'   => 'https://wpsheeteditor.com/go/frontend-addon?utm_source=wp-admin&utm_medium=extensions-list&utm_campaign=frontend',
-						'inactive_action_label' => __( 'Buy', 'vg_sheet_editor' ),
+						'inactive_action_label' => esc_html__( 'Buy', 'vg_sheet_editor' ),
 						'freemius_function'     => 'bepof_fs',
 						'bundle'                => false,
 						'class_function_name'   => 'VGSE_FRONTEND_IS_PREMIUM',
@@ -371,170 +375,147 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 						'extension_id'          => 25,
 					),
 					'woocommerce'         => array(
-						'title'               => __( 'WooCommerce - Products Integration', 'vg_sheet_editor' ),
+						'title'               => esc_html__( 'WooCommerce - Products Integration', 'vg_sheet_editor' ),
 						'icon'                => 'fa-shopping-cart', // fa-search
 						'image'               => '', // fa-search
-						'description'         => __( '<p >Edit WooCommerce products in the spreadsheet. It supports all kinds of products, including Variable Products, Downloadable Products, External Products, Simple Products. You can edit all product fields in the spreadsheet, including attributes, images, etc.</p>', 'vg_sheet_editor' ), // incluir <p>
-				//      //'status' => __('Included in "Pro Bundle".', 'vg_sheet_editor' ), // vacío  o installed
-						'bundle'              => array( 'custom_post_types' ),
+						'description'         => __( 'Edit WooCommerce products in the spreadsheet. It supports all kinds of products, including Variable Products, Downloadable Products, External Products, Simple Products. You can edit all product fields in the spreadsheet, including attributes, images, etc.', 'vg_sheet_editor' ),
+						//      //'status' => esc_html__('Included in "Pro Bundle".', 'vg_sheet_editor' ), // vacío  o installed
+								'bundle'      => array( 'custom_post_types' ),
 						'class_function_name' => 'WP_Sheet_Editor_WooCommerce',
 						'wp_org_slug'         => 'woo-bulk-edit-products',
 						'post_types'          => array( 'product' ),
 						'extension_id'        => 17,
 					),
 					'custom_post_types'   => array(
-						'title'               => __( 'Custom post types', 'vg_sheet_editor' ),
+						'title'               => esc_html__( 'Custom post types', 'vg_sheet_editor' ),
 						'icon'                => 'fa-file', // fa-search
 						'image'               => '', // fa-search
-						'description'         => __( '<p >Edit restaurant menus, courses, projects, portfolios, and all custom post types.</p>', 'vg_sheet_editor' ), // incluir <p>
-				//      //'status' => __('Included in "Pro Bundle".', 'vg_sheet_editor' ), // vacío  o installed
-						'bundle'              => array( 'custom_post_types' ),
+						'description'         => __( 'Edit restaurant menus, courses, projects, portfolios, and all custom post types.', 'vg_sheet_editor' ),
+						//      //'status' => esc_html__('Included in "Pro Bundle".', 'vg_sheet_editor' ), // vacío  o installed
+								'bundle'      => array( 'custom_post_types' ),
 						'class_function_name' => 'WP_Sheet_Editor_CPTs',
 						'post_types'          => array(),
 					),
 					'columns_renaming'    => array(
-						'title'                 => __( 'Columns renaming', 'vg_sheet_editor' ),
+						'title'                 => esc_html__( 'Columns renaming', 'vg_sheet_editor' ),
 						'icon'                  => 'fa-exchange', // fa-search
 						'image'                 => '', // fa-search
-						'description'           => __( '<p >You can rename the columns of the spreadsheet.<br>Example. Instead of showing “Post author” on the spreadsheet, you can change it to “Uploaded by”.</p>', 'vg_sheet_editor' ), // incluir <p>
-						'inactive_action_label' => __( 'Install for Free', 'vg_sheet_editor' ),
+						'description'           => __( 'You can rename the columns of the spreadsheet.<br>Example. Instead of showing “Post author” on the spreadsheet, you can change it to “Uploaded by”.', 'vg_sheet_editor' ),
+						'inactive_action_label' => esc_html__( 'Install for Free', 'vg_sheet_editor' ),
 						'inactive_action_url'   => $free_plugin_base_url . 'wp-sheet-editor-columns-renaming',
-						//      'status' => __('Free.', 'vg_sheet_editor' ), // vacío  o installed
+						//      'status' => esc_html__('Free.', 'vg_sheet_editor' ), // vacío  o installed
 														'bundle' => false,
 						'class_function_name'   => 'WP_Sheet_Editor_Columns_Renaming',
 						'post_types'            => array(),
 					),
 					'yoast'               => array(
-						'title'                 => __( 'YOAST SEO', 'vg_sheet_editor' ),
+						'title'                 => esc_html__( 'YOAST SEO', 'vg_sheet_editor' ),
 						'icon'                  => 'fa-google', // fa-search
 						'image'                 => '', // fa-search
-						'description'           => __( '<p >Edit SEO title, description, keyword, and SEO score in spreadsheet</p>', 'vg_sheet_editor' ), // incluir <p>
-						'inactive_action_label' => __( 'Install for Free', 'vg_sheet_editor' ),
+						'description'           => __( 'Edit SEO title, description, keyword, and SEO score in spreadsheet', 'vg_sheet_editor' ),
+						'inactive_action_label' => esc_html__( 'Install for Free', 'vg_sheet_editor' ),
 						'inactive_action_url'   => $free_plugin_base_url . 'wp-sheet-editor-yoast-seo',
-						//      'status' => __('Free.', 'vg_sheet_editor' ), // vacío  o installed
+						//      'status' => esc_html__('Free.', 'vg_sheet_editor' ), // vacío  o installed
 														'bundle' => false,
 						'class_function_name'   => 'WP_Sheet_Editor_YOAST_SEO',
 						'post_types'            => array(),
 					),
 					'advanced_filters'    => array(
-						'title'               => __( 'Advanced Search', 'vg_sheet_editor' ),
+						'title'               => esc_html__( 'Advanced Search', 'vg_sheet_editor' ),
 						'icon'                => 'fa-search', // fa-search
 						'image'               => '', // fa-search
-						'description'         => __( '<p >Find posts by keyword, taxonomies, author, date, status, or custom fields.</p><p>Search in multiple fields with advanced operators: =, !=, &lt;, &gt;, LIKE, NOT LIKE</p><p>Examples: Find products from category Audio with stock < 20, or products from category Apple without featured image, or products containing the keyword "Google" without image gallery.</p>', 'vg_sheet_editor' ), // incluir <p>
-						//'status' => __('Included in "Pro Bundle".', 'vg_sheet_editor' ), // vacío  o installed
+						'description'         => __( 'Find posts by keyword, taxonomies, author, date, status, or custom fields.</p><p>Search in multiple fields with advanced operators: =, !=, &lt;, &gt;, LIKE, NOT LIKE</p><p>Examples: Find products from category Audio with stock < 20, or products from category Apple without featured image, or products containing the keyword "Google" without image gallery.', 'vg_sheet_editor' ),
+						//'status' => esc_html__('Included in "Pro Bundle".', 'vg_sheet_editor' ), // vacío  o installed
 						'bundle'              => array( 'users', 'custom_post_types' ),
 						'class_function_name' => 'WP_Sheet_Editor_Advanced_Filters',
 						'post_types'          => array(),
 					),
 					'replace_formulas'    => array(
-						'title'               => __( 'Formulas', 'vg_sheet_editor' ),
+						'title'               => esc_html__( 'Formulas', 'vg_sheet_editor' ),
 						'icon'                => 'fa fa-pencil-square', // fa-search
 						'image'               => '', // fa-search
-						'description'         => __( '<p >Edit Hundreds of Posts at Once with just a few clicks. Search and replace, Replace urls and phrases, save values to fields in bulk, copy values between fields, merge fields, etc..</p><p>Examples: Copy regular price to sale price, update product attributes names, etc.</p>', 'vg_sheet_editor' ), // incluir <p>
-				//      //'status' => __('Included in "Pro Bundle".', 'vg_sheet_editor' ), // vacío  o installed
-						'bundle'              => array( 'users', 'custom_post_types' ),
+						'description'         => __( 'Edit Hundreds of Posts at Once with just a few clicks. Search and replace, Replace urls and phrases, save values to fields in bulk, copy values between fields, merge fields, etc..</p><p>Examples: Copy regular price to sale price, update product attributes names, etc.', 'vg_sheet_editor' ),
+						//      //'status' => esc_html__('Included in "Pro Bundle".', 'vg_sheet_editor' ), // vacío  o installed
+								'bundle'      => array( 'users', 'custom_post_types' ),
 						'class_function_name' => 'WP_Sheet_Editor_Formulas',
 						'post_types'          => array(),
 					),
 					'math_formulas'       => array(
-						'title'               => __( 'Math Formulas', 'vg_sheet_editor' ),
+						'title'               => esc_html__( 'Math Formulas', 'vg_sheet_editor' ),
 						'icon'                => 'fa-hashtag', // fa-search
 						'image'               => '', // fa-search
-						'description'         => __( '<p >Edit Hundreds of Posts at Once. Update numeric fields using advanced math formulas. Example, increase prices by 10% , manage inventory , etc. Run any math formula.</p><p>You can use multiple fields in the formula, for example, "Regular price x Inventory / Sales price</p>', 'vg_sheet_editor' ), // incluir <p>
-						//'status' => __('Included in "Pro Bundle".', 'vg_sheet_editor' ), // vacío  o installed
+						'description'         => __( 'Edit Hundreds of Posts at Once. Update numeric fields using advanced math formulas. Example, increase prices by 10% , manage inventory , etc. Run any math formula.</p><p>You can use multiple fields in the formula, for example, "Regular price x Inventory / Sales price', 'vg_sheet_editor' ),
+						//'status' => esc_html__('Included in "Pro Bundle".', 'vg_sheet_editor' ), // vacío  o installed
 						'bundle'              => array( 'users', 'custom_post_types' ),
 						'class_function_name' => 'WP_Sheet_Editor_Formulas',
 						'post_types'          => array(),
 					),
 					'acf'                 => array(
-						'title'               => __( 'Advanced Custom Fields', 'vg_sheet_editor' ),
+						'title'               => esc_html__( 'Advanced Custom Fields', 'vg_sheet_editor' ),
 						'icon'                => 'fa-files-o', // fa-search
 						'image'               => '', // fa-search
-						'description'         => __( '<p >Advanced Custom Fields metaboxes appear in the Spreadsheet Automatically. So you can edit custom fields easily.</p>', 'vg_sheet_editor' ), // incluir <p>
-						//'status' => __('Included in "Pro Bundle".', 'vg_sheet_editor' ), // vacío  o installed
+						'description'         => __( 'Advanced Custom Fields metaboxes appear in the Spreadsheet Automatically. So you can edit custom fields easily.', 'vg_sheet_editor' ),
+						//'status' => esc_html__('Included in "Pro Bundle".', 'vg_sheet_editor' ), // vacío  o installed
 						'bundle'              => array( 'users', 'custom_post_types' ),
 						'class_function_name' => 'WP_Sheet_Editor_ACF',
 						'post_types'          => array(),
 					),
 					'custom_columns'      => array(
-						'title'               => __( 'Edit Custom Fields in Spreadsheet', 'vg_sheet_editor' ),
+						'title'               => esc_html__( 'Edit Custom Fields in Spreadsheet', 'vg_sheet_editor' ),
 						'icon'                => 'fa-plus', // fa-search
 						'image'               => '', // fa-search
-						'description'         => __( '<p >You can create columns for custom fields. <br>Edit page settings added by your theme, event details, products information, etc.</p>', 'vg_sheet_editor' ), // incluir <p>
-						//'status' => __('Included in "Pro Bundle".', 'vg_sheet_editor' ), // vacío  o installed
+						'description'         => __( 'You can create columns for custom fields. <br>Edit page settings added by your theme, event details, products information, etc.', 'vg_sheet_editor' ),
+						//'status' => esc_html__('Included in "Pro Bundle".', 'vg_sheet_editor' ), // vacío  o installed
 						'bundle'              => array( 'users', 'custom_post_types' ),
 						'class_function_name' => 'WP_Sheet_Editor_Custom_Columns',
 						'post_types'          => array(),
 					),
 					'posts'               => array(
-						'title'               => __( 'Edit Posts and Pages in Spreadsheet', 'vg_sheet_editor' ),
-						'icon'                => 'fa-table', // fa-search
-						'image'               => '', // fa-search
-						'description'         => __( '<p >Edit default post fields in spreadsheet.</p>', 'vg_sheet_editor' ), // incluir <p>
-				//                  'bundle' => array('custom_post_types'),
-						'class_function_name' => 'WP_Sheet_Editor_Dist',
-						'wp_org_slug'         => 'wp-sheet-editor-bulk-spreadsheet-editor-for-posts-and-pages',
-						'post_types'          => array(), // We can't add post types here, they are added in $this->bundles.
-						'extension_id'        => 20,
+						'title'                       => esc_html__( 'Edit Posts and Pages in Spreadsheet', 'vg_sheet_editor' ),
+						'icon'                        => 'fa-table', // fa-search
+						'image'                       => '', // fa-search
+						'description'                 => __( 'Edit default post fields in spreadsheet.', 'vg_sheet_editor' ),
+						//                  'bundle' => array('custom_post_types'),
+								'class_function_name' => 'WP_Sheet_Editor_Dist',
+						'wp_org_slug'                 => 'wp-sheet-editor-bulk-spreadsheet-editor-for-posts-and-pages',
+						'post_types'                  => array(), // We can't add post types here, they are added in $this->bundles.
+						'extension_id'                => 20,
 					),
 					'wc_lite'             => array(
-						'title'               => __( 'WooCommerce - BASIC integration', 'vg_sheet_editor' ),
-						'icon'                => 'fa-table', // fa-search
-						'image'               => '', // fa-search
-						'description'         => __( '<p>You can edit simple products only. Available columns: title, url, description, date, SKU, regular price, sale price, stock status, manage stock, stock quantity.</p><p>More columns and product types available as premium extension.</p>', 'vg_sheet_editor' ), // incluir <p>
-				//                  'bundle' => array('custom_post_types'),
-						'class_function_name' => 'WP_Sheet_Editor_Dist',
-						'wp_org_slug'         => 'woo-bulk-edit-products',
-						'post_types'          => array( 'product' ),
-						'extension_id'        => 17,
+						'title'                       => esc_html__( 'WooCommerce - BASIC integration', 'vg_sheet_editor' ),
+						'icon'                        => 'fa-table', // fa-search
+						'image'                       => '', // fa-search
+						'description'                 => __( 'You can edit simple products only. Available columns: title, url, description, date, SKU, regular price, sale price, stock status, manage stock, stock quantity.</p><p>More columns and product types available as premium extension.', 'vg_sheet_editor' ),
+						//                  'bundle' => array('custom_post_types'),
+								'class_function_name' => 'WP_Sheet_Editor_Dist',
+						'wp_org_slug'                 => 'woo-bulk-edit-products',
+						'post_types'                  => array( 'product' ),
+						'extension_id'                => 17,
 					),
 					'columns_visibility'  => array(
-						'title'               => __( 'Columns visibility', 'vg_sheet_editor' ),
+						'title'               => esc_html__( 'Columns visibility', 'vg_sheet_editor' ),
 						'icon'                => 'fa-cog', // fa-search
 						'image'               => '', // fa-search
-						'description'         => __( '<p >You can show, hide, and sort columns in the spreadsheet.</p>', 'vg_sheet_editor' ), // incluir <p>
+						'description'         => __( 'You can show, hide, and sort columns in the spreadsheet.', 'vg_sheet_editor' ),
 						'bundle'              => false,
 						'class_function_name' => 'WP_Sheet_Editor_Columns_Visibility',
 						'post_types'          => array(),
 					),
-					'autofill'            => array(
-						'title'               => __( 'Autofill cells', 'vg_sheet_editor' ),
-						'icon'                => '', // fa-search
-						'image'               => '<img src="' . VGSE()->plugin_url . 'assets/imgs/drag-down-autofill-demo.gif" style="max-height: 65px;">', // fa-search
-						'description'         => __( '<p >You can auto fill cells (copy) by dragging the cell corner into other cells, as you can do in excel.</p>', 'vg_sheet_editor' ), // incluir <p>
-						'button_label'        => __( 'Install for Free', 'vg_sheet_editor' ),
-						'button_url'          => $free_plugin_base_url . 'wp-sheet-editor-autofill',
-						'bundle'              => false,
-						'class_function_name' => 'WP_Sheet_Editor_Autofill_Cells',
-						'post_types'          => array(),
-					),
 					'basic_filters'       => array(
-						'title'               => __( 'Basic search', 'vg_sheet_editor' ),
+						'title'               => esc_html__( 'Basic search', 'vg_sheet_editor' ),
 						'icon'                => 'fa-search', // fa-search
-						'description'         => __( '<p >Search in the spreadsheet. Find posts by keyword, status, and author.</p>', 'vg_sheet_editor' ), // incluir <p>
-				//      'button_label' => __('Install for Free', 'vg_sheet_editor' ),
-				//      'button_url' => $free_plugin_base_url . 'wp-sheet-editor-autofill',
-						'bundle'              => false,
+						'description'         => __( 'Search in the spreadsheet. Find posts by keyword, status, and author.', 'vg_sheet_editor' ),
+						'bundle'      => false,
 						'class_function_name' => 'WP_Sheet_Editor_Filters',
 						'post_types'          => array(),
 					),
 					'columns_resizing'    => array(
-						'title'               => __( 'Columns resizing', 'vg_sheet_editor' ),
+						'title'               => esc_html__( 'Columns resizing', 'vg_sheet_editor' ),
 						'icon'                => 'fa-arrows-h', // fa-search
-						'description'         => __( '<p >Resize columns in the spreadsheet and save it for future sessions.</p>', 'vg_sheet_editor' ), // incluir <p>
+						'description'         => __( 'Resize columns in the spreadsheet and save it for future sessions.', 'vg_sheet_editor' ),
 						'bundle'              => false,
 						'class_function_name' => 'VGSE_Columns_Resizing',
 						'post_types'          => array(),
-					),
-					'post_templates'      => array(
-						'title'                 => __( 'Duplicate (Tool)', 'vg_sheet_editor' ),
-						'icon'                  => 'fa-copy', // fa-search
-						'description'           => __( '<p >Add a "duplicate" tool to the spreadsheet. You can select one row (post, product, coupon, etc.) and create a lot of copies.</p><p>Example. Create 100 products with the same tags, dimensions, attributes, and variations. And only change a couple of fields manually.</p>', 'vg_sheet_editor' ), // incluir <p>
-						'inactive_action_label' => __( 'Install for Free', 'vg_sheet_editor' ),
-						'inactive_action_url'   => $free_plugin_base_url . 'wp-sheet-editor-post-templates',
-						'bundle'                => false,
-						'class_function_name'   => 'WP_Sheet_Editor_Post_Templates',
-						'post_types'            => array(),
 					),
 				)
 			);
@@ -543,27 +524,27 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 				'vg_sheet_editor/extensions/bundles',
 				array(
 					'custom_post_types' => array(
-						'name'                  => __( 'Everything you need for All Posts Types and Products', 'vg_sheet_editor' ),
+						'name'                  => esc_html__( 'Everything you need for All Posts Types and Products', 'vg_sheet_editor' ),
 						'old_price'             => '99.99',
 						'price'                 => '49.99',
 						'percentage_off'        => 50,
 						'coupon'                => null,
 						'extensions'            => array(),
 						'inactive_action_url'   => 'https://wpsheeteditor.com/buy-extension/?extension_id=886&utm_source=wp-admin&utm_medium=extensions-list&utm_campaign=posts-bundle',
-						'inactive_action_label' => __( 'Buy bundle', 'vg_sheet_editor' ),
+						'inactive_action_label' => esc_html__( 'Buy bundle', 'vg_sheet_editor' ),
 						'freemius_function'     => 'vgse_freemius',
 						'wp_org_slug'           => 'wp-sheet-editor-bulk-spreadsheet-editor-for-posts-and-pages',
 						'post_types'            => array(),
 					),
 					'users'             => array(
-						'name'                  => __( 'Everything you need for Users and Customers', 'vg_sheet_editor' ),
+						'name'                  => esc_html__( 'Everything you need for Users and Customers', 'vg_sheet_editor' ),
 						'old_price'             => '99.99',
 						'price'                 => '49.99',
 						'percentage_off'        => 50,
 						'coupon'                => null,
 						'extensions'            => array(),
 						'inactive_action_url'   => 'https://wpsheeteditor.com/go/users-addon?utm_source=wp-admin&utm_medium=extensions-list&utm_campaign=users-bundle',
-						'inactive_action_label' => __( 'Buy bundle', 'vg_sheet_editor' ),
+						'inactive_action_label' => esc_html__( 'Buy bundle', 'vg_sheet_editor' ),
 						'freemius_function'     => 'beupis_fs',
 						'wp_org_slug'           => 'bulk-edit-user-profiles-in-spreadsheet',
 						'post_types'            => array( 'user' ),
@@ -664,11 +645,87 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 			add_filter( 'wp_update_term_data', array( $this, 'clear_cache_after_term_edited' ), 10, 4 );
 			add_action( 'delete_term', array( $this, 'clear_cache_after_term_deleted' ), 10, 3 );
 			add_action( 'user_register', array( $this, 'clear_cache_after_user_created' ), 10, 1 );
-			add_action( 'vg_sheet_editor/on_uninstall', array( $this, 'on_uninstall' ) );
+			add_action( 'vg_sheet_editor/on_uninstall', array( $this, 'maybe_delete_settings_on_uninstall' ) );
 			add_action( 'admin_page_access_denied', array( $this, 'catch_license_page_error' ) );
 			$this->maybe_auto_enable_sheet();
 
 			add_filter( 'stateless_skip_cache_busting', array( $this, 'disable_filename_randomization_for_wpse_files' ), 10, 2 );
+			add_action( 'admin_init', array( $this, 'maybe_migrate_old_options' ) );
+
+			add_action(
+				'admin_notices',
+				function () {
+					if ( function_exists( 'WPSEAI_CORE' ) && version_compare( WPSEAI_CORE()->version, '1.0.4-beta.1' ) < 0 ) {
+						$this->render_message_update_wpse_addon( 'WP Sheet Editor - AI' );
+					}
+					if ( function_exists( 'WPSE_Automations_Init_Obj' ) && version_compare( WPSE_Automations_Init_Obj()->version, '1.0.11-beta.2' ) < 0 ) {
+						$this->render_message_update_wpse_addon( 'WP Sheet Editor - Automations' );
+					}
+					if ( function_exists( 'WPSE_Google_Sheets_Obj' ) && version_compare( WPSE_Google_Sheets_Obj()->version, '1.0.12-beta.1' ) < 0 ) {
+						$this->render_message_update_wpse_addon( 'WP Sheet Editor - Google Sheets' );
+					}
+				}
+			);
+
+			if ( is_admin() ) {
+				// Schedule trash collection
+				if ( ! wp_next_scheduled( 'wpse_daily_cron' ) && ! wp_installing() ) {
+					wp_schedule_event( time(), 'daily', 'wpse_daily_cron' );
+				}
+
+				add_action( 'activated_plugin', array( $this, 'increase_toolbar_cache_seed' ) );
+				add_action( 'admin_init', array( $this, 'maybe_disable_inventory_stats' ) );
+			}
+		}
+
+		public function maybe_disable_inventory_stats() {
+			if ( VGSE()->get_option( 'ultra_performance_mode' ) ) {
+				VGSE()->options['be_disable_woocommerce_inventory_stats'] = true;
+			}
+		}
+
+		public function increase_toolbar_cache_seed() {
+			if ( VGSE()->get_option( 'ultra_performance_mode' ) ) {
+				update_option( 'vgse_toolbar_cache_seed', time(), false );
+			}
+		}
+
+		public function maybe_migrate_old_options() {
+			// Migrate old options. This can be removed in the future
+			if ( VGSE()->get_option( 'manage_taxonomy_columns_term_ids' ) ) {
+				VGSE()->update_option( 'manage_taxonomy_columns_format', 'term_id' );
+				VGSE()->update_option( 'manage_taxonomy_columns_term_ids', false );
+			}
+			if ( VGSE()->get_option( 'manage_taxonomy_columns_term_slugs' ) ) {
+				VGSE()->update_option( 'manage_taxonomy_columns_format', 'slug' );
+				VGSE()->update_option( 'manage_taxonomy_columns_term_slugs', false );
+			}
+		}
+
+		public function render_message_update_wpse_addon( $plugin_name ) {
+			?>
+			<div class="notice notice-error wpse-notice">
+				<p>
+				<?php
+				// translators: 1: plugin name
+				printf( esc_html__( 'Please update the plugin "%s" because you are using an old version that is not compatible with your other updated WP Sheet Editor plugins, which can cause unexpected issues.', 'vg_sheet_editor' ), esc_html( $plugin_name ) );
+				?>
+				</p>
+			</div>
+			<?php
+		}
+
+		public function render_message_update_all_wpse_plugins( $plugin_name ) {
+			?>
+			<div class="notice notice-error wpse-notice">
+				<p>
+				<?php
+				// translators: 1: plugin name
+				printf( esc_html__( 'Please update the WP Sheet Editor plugin and all its extensions to the latest version. The features of the plugin "%s" will be disabled temporarily because it is the newest version and it conflicts with old versions of other WP Sheet Editor plugins. The features will be enabled automatically after you install the updates.', 'vg_sheet_editor' ), esc_html( $plugin_name ) );
+				?>
+				</p>
+			</div>
+			<?php
 		}
 
 		/**
@@ -687,6 +744,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 		}
 
 		function maybe_auto_enable_sheet() {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( empty( $_GET['wpse_auto_enable_sheet'] ) || ! is_admin() || ! VGSE()->helpers->user_can_manage_options() || ! VGSE()->helpers->is_editor_page() || ! VGSE()->helpers->verify_nonce_from_request( '_wpnonce' ) ) {
 				return;
 			}
@@ -704,26 +762,10 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 
 		function catch_license_page_error() {
 			if ( empty( $_POST ) && ! empty( $_GET['page'] ) && preg_match( '/^(wpse|vgse|vg_sheet_editor)/', $_GET['page'] ) && strpos( $_GET['page'], '-account' ) !== false ) {
-				$message = sprintf(
-					__(
-						'<h1>WP Sheet Editor</h1>
-                <p>Do you want to install the premium plugin that you purchased? Follow these steps:</p>
-                <ol>
-                    <li>If you were using the free version of the plugin before the purchase, you need to uninstall the free version now</li>
-                    <li>When you purchased the plugin, you received an email with the download link and license key</li>
-                    <li>Now go to <a href="%1$s" target="_blank">this page</a> and click on the "Upload" button at the top</li>
-                    <li>Upload the premium zip file</li>
-                    <li>Activate the plugin</li>
-                    <li>You will see a screen asking for a license, enter your license key</li>
-                    <li>Done. Now you should see the welcome page where you can set up the plugin and start using it</li>
-                </ol>
-                <p>If you need help, you can <a href="%2$s" target="_blank">contact us</a></p>',
-						'vg_sheet_editor'
-					),
-					esc_url( admin_url( 'plugin - install . php' ) ),
-					VGSE()->get_support_links( 'contact_us', 'url', 'license - page - error' )
-				);
-				wp_die( $message );
+				ob_start();
+				include __DIR__ . '/views/license-page-error.php';
+				$message = ob_get_clean();
+				wp_die( wp_kses_post( $message ) );
 			}
 		}
 
@@ -823,11 +865,16 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 			header( 'Content-type: application/json' );
 			header( 'Content-disposition: attachment; filename = ' . basename( $file_path ) );
 			VGSE()->helpers->readfile_chunked( $file_path );
-			unlink( $file_path );
+			wp_delete_file( $file_path );
 			die();
 		}
 
-		function on_uninstall() {
+		function maybe_delete_settings_on_uninstall() {
+			if ( VGSE()->get_option( 'delete_all_data_after_uninstall' ) && isset( $GLOBALS['wp_sheet_edit_init_counter'] ) && $GLOBALS['wp_sheet_edit_init_counter'] < 2 ) {
+				$this->delete_settings();
+			}
+		}
+		function delete_settings() {
 			global $wpdb;
 
 			// Delete unnecessary info from the DB
@@ -835,9 +882,9 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 				'vgse_user_path',
 				'vgse_hide_whats_new',
 				'vgse_dismiss_review_tip',
-				'vgse_post_type_setup_done',
 				'vgse_detected_fields',
-				'vgse_all_meta_keys_',
+				'vgse_all_meta_keys',
+				'vgse_impskipped',
 			);
 			$option_keys_equal = array(
 				'vgse_welcome_redirect',
@@ -851,6 +898,12 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 				'vgse_favorite_search_fields',
 				'vgse_saved_searches',
 				'vgse_json_fields',
+				'vgse_active_users',
+				'vgse_removed_columns',
+				'vgse_saved_exports',
+				'vgse_last_csv_purge_check',
+				'vgse_toolbar_cache_seed',
+				'vgse_can_edit_cpt_free',
 			);
 			// We no longer remove the key vg_sheet_editor because it
 			// caused issues when using the frontend sheet, the enabled post types
@@ -858,6 +911,10 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 			if ( ! empty( $_GET['wpse_hard_reset'] ) ) {
 				$option_keys_equal[] = 'vg_sheet_editor';
 				$option_keys_equal[] = 'vgse_column_groups';
+				$option_keys_equal[] = 'vgse_columns_manager';
+				$option_keys_equal[] = 'vgse_columns_visibility';
+				$option_keys_equal[] = 'vgse_custom_columns_new';
+				$option_keys_equal[] = 'vgse_secret_key';
 			}
 
 			foreach ( $option_keys_like as $option_key ) {
@@ -942,7 +999,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 				return;
 			}
 
-			$post_type = sanitize_text_field( $_GET['wpse_post_type'] );
+			$post_type = sanitize_text_field( wp_unslash( $_GET['wpse_post_type'] ) );
 			if ( isset( $wp_meta_boxes[ $post_type ] ) ) {
 				unset( $wp_meta_boxes[ $post_type ] );
 			}
@@ -1081,18 +1138,18 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 			$support_links = array(
 				'faq'        => array(
 					'url'         => 'https://wpsheeteditor.com/documentation/faq/?utm_source=' . $source . '&utm_medium=' . $medium . '&utm_campaign=' . $campaign,
-					'label'       => __( 'Quick Answers', 'vg_sheet_editor' ),
-					'description' => __( 'You can read our FAQ with a list of hundreds of questions', 'vg_sheet_editor' ),
+					'label'       => esc_html__( 'Quick Answers', 'vg_sheet_editor' ),
+					'description' => esc_html__( 'You can read our FAQ with a list of hundreds of questions', 'vg_sheet_editor' ),
 				),
 				'guides'     => array(
 					'url'         => 'https://wpsheeteditor.com/blog/?utm_source=' . $source . '&utm_medium=' . $medium . '&utm_campaign=' . $campaign,
-					'label'       => __( 'Guides and Tutorials', 'vg_sheet_editor' ),
-					'description' => __( 'We have +200 tutorials and guides on our blog', 'vg_sheet_editor' ),
+					'label'       => esc_html__( 'Guides and Tutorials', 'vg_sheet_editor' ),
+					'description' => esc_html__( 'We have +200 tutorials and guides on our blog', 'vg_sheet_editor' ),
 				),
 				'contact_us' => array(
 					'url'         => 'https://wpsheeteditor.com/company/contact/?utm_source=' . $source . '&utm_medium=' . $medium . '&utm_campaign=' . $campaign,
-					'label'       => __( 'Contact us', 'vg_sheet_editor' ),
-					'description' => __( 'Get instant help in the live chat + email support during business hours', 'vg_sheet_editor' ),
+					'label'       => esc_html__( 'Contact us', 'vg_sheet_editor' ),
+					'description' => esc_html__( 'Get instant help in the live chat + email support during business hours', 'vg_sheet_editor' ),
 				),
 			);
 			$links         = apply_filters( 'vg_sheet_editor/support_links', $support_links );
@@ -1129,7 +1186,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 			if ( ! empty( VGSE()->options['be_disable_dashboard_widget'] ) ) {
 				return;
 			}
-			add_meta_box( 'vg_sheet_editor_usage_stats', __( 'WP Sheet Editor Usage', 'vg_sheet_editor' ), array( $this, 'render_usage_stats_widget' ), 'dashboard', 'normal', 'high' );
+			add_meta_box( 'vg_sheet_editor_usage_stats', esc_html__( 'WP Sheet Editor Usage', 'vg_sheet_editor' ), array( $this, 'render_usage_stats_widget' ), 'dashboard', 'normal', 'high' );
 		}
 
 		function render_usage_stats_widget() {
@@ -1142,7 +1199,12 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 		function redirect_to_whats_new_page() {
 
 			// bail if settings are empty = fresh install
-			if ( empty( VGSE()->options ) ) {
+			if ( empty( VGSE()->options ) || ! is_admin() || ! VGSE()->helpers->user_can_manage_options() ) {
+				return;
+			}
+
+			// Only show to premium users
+			if ( ! class_exists( 'WP_Sheet_Editor_Custom_Columns') ) {
 				return;
 			}
 
@@ -1151,8 +1213,8 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 				return;
 			}
 
-			// exit if the welcome page hasn\'t been showed
-			if ( get_option( 'vgse_welcome_redirect' ) !== 'no' ) {
+			// The redirect will only happen when they open the sheet
+			if ( ! VGSE()->helpers->is_editor_page() ) {
 				return;
 			}
 
@@ -1163,11 +1225,6 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 
 			// Delete the redirect transient
 			update_option( 'vgse_hide_whats_new_' . VGSE()->version, 'yes' );
-
-			// Bail if activating from network, or bulk
-			if ( is_network_admin() || isset( $_GET['activate-multi'] ) ) {
-				return;
-			}
 
 			if ( ! empty( $_GET['sheet_skip_whatsnew'] ) ) {
 				return;
@@ -1182,13 +1239,13 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 		 */
 		function register_menu() {
 			if ( apply_filters( 'vg_sheet_editor/register_admin_pages', true ) ) {
-				add_menu_page( __( 'WP Sheet Editor', 'vg_sheet_editor' ), __( 'WP Sheet Editor', 'vg_sheet_editor' ), 'manage_options', 'vg_sheet_editor_setup', array( $this, 'render_quick_setup_page' ), VGSE()->plugin_url . 'assets/imgs/icon.svg' );
-				add_submenu_page( 'vg_sheet_editor_setup', __( 'Extensions', 'vg_sheet_editor' ), __( 'Extensions', 'vg_sheet_editor' ), 'manage_options', 'vg_sheet_editor_extensions', array( $this, 'render_extensions_page' ) );
+				add_menu_page( esc_html__( 'WP Sheet Editor', 'vg_sheet_editor' ), esc_html__( 'WP Sheet Editor', 'vg_sheet_editor' ), 'manage_options', 'vg_sheet_editor_setup', array( $this, 'render_quick_setup_page' ), VGSE()->plugin_url . 'assets/imgs/icon.svg' );
+				add_submenu_page( 'vg_sheet_editor_setup', esc_html__( 'Extensions', 'vg_sheet_editor' ), esc_html__( 'Extensions', 'vg_sheet_editor' ), 'manage_options', 'vg_sheet_editor_extensions', array( $this, 'render_extensions_page' ) );
 			}
 
 			// Add the whats_new page only when we need to see the page
-			if ( strpos( $_SERVER['REQUEST_URI'], 'vg_sheet_editor_whats_new' ) !== false ) {
-				add_submenu_page( null, __( 'Sheet Editor', 'vg_sheet_editor' ), __( 'Sheet Editor', 'vg_sheet_editor' ), 'manage_options', 'vg_sheet_editor_whats_new', array( $this, 'render_whats_new_page' ) );
+			if ( isset( $_SERVER['REQUEST_URI'] ) && strpos( $_SERVER['REQUEST_URI'], 'vg_sheet_editor_whats_new' ) !== false ) {
+				add_submenu_page( null, esc_html__( 'Sheet Editor', 'vg_sheet_editor' ), esc_html__( 'Sheet Editor', 'vg_sheet_editor' ), 'manage_options', 'vg_sheet_editor_whats_new', array( $this, 'render_whats_new_page' ) );
 			}
 		}
 
@@ -1197,7 +1254,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 		 */
 		function render_extensions_page() {
 			if ( ! VGSE()->helpers->user_can_manage_options() ) {
-				wp_die( __( 'You dont have enough permissions to view this page.', 'vg_sheet_editor' ) );
+				wp_die( esc_html__( 'You dont have enough permissions to view this page.', 'vg_sheet_editor' ) );
 			}
 
 			if ( ! apply_filters( 'vg_sheet_editor/extensions/is_page_allowed', true ) ) {
@@ -1211,7 +1268,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 		 */
 		function render_quick_setup_page() {
 			if ( ! VGSE()->helpers->user_can_manage_options() ) {
-				wp_die( __( 'You dont have enough permissions to view this page.', 'vg_sheet_editor' ) );
+				wp_die( esc_html__( 'You dont have enough permissions to view this page.', 'vg_sheet_editor' ) );
 			}
 
 			require 'views/quick-setup.php';
@@ -1222,7 +1279,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 		 */
 		function render_whats_new_page() {
 			if ( ! VGSE()->helpers->user_can_manage_options() ) {
-				wp_die( __( 'You dont have enough permissions to view this page.', 'vg_sheet_editor' ) );
+				wp_die( esc_html__( 'You dont have enough permissions to view this page.', 'vg_sheet_editor' ) );
 			}
 
 			require 'views/whats-new.php';
@@ -1259,18 +1316,18 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 				wp_enqueue_script( 'chosen-editor', $this->plugin_url . 'assets/js/handsontable-chosen-editor.js', array(), $this->version, false );
 				wp_enqueue_script( 'text_editor_js', $this->plugin_url . 'assets/vendor/jqueryte/dist/jquery-te-1.4.0.min.js', array(), $this->version, false );
 				wp_enqueue_script( 'bep_nanobar', $this->plugin_url . 'assets/vendor/nanobar/nanobar.js', array(), $this->version, false );
-				wp_enqueue_script( 'bep-form-to-object', $this->plugin_url . 'assets/vendor/formToObject/dist/formToObject.js', array(), $this->version, false );
 
 				wp_enqueue_script( 'bep_global', $this->plugin_url . 'assets/js/global.js', array(), $this->version, false );
 
-				wp_enqueue_script( 'bep_init_js', $this->plugin_url . 'assets/js/init.js', array( 'handsontable_js' ), $this->version, false );
+				wp_enqueue_script( 'bep_init_js', $this->plugin_url . 'assets/js/init.js', array( 'handsontable_js', 'wp-hooks' ), $this->version, false );
+				wp_enqueue_script( 'bep_init_js', $this->plugin_url . 'assets/js/init.js', array( 'handsontable_js', 'wp-hooks' ), $this->version, false );
 				wp_enqueue_script( 'bep_post-status-plugin_js', $this->plugin_url . 'assets/js/post-status-plugin.js', array( 'bep_init_js' ), $this->version, false );
 				$localize_handle = 'bep_global';
 			} else {
 
 				$min_extension = ( ! empty( $_GET['wpse_debug'] ) ) ? '' : '.min';
-				wp_enqueue_script( 'bep_libraries_js', $this->plugin_url . 'assets/vendor/js/libraries' . $min_extension . '.js', array(), $this->version, false );
-				wp_enqueue_script( 'bep_init_js', $this->plugin_url . 'assets/js/scripts' . $min_extension . '.js', array( 'bep_libraries_js', 'wp-hooks' ), $this->version, false );
+				wp_enqueue_script( 'bep_libraries_js', $this->plugin_url . 'assets/vendor/js/libraries' . $min_extension . '.js', array(), filemtime( __DIR__ . '/assets/vendor/js/libraries' . $min_extension . '.js' ), false );
+				wp_enqueue_script( 'bep_init_js', $this->plugin_url . 'assets/js/scripts' . $min_extension . '.js', array( 'bep_libraries_js', 'wp-hooks' ), filemtime( __DIR__ . '/assets/js/scripts' . $min_extension . '.js' ), false );
 				$localize_handle = 'bep_init_js';
 			}
 
@@ -1288,6 +1345,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 					array(
 						'ajax_url'        => admin_url( 'admin-ajax.php' ),
 						'delayed_js_urls' => $delayed_js_urls,
+						'nonce'           => wp_create_nonce( 'bep-nonce' ),
 					)
 				)
 			);
@@ -1295,7 +1353,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 				ob_start();
 				?>
 			<script>
-				// Function to insert the script tag with a delayed execution. We need this because if we enqueue the Alpine framework with wp_enqueue_script, it throws errors because the DOM is not ready yet when Alpine initializes. So we need Alpine to init after the DOM is ready.
+				// Insert the script tag with a delayed execution. If we enqueue the Alpine library, it loads too quickly while some DOM elements are being moved on the doc ready event, causing double initialization of Alpine apps and causing reactivity issues
 				function vgseInsertScriptTag(url) {
 					const script = document.createElement('script');
 					script.src = url;
@@ -1303,20 +1361,24 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 					script.setAttribute("data-wp-strategy", "defer");		
 					document.body.appendChild(script);
 				}
+				document.addEventListener('DOMContentLoaded', function() {
+					// Timeout to ensure the browser runs this after all the other doc ready handlers
+					setTimeout(function() {
+						if(vgse_global_data.delayed_js_urls && vgse_global_data.delayed_js_urls.length){
+							vgse_global_data.delayed_js_urls.forEach((url) => {
+								setTimeout(() => {
+									vgseInsertScriptTag(url);
+								}, 1000);
+							});
+						}
+					}, 0);
+				});
 			
-				// Insert the script tag after some milliseconds
-				if(vgse_global_data.delayed_js_urls && vgse_global_data.delayed_js_urls.length){
-					vgse_global_data.delayed_js_urls.forEach((url) => {
-						setTimeout(() => {
-							vgseInsertScriptTag(url);
-						}, 1000);
-					});
-				}
 			</script>
 				<?php
 				$js = ob_get_clean();
 				$js = str_replace( array( '<script>', '</script>' ), '', $js );
-				wp_register_script( 'wpse-delayed-js', '' );
+				wp_register_script( 'wpse-delayed-js', '', array(), $this->version, true );
 				wp_enqueue_script( 'wpse-delayed-js' );
 				wp_add_inline_script( 'wpse-delayed-js', $js );
 			}
@@ -1331,7 +1393,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 
 			$allowed_pages = array();
 			if ( ! empty( $_GET['page'] ) && ( strpos( $_GET['page'], 'vgse-bulk-' ) !== false || strpos( $_GET['page'], 'vgse_' ) !== false || strpos( $_GET['page'], 'vg_sheet_editor' ) !== false ) ) {
-				$allowed_pages[] = sanitize_text_field( $_GET['page'] );
+				$allowed_pages[] = sanitize_text_field( wp_unslash( $_GET['page'] ) );
 			}
 			$allowed_pages = apply_filters( 'vg_sheet_editor/scripts/pages_allowed', $allowed_pages );
 
@@ -1341,7 +1403,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 		function get_trigger_link( $prefix, $url, $id = '', $append_page_slug = false ) {
 			$id = $prefix . '-' . $id;
 			if ( $append_page_slug && ! empty( $_GET['page'] ) ) {
-				$id .= '-' . sanitize_text_field( $_GET['page'] );
+				$id .= '-' . sanitize_text_field( wp_unslash( $_GET['page'] ) );
 			}
 			return esc_url( add_query_arg( 'vgseup_t', $id, $url ) );
 		}
@@ -1428,7 +1490,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 
 				if ( $freemius ) {
 					$button_url   = ( $freemius->can_use_premium_code__premium_only() ) ? $freemius->get_account_url() : $this->get_buy_link( 'extensions', $freemius->checkout_url(), true );
-					$button_label = ( $freemius->can_use_premium_code__premium_only() ) ? __( 'My license', 'vg_sheet_editor' ) : $button_label;
+					$button_label = ( $freemius->can_use_premium_code__premium_only() ) ? esc_html__( 'My license', 'vg_sheet_editor' ) : $button_label;
 				}
 				include VGSE()->plugin_dir . '/views/single-extension.php';
 			}
@@ -1448,8 +1510,8 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 				wp_enqueue_style( 'modal_css', $this->plugin_url . 'assets/vendor/remodal/dist/remodal.css', '', $this->version, 'all' );
 				wp_enqueue_style( 'modal_theme_css', $this->plugin_url . 'assets/vendor/remodal/dist/remodal-default-theme.css', '', $this->version, 'all' );
 			} else {
-				wp_enqueue_style( 'wp-sheet-editor-libraries-css', $this->plugin_url . 'assets/vendor/css/libraries.min.css', '', $this->version, 'all' );
-				wp_enqueue_style( 'wp-sheet-editor-main-css', $this->plugin_url . 'assets/css/styles.min.css', '', $this->version, 'all' );
+				wp_enqueue_style( 'wp-sheet-editor-libraries-css', $this->plugin_url . 'assets/vendor/css/libraries.min.css', '', filemtime( __DIR__ . '/assets/vendor/css/libraries.min.css' ), 'all' );
+				wp_enqueue_style( 'wp-sheet-editor-main-css', $this->plugin_url . 'assets/css/styles.min.css', '', filemtime( __DIR__ . '/assets/css/styles.min.css' ), 'all' );
 			}
 			$css_src = includes_url( 'css/' ) . 'editor.css';
 			wp_enqueue_style( 'tinymce_css', $css_src, '', $this->version, 'all' );
@@ -1537,7 +1599,7 @@ if ( ! function_exists( 'VGSE' ) ) {
 // }
 
 if ( ! function_exists( 'vgse_force_editor_to_ltr' ) ) {
-	// Experimental way to change RTL to LTR without changing the language to English
+	// WPML - Change RTL to LTR without changing the language to English
 	function vgse_force_editor_to_ltr() {
 		$is_editor_page           = isset( $_GET['page'] ) && strpos( $_GET['page'], 'vgse-bulk-edit-' ) !== false;
 		$is_editor_export_request = ! empty( $_REQUEST['vgse_csv_export'] );

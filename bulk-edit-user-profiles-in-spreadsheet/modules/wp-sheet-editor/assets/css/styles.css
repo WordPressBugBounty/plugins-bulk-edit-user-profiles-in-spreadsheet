@@ -86,7 +86,7 @@ textarea {
 }
 
 .unstyled-list>li {
-    padding: 10px;
+    padding: 10px 0;
 }
 
 .unstyled-list>li:nth-child(odd) {
@@ -787,7 +787,8 @@ html.wp-toolbar,
 }
 
 .remodal-wrapper .remodal-cancel,
-.remodal-wrapper .remodal-confirm {
+.remodal-wrapper .remodal-confirm,
+.remodal-wrapper a.remodal-confirm {
     color: white;
 }
 
@@ -1016,8 +1017,8 @@ div.mce-inline-toolbar-grp {
 #vgse-wrapper .handsontable tr td,
 #vgse-wrapper .ht_clone_left tbody th,
 #vgse-wrapper .ht_clone_left tbody td {
-    /* Disabled because it breaks the dynamic height set by handsontable on the fixed columns */
     /* padding: 5px; */
+    /* Disabled because it breaks the dynamic height set by handsontable on the fixed columns */
     color: #444;
     font-size: 14px;
 }
@@ -1554,14 +1555,18 @@ table.widefat {
 #vgse-wrapper .vg-toolbar .button-container.expand-submenu .toolbar-submenu {
     display: none;
     position: absolute;
-    width: 300px;
-    background: white;
-    padding: 5px;
     z-index: 99999999;
     /* height: 300px; */
     left: 0px;
     float: none;
     top: 17px;
+}
+
+/* Moved submenu contents into toolbar-submenu-holder so it can have fixed size with vertical scroll bar without affecting the wrapper padding, the wrapper padding was added to ensure the dropdown doesnt close too much with some space around it to reduce hover sensitivity */
+#vgse-wrapper .vg-toolbar .toolbar-submenu-holder {
+    width: 325px;
+    background: white;
+    padding: 5px;
     border: 1px solid #d4d4d4;
     border-top: 0;
     max-height: 60vh;
@@ -1579,7 +1584,8 @@ table.widefat {
     display: block;
 }
 
-#vgse-wrapper .vg-toolbar .run_formula-container.button-container:hover .toolbar-submenu {
+#vgse-wrapper .vg-toolbar .run_formula-container.button-container:hover .toolbar-submenu,
+#vgse-wrapper .vg-toolbar .run_formula-container.button-container:hover .toolbar-submenu-holder {
     width: 400px;
 }
 
@@ -1699,6 +1705,8 @@ are rendered but handsontable sets visibility:hiden*/
 .modal-columns-visibility .vgse-sorter-section {
     border: 2px dotted #c3c3c3;
     padding: 0 10px 10px;
+    min-height: 200px;
+    overflow: hidden;
 }
 
 .modal-columns-visibility .vgse-sorter-section:first-child {
@@ -1718,11 +1726,13 @@ are rendered but handsontable sets visibility:hiden*/
     text-overflow: ellipsis;
     overflow: hidden;
     display: inline-block;
-    max-width: 324px;
+    white-space: nowrap;
+ /*Disable text wrapping to a second line for long column titles because it breaks the virtual list scroll and height*/
+    max-width: calc( 100% - 140px );
 }
 
 .vgse-sorter.columns-disabled li .column-title {
-    max-width: 325px;
+    max-width: calc( 100% - 100px);
 }
 
 @media only screen and (min-width: 641px) {
@@ -1813,10 +1823,6 @@ are rendered but handsontable sets visibility:hiden*/
     font-style: italic;
 }
 
-.import-csv-form .field-find-existing-columns {
-    display: none;
-}
-
 .import-csv-form .field-find-existing-columns .field-wrapper {
     width: 50%;
     float: left;
@@ -1830,8 +1836,12 @@ are rendered but handsontable sets visibility:hiden*/
     margin: 0 6px;
 }
 
-.remodal[data-remodal-id="import-csv-modal"] {
+.remodal.remodal-medium {
     max-width: 800px;
+}
+
+.remodal.remodal-large {
+    max-width: 1100px;
 }
 
 .import-csv-form input:not([type="checkbox"]):not([type="radio"]),
@@ -1844,10 +1854,6 @@ are rendered but handsontable sets visibility:hiden*/
 
 .import-csv-form .data-input {
     margin-bottom: 20px;
-}
-
-.import-csv-modal .import-step {
-    display: none;
 }
 
 .edit-google-sheets-modal .access-link-visible {
@@ -1890,14 +1896,6 @@ html.wp-toolbar.wpse-full-screen {
 
 .wpse-full-screen-notice-content a {
     color: #444;
-}
-
-.import-csv-modal .import-column-list-headers,
-.import-csv-modal .import-auto-map-notice,
-.import-csv-modal .one-column-detected-tip,
-.import-csv-modal .map-columns .button-primario.next-step,
-.import-csv-modal .map-template {
-    display: none;
 }
 
 #ohsnap .alert a {
@@ -1969,8 +1967,8 @@ html.wp-toolbar.wpse-full-screen {
 
 #vgse-wrapper .vg-toolbar>.vg-header-toolbar-inner .toolbar-submenu,
 #vgse-wrapper .vg-toolbar .button-container.share-container:hover .toolbar-submenu {
-    /* Disabled left property because it interferes with the keyboard shortcut to auto expand the quick search dropdown, and it seems that it's not needed in general */
     /* left: auto; */
+    /* Disabled left property because it interferes with the keyboard shortcut to auto expand the quick search dropdown, and it seems that it's not needed in general */
 right: 0;
     top: 30px;
     width: 262px;
@@ -1995,410 +1993,424 @@ margin: 0;
 bottom: 0;
 }
 
-/*Move the sheet up 42px, so the column headers are 
-fixed 42px below the sticky toolbar*/
-#vgse-wrapper .handsontable .ht_master .wtHider {
-padding-top: 118px;
-top: -118px;
-}
+/*Move the sheet up 42px, so the column headers are fixed 42px below the sticky toolbar*/
+/* Update: We don't need to offset the sticky column headers if we are in boxed mode with scroll bars inside the table*/
+/* Final update: No longer needed, I edited the handsontable.full.js to take into account the sticky header */
+/* html:not(.remodal-is-docked-body) #vgse-wrapper .handsontable .ht_master .wtHider {     */
+/* padding-top: 118px; */
+/* top: -118px; */
+/* }  */
 
 #vgse-wrapper div#vg-header-toolbar.sticky {
-border-bottom: 1px solid #d4d4d4;
+    border-bottom: 1px solid #d4d4d4;
 }
 
 #vgse-wrapper #vg-header-toolbar .vgse-current-filters {
-z-index: 10;
-position: relative;
-margin-left: 10px;
+    z-index: 10;
+    position: relative;
+    margin-left: 10px;
 }
 
 #vgse-wrapper.vgse-subtle-lock i.fa.fa-lock {
-color: #b7b7b7;
+    color: #b7b7b7;
 }
 
 /*Super subtle*/
 #vgse-wrapper.vgse-subtle-lock i.fa.fa-lock.vg-premium-column {
-float: right;
-display: none;
+    float: right;
+    display: none;
 }
 
 #vgse-wrapper.vgse-subtle-lock #post-data table a.vg-premium-column-link {
-color: #b7b7b7;
+    color: #b7b7b7;
 }
 
 #vgse-wrapper #post-data table a.vg-premium-column-link:hover {
-color: #1f38c7;
+    color: #1f38c7;
 }
 
 #vgse-wrapper .handsontable .htDimmed {
-color: #444;
+    color: #444;
 }
 
 #vgse-wrapper .button-container input[type="search"] {
-width: 140px;
-line-height: 16px;
+    width: 140px;
+    line-height: 16px;
 }
 
 .remodal .individual-variations-wrapper,
 .remodal .individual-variations-selector-wrapper {
-display: none;
+    display: none;
 }
 
 #vgse-wrapper .htCommentCell:after {
-border-top: 6px solid #d4d4d4;
+    border-top: 6px solid #d4d4d4;
 }
 
 .remodal .import-response {
-margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .remodal-wrapper .modal-content {
--webkit-box-shadow: none;
-        box-shadow: none;
-border: none;
-background-color: transparent;
+    -webkit-box-shadow: none;
+            box-shadow: none;
+    border: none;
+    background-color: transparent;
 }
 
 .media-modal {
-z-index: 9999999;
+    z-index: 9999999;
 }
 
 #vgse-wrapper .handsontable .autocompleteEditor.handsontable td {
-background: #f3f3f3;
+    background: #f3f3f3;
 }
 
 .alert a {
-color: white;
+    color: white;
 }
 
 /*Sticky menu styles*/
 .wpse-full-screen #vgse-wrapper div#vg-header-toolbar.sticky .vg-header-toolbar-inner,
 .wpse-full-screen #vgse-wrapper div#vg-header-toolbar.sticky #responseConsole {
-padding-left: 20px;
+    padding-left: 20px;
 }
 
 #vgse-wrapper div#vg-header-toolbar.sticky .vgse-current-filters,
 #vgse-wrapper div#vg-header-toolbar.sticky #responseConsole {
-display: inline-block;
+    display: inline-block;
 }
 
 #vgse-wrapper .vg-toolbar {
-background: white;
+    background: white;
 }
 
 #vgse-wrapper #vg-header-toolbar .vg-header-toolbar-inner .button:not(.primary) {
-background: transparent;
+    background: transparent;
 }
 
 #vgse-wrapper .vg-toolbar>.vg-header-toolbar-inner {
-border: 1px solid #d4d4d4;
-border-left: 0;
-border-right: 0;
+    border: 1px solid #d4d4d4;
+    border-left: 0;
+    border-right: 0;
 }
 
 #vgse-wrapper .vg-toolbar .vg-header-toolbar-inner>.button-container {
-border: 0;
+    border: 0;
 }
 
 .import-csv-form .advanced-options {
-max-width: 360px;
-text-align: left;
-margin: 20px auto;
-border: 1px solid #d6d6d6;
-padding: 20px;
-border-left: 0;
-border-right: 0;
+    max-width: 360px;
+    text-align: left;
+    margin: 20px auto;
+    border: 1px solid #d6d6d6;
+    padding: 20px;
+    border-left: 0;
+    border-right: 0;
 }
 
 #vgse-wrapper #vg-footer-toolbar a {
-color: black;
-display: inline-block;
-padding: 3px;
+    color: black;
+    display: inline-block;
+    padding: 3px;
 }
 
 /*Fix compatibility issue with ACF Extended plugin*/
 .select2-container .select2-selection--multiple {
-height: auto !important;
+    height: auto !important;
 }
 
 .import-csv-form .wp-field-requires-ignored-column {
-display: none;
+    display: none;
 }
 
 /* this fixes the cells alignment issue, the elements inside cells should be display: inline*/
 #vgse-wrapper .handsontable tr td .button,
 #vgse-wrapper .handsontable tr td button,
 #vgse-wrapper .handsontable tr td a {
-display: inline;
+    display: inline;
 }
 
 /*Fix frontend style issues caused by theme's overriding our css'*/
 #vgse-wrapper .button-container {
-width: auto;
+    width: auto;
 }
 
 .remodal-wrapper .modal-content {
-margin: 0;
-padding: 0;
-width: 100%;
-height: auto;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: auto;
 }
 
 .remodal {
-padding: 10px 35px;
+    padding: 10px 35px;
 }
 
 #vgse-wrapper div#vg-header-toolbar.sticky .sheet-logo-wrapper {
-display: none;
+    display: none;
 }
 
 #vgse-wrapper .vg-toolbar .exit_full_screen-container {
-display: none;
+    display: none;
 }
 
 .wpse-full-screen #vgse-wrapper .vg-toolbar.sticky .exit_full_screen-container,
 .wpse-full-screen #vgse-wrapper .vg-toolbar.sticky-left .exit_full_screen-container {
-display: inline-block;
+    display: inline-block;
 }
 
 div#ohsnap:empty {
-display: none;
+    display: none;
 }
 
 .remodal .save-search-wrapper {
-margin-top: 10px;
+    margin-top: 10px;
 }
 
 #vgse-wrapper button.wpse-delete-saved-item {
-float: right !important;
-display: inline-block;
+    float: right !important;
+    display: inline-block;
 }
 
 .modal-columns-visibility .column-settings.settings-opened {
-display: block;
+    display: block;
 }
 
 .modal-columns-visibility .column-settings label,
 .modal-columns-visibility .column-settings textarea,
 .modal-columns-visibility .column-settings input[type="text"] {
-display: block;
+    display: block;
 }
 
 .modal-columns-visibility .column-settings textarea {
-width: 100%;
-height: 100px;
+    width: 100%;
+    height: 100px;
 }
 
 #vgse-wrapper #vg-footer-toolbar .pagination-links,
 #vgse-wrapper #vg-footer-toolbar .pagination-jump {
-display: inline-block;
+    display: inline-block;
 }
 
 #vgse-wrapper #vg-footer-toolbar .pagination-jump {
-margin-left: 20px;
+    margin-left: 20px;
 }
 
 #vgse-wrapper #vg-footer-toolbar .pagination-jump input {
-width: 80px;
+    width: 80px;
 }
 
 #vgse-wrapper #vg-footer-toolbar .pagination-links>span {
-line-height: 29px;
+    line-height: 29px;
 }
 
 .wpse-settings-form-wrapper .tabs-links {
-max-width: 150px;
-text-align: left;
-float: left;
+    max-width: 150px;
+    text-align: left;
+    float: left;
+    width: 100%;
 }
 
 .wpse-settings-form-wrapper form.wpse-set-settings .field-wrapper {
-margin-bottom: 15px;
+    margin-bottom: 15px;
 }
 
 .wpse-settings-form-wrapper form.wpse-set-settings {
-margin-left: 170px;
-padding-left: 10px;
-text-align: left;
-border-left: 1px solid #aeaeae;
+    margin-left: 170px;
+    padding-left: 10px;
+    text-align: left;
+    border-left: 1px solid #aeaeae;
 }
 
 .wpse-settings-form-wrapper .tabs-links a.tab-active {
-background-color: #f1f1f1;
+    background-color: #f1f1f1;
+    padding-left: 8px;
 }
 
 .wpse-settings-form-wrapper .tabs-links a {
-display: block;
-padding: 10px 0;
-color: black;
-text-decoration: none;
-border-bottom: 1px solid #aeaeae;
+    display: block;
+    padding: 8px 8px 8px 0;
+    color: black;
+    text-decoration: none;
+    border-bottom: 1px solid #aeaeae;
+    width: 100%;
 }
 
-.tabs-content .tab-content {
-display: none;
+.wpse-settings-form-wrapper ol li {
+    list-style: none;
+    counter-increment: none !important;
+    padding-left: 0;
+    font-size: 14px;
+    margin: 0 0 10px;
+}
+
+.wpse-settings-form-wrapper ol li:before {
+    display: none;
 }
 
 .wpse-settings-form-wrapper form.wpse-set-settings textarea,
 .wpse-settings-form-wrapper form.wpse-set-settings select {
-width: 100%;
+    width: 100%;
 }
 
 .wpse-settings-form-wrapper form.wpse-set-settings label {
-display: block;
+    display: block;
 }
 
 .wpse-settings-form-wrapper form.wpse-set-settings .actions {
-text-align: center;
+    text-align: center;
 }
 
 #vgse-wrapper .button-container input.wpse-quick-search {
-width: 100%;
+    width: 100%;
 }
 
 #vgse-create-formula .select2-container .select2-search--inline {
-width: auto;
+    width: auto;
 }
 
 #be-filters .advanced-filters .field-wrap.search-operator-wrap {
-width: 130px;
+    width: 130px;
 }
 
 #be-filters .advanced-filters .fields-wrap.search-row-remove-wrap,
 #be-filters .advanced-filters .fields-wrap.search-row-add-new {
-display: inline-block;
-padding-top: 24px;
+    display: inline-block;
+    padding-top: 24px;
 }
 
 #be-filters .advanced-filters .fields-wrap.search-row-add-new,
 #be-filters .advanced-filters .advanced-filters-list li:last-child .fields-wrap.search-row-remove-wrap {
-display: none;
+    display: none;
 }
 
 #be-filters .advanced-filters .advanced-filters-list li:last-child .fields-wrap.search-row-add-new {
-display: inline-block;
+    display: inline-block;
 }
 
 #be-filters .advanced-filters .field-wrap {
-padding: 4px;
+    padding: 4px;
 }
 
 #be-filters .advanced-filters .field-wrap.search-field-wrap {
-width: 170px;
+    width: 170px;
 }
 
 #be-filters .advanced-filters .field-wrap {
-padding: 4px;
+    padding: 4px;
 }
 
 #be-filters .advanced-filters .fields-wrap .button {
-line-height: 24px;
+    line-height: 24px;
 }
 
 #be-filters .advanced-filters .fields-wrap select,
 #be-filters .advanced-filters .fields-wrap .select2-container .select2-selection--single {
-min-height: 25px;
-height: 25px;
-line-height: 14px;
+    min-height: 25px;
+    height: 25px;
+    line-height: 14px;
 }
 
 #be-filters .advanced-filters .fields-wrap .select2-container--default .select2-selection--single .select2-selection__rendered {
-line-height: 20px;
+    line-height: 20px;
 }
 
 #vgse-wrapper #vg-footer-toolbar.sticky-left {
-padding-left: 20px;
+    padding-left: 20px;
+    margin-top: 45px;
 }
 
 #vgse-wrapper .automatic-loading-rows-disabled {
-padding: 0 0 20px;
-text-align: center;
-position: absolute;
-z-index: 200;
-background: white;
-width: 100%;
-height: 70%;
+    padding: 0 0 20px;
+    text-align: center;
+    position: absolute;
+    z-index: 200;
+    background: white;
+    width: 100%;
+    height: 70%;
 }
 
 .wp-core-ui #vgse-wrapper .button.disabled:not(.wpse-save) {
-background: inherit !important;
-color: inherit !important;
+    background: inherit !important;
+    color: inherit !important;
 }
 
 .remodal .vgse-sorter-section .toggle-search-button {
-float: right;
-font-size: 14px;
-color: #666;
-border-width: 1px;
+    float: right;
+    font-size: 14px;
+    color: #666;
+    border-width: 1px;
 }
 
 .remodal .vgse-sorter-section .wpse-columns-bulk-actions {
-margin-bottom: 30px;
-width: 100%;
-    /* overflow: auto; */
+    margin-bottom: 30px;
+    width: 100%;
+    overflow: auto;
 }
 
 .remodal .vgse-sorter-section .wpse-columns-bulk-actions input {
-width: 65%;
+    width: 65%;
 }
 
 .remodal .vgse-sorter-section .wpse-columns-bulk-actions input,
 .remodal .vgse-sorter-section .wpse-columns-bulk-actions select {
-display: inline-block;
-float: left;
-border: 1px solid #999;
+    display: inline-block;
+    float: left;
+    border: 1px solid #999;
 }
 
 .wpse-stuck-loading button,
 a[data-wpse-remodal-target] {
-cursor: pointer;
+    cursor: pointer;
 }
 
 #vgse-wrapper i.fa {
-display: inline;
+    display: inline;
 }
 
 .remodal .vgse-sorter-section .wpse-columns-bulk-actions select {
-width: 110px;
+    width: 110px;
 }
 
 .remodal .wpse-favorite-search-field {
-border: 0;
-background: transparent;
-position: absolute;
-right: 0;
-top: 20%;
+    border: 0;
+    background: transparent;
+    position: absolute;
+    right: 0;
+    top: 20%;
 }
 
 .remodal .wpse-favorite-search-field .fa-star {
-color: orange;
+    color: orange;
 }
 
 .unstyled-list>li {
-position: relative;
+    position: relative;
 }
 
 #vgse-wrapper .vg-toolbar .button-container.run_filters-container .toolbar-submenu {
-width: 360px !important;
+    width: 360px !important;
 }
 
 #vgse-wrapper .vg-toolbar .button-container.run_filters-container.expand-submenu .toolbar-submenu {
-top: 30px;
+    top: 30px;
 }
 
 #vgse-wrapper .vg-toolbar .toolbar-submenu .wpse-favorite-search-field {
-display: none;
+    display: none;
 }
 
 #vgse-wrapper .vg-toolbar .toolbar-submenu input[type="checkbox"] {
-display: inline-block;
-padding: 0 !important;
+    display: inline-block;
+    padding: 0 !important;
 }
 
-#vgse-wrapper .vg-toolbar .toolbar-submenu .select2 li,
+/*#vgse-wrapper .vg-toolbar .toolbar-submenu .select2 li,*/
 #vgse-wrapper .vg-toolbar .toolbar-submenu .select2 input {
-margin: 0;
-padding: 0;
+    margin: 0;
+    padding: 0;
+    width: 100% !important;
 }
 
 #vgse-wrapper .vg-toolbar .toolbar-submenu .wpse-start-quick-search,
@@ -2407,58 +2419,61 @@ padding: 0;
 #vgse-wrapper .vg-toolbar .toolbar-submenu .advanced-field .search-row-add-new,
 #vgse-wrapper .vg-toolbar .toolbar-submenu .advanced-field .search-row-remove-wrap,
 #vgse-wrapper .vg-toolbar .toolbar-submenu .advanced-field label {
-display: none;
+    display: none;
 }
+ #vgse-wrapper .vg-toolbar .toolbar-submenu .advanced-field .search-field-wrap label {
+     display: block;
+ }
 
 #vgse-wrapper .vg-toolbar .toolbar-submenu .advanced-field .select2-container,
 #vgse-wrapper .vg-toolbar .toolbar-submenu .advanced-field select,
 #vgse-wrapper .vg-toolbar .toolbar-submenu .advanced-field input {
-max-width: 100px;
-min-width: 100px;
+    max-width: 100px;
+    min-width: 100px;
 }
 
 #vgse-wrapper .vg-toolbar .toolbar-submenu .advanced-field .field-wrap {
-display: inline-block;
+    display: inline-block;
 }
 
 #vgse-wrapper .vg-toolbar .toolbar-submenu .date-range br {
-display: none;
+    display: none;
 }
 
 #vgse-wrapper .vg-toolbar .toolbar-submenu .date-range input {
-width: 88px;
+    width: 88px;
 }
 
 #wpwrap #vgse-wrapper .vg-toolbar .toolbar-submenu .button {
-display: block;
-float: none;
-width: 100%;
-text-align: left;
+    display: block;
+    float: none;
+    width: 100%;
+    text-align: left;
 }
 
 #wpwrap #vgse-wrapper .vg-toolbar .toolbar-submenu .button[data-saved-item] {
-display: inline-block;
-width: 90%;
+    display: inline-block;
+    width: 90%;
 }
 
 #vgse-wrapper #vg-header-toolbar .vg-header-toolbar-inner .button[data-active-item] {
-font-weight: 500;
+    font-weight: 500;
 }
 
 /*Highlight the selected element in the autocomplete dropdowns*/
 #vgse-wrapper .handsontable .autocompleteEditor.handsontable td.current {
-font-weight: bold;
+    font-weight: bold;
 }
 
 #vgse-wrapper .button-container.auto_saving_status-container a {
-text-decoration: underline;
-color: black;
+    text-decoration: underline;
+    color: black;
 }
 
 @media screen and (max-width: 782px) {
-#vgse-wrapper .button-container input {
-    min-height: 30px;
-}
+    #vgse-wrapper .button-container input {
+        min-height: 30px;
+    }
 }
 
 .import-csv-form .map-template .wpse-ignore-column-cross {
@@ -2492,11 +2507,13 @@ color: black;
     display: block;
 }
 
-.export-csv-form .field-wrap {
+.export-csv-form .field-wrap,
+.remodal-duplicate .field-wrap {
     margin-bottom: 15px;
 }
 
-.export-csv-form .field-wrap label {
+.export-csv-form .field-wrap label,
+.remodal-duplicate .field-wrap label {
     display: block;
 }
 
@@ -2549,7 +2566,8 @@ color: black;
     display: none;
 }
 
-#vgse-wrapper .chosen-container-multi .chosen-choices li.search-field.wpse-is-loading:after {
+#vgse-wrapper .chosen-container-multi .chosen-choices li.search-field.wpse-is-loading:after,
+.vgse-spin-animation {
     position: absolute;
     right: 3px;
     top: 3px;
@@ -2883,7 +2901,6 @@ a[data-remodal-target] {
 /* #vgse-wrapper .handsontable th {
     height: 28px !important;
 } */
-
 #vgse-wrapper .chosen-container-single .chosen-search input[type=text] {
     -webkit-box-sizing: border-box;
        -moz-box-sizing: border-box;
@@ -2900,7 +2917,7 @@ a[data-remodal-target] {
     margin-bottom: 15px;
 }
 
-.export-csv-form input:not([type="checkbox"]):not([type="radio"]),
+.export-csv-form input:not([type="checkbox"]):not([type="radio"]):not(.select2-search__field),
 .export-csv-form select {
     min-width: 350px;
 }
@@ -2914,23 +2931,7 @@ a[data-remodal-target] {
 }
 
 /*Dark mode*/
-.vgse-dark-mode #wpcontent,
-.vgse-dark-mode #wpfooter,
-.vgse-dark-mode #wpwrap,
-.vgse-dark-mode body.wp-admin,
-html.wp-toolbar.vgse-dark-mode,
-.vgse-dark-mode #wp-content-editor-tools,
-.vgse-dark-mode #vgse-wrapper .vg-toolbar,
-.vgse-dark-mode #vgse-wrapper .vg-secondary-toolbar,
-.vgse-dark-mode #vgse-wrapper .handsontable th,
-.vgse-dark-mode #vgse-wrapper .handsontable td,
-.vgse-dark-mode .remodal .handsontable th,
-.vgse-dark-mode .remodal .handsontable td,
-.vgse-dark-mode #vgse-wrapper .vg-toolbar .toolbar-submenu,
-.vgse-dark-mode #vgse-wrapper .vg-toolbar .button-container:not(.require-click-to-expand):hover .toolbar-submenu,
-.vgse-dark-mode #vgse-wrapper .vg-toolbar .button-container.expand-submenu .toolbar-submenu,
-.vgse-dark-mode .remodal,
-.vgse-dark-mode #vgse-wrapper .automatic-loading-rows-disabled {
+.vgse-dark-mode #wpcontent, .vgse-dark-mode #wpfooter, .vgse-dark-mode #wpwrap, .vgse-dark-mode body.wp-admin, html.wp-toolbar.vgse-dark-mode, .vgse-dark-mode #wp-content-editor-tools, .vgse-dark-mode #vgse-wrapper .vg-toolbar, .vgse-dark-mode #vgse-wrapper .vg-secondary-toolbar, .vgse-dark-mode #vgse-wrapper .handsontable th, .vgse-dark-mode #vgse-wrapper .handsontable td, .vgse-dark-mode .remodal .handsontable th, .vgse-dark-mode .remodal .handsontable td, .vgse-dark-mode #vgse-wrapper .vg-toolbar .toolbar-submenu-holder, .vgse-dark-mode #vgse-wrapper .vg-toolbar .button-container:not(.require-click-to-expand):hover .toolbar-submenu-holder, .vgse-dark-mode #vgse-wrapper .vg-toolbar .button-container.expand-submenu .toolbar-submenu, .vgse-dark-mode .remodal, .vgse-dark-mode #vgse-wrapper .automatic-loading-rows-disabled {
     background: #222;
 }
 
@@ -2943,7 +2944,7 @@ html.wp-toolbar.vgse-dark-mode,
 .vgse-dark-mode .select2-dropdown,
 .vgse-dark-mode .wp-core-ui #vgse-wrapper .button,
 .vgse-dark-mode .wp-core-ui #vgse-wrapper .button-secondary,
-.vgse-dark-mode .wp-core-ui .remodal .button,
+.vgse-dark-mode .wp-core-ui .remodal .button:not(.button-primary),
 .vgse-dark-mode .wp-core-ui .remodal .button-secondary,
 .vgse-dark-mode #wpwrap #vgse-wrapper .button {
     background: #363636;
@@ -2985,6 +2986,10 @@ html.wp-toolbar.vgse-dark-mode,
 .vgse-dark-mode .modal-columns-visibility .column-action,
 .vgse-dark-mode #vgse-wrapper button {
     background-color: #2a2a2a;
+}
+
+.vgse-dark-mode .remodal a:not(.remodal-confirm) {
+    color: #3c9fef;
 }
 
 .vgse-dark-mode #vgse-wrapper,
@@ -3107,10 +3112,6 @@ html.wp-toolbar.vgse-dark-mode,
     color: #ebebeb;
 }
 
-.vgse-dark-mode .remodal a {
-    color: #3c9fef;
-}
-
 .vgse-dark-mode .modal-google-sheets .connection-status-connected {
     color: #00bf00;
 }
@@ -3124,58 +3125,7 @@ html.wp-toolbar.vgse-dark-mode,
     color: white;
 }
 
-.vgse-dark-mode .wp-core-ui #vgse-wrapper .button,
-.vgse-dark-mode .wp-core-ui #vgse-wrapper .button-secondary,
-.vgse-dark-mode .wp-core-ui .remodal .button,
-.vgse-dark-mode .wp-core-ui .remodal .button-secondary,
-.vgse-dark-mode #vgse-wrapper .handsontable th,
-.vgse-dark-mode #vgse-wrapper .handsontable td,
-.vgse-dark-mode #vgse-wrapper .vg-toolbar>.vg-header-toolbar-inner,
-.vgse-dark-mode #vgse-wrapper input,
-.vgse-dark-mode #vgse-wrapper button,
-.vgse-dark-mode #vgse-wrapper .button,
-.vgse-dark-mode .select2-container--default.select2-container--focus .select2-selection--multiple,
-.vgse-dark-mode .select2-container--default .select2-selection--multiple,
-.vgse-dark-mode .select2-container--default .select2-selection--single,
-.vgse-dark-mode #vgse-wrapper .vg-toolbar .toolbar-submenu,
-.vgse-dark-mode #vgse-wrapper .vg-toolbar .button-container:not(.require-click-to-expand):hover .toolbar-submenu,
-.vgse-dark-mode #vgse-wrapper .vg-toolbar .button-container.expand-submenu .toolbar-submenu,
-.vgse-dark-mode .select2-container--default.select2-container--focus .select2-selection--multiple,
-.vgse-dark-mode .select2-container--default .select2-selection--multiple,
-.vgse-dark-mode hr,
-.vgse-dark-mode .select2-container--default .select2-selection--single .vgse-dark-mode #vgse-wrapper .vg-toolbar .toolbar-submenu .button-container,
-.vgse-dark-mode #vgse-wrapper input[type=color],
-.vgse-dark-mode #vgse-wrapper input[type=date],
-.vgse-dark-mode #vgse-wrapper input[type=datetime-local],
-.vgse-dark-mode #vgse-wrapper input[type=datetime],
-.vgse-dark-mode #vgse-wrapper input[type=email],
-.vgse-dark-mode #vgse-wrapper input[type=month],
-.vgse-dark-mode #vgse-wrapper input[type=number],
-.vgse-dark-mode #vgse-wrapper input[type=password],
-.vgse-dark-mode #vgse-wrapper input[type=search],
-.vgse-dark-mode #vgse-wrapper input[type=tel],
-.vgse-dark-mode #vgse-wrapper input[type=text],
-.vgse-dark-mode #vgse-wrapper input[type=time],
-.vgse-dark-mode #vgse-wrapper input[type=url],
-.vgse-dark-mode #vgse-wrapper input[type=week],
-.vgse-dark-mode #vgse-wrapper select,
-.vgse-dark-mode #vgse-wrapper textarea,
-.vgse-dark-mode .remodal input[type=color],
-.vgse-dark-mode .remodal input[type=date],
-.vgse-dark-mode .remodal input[type=datetime-local],
-.vgse-dark-mode .remodal input[type=datetime],
-.vgse-dark-mode .remodal input[type=email],
-.vgse-dark-mode .remodal input[type=month],
-.vgse-dark-mode .remodal input[type=number],
-.vgse-dark-mode .remodal input[type=password],
-.vgse-dark-mode .remodal input[type=search],
-.vgse-dark-mode .remodal input[type=tel],
-.vgse-dark-mode .remodal input[type=text],
-.vgse-dark-mode .remodal input[type=time],
-.vgse-dark-mode .remodal input[type=url],
-.vgse-dark-mode .remodal input[type=week],
-.vgse-dark-mode .remodal select,
-.vgse-dark-mode .remodal textarea {
+.vgse-dark-mode .wp-core-ui #vgse-wrapper .button, .vgse-dark-mode .wp-core-ui #vgse-wrapper .button-secondary, .vgse-dark-mode .wp-core-ui .remodal .button, .vgse-dark-mode .wp-core-ui .remodal .button-secondary, .vgse-dark-mode #vgse-wrapper .handsontable th, .vgse-dark-mode #vgse-wrapper .handsontable td, .vgse-dark-mode #vgse-wrapper .vg-toolbar>.vg-header-toolbar-inner, .vgse-dark-mode #vgse-wrapper input, .vgse-dark-mode #vgse-wrapper button, .vgse-dark-mode #vgse-wrapper .button, .vgse-dark-mode .select2-container--default.select2-container--focus .select2-selection--multiple, .vgse-dark-mode .select2-container--default .select2-selection--multiple, .vgse-dark-mode .select2-container--default .select2-selection--single, .vgse-dark-mode #vgse-wrapper .vg-toolbar .toolbar-submenu-holder, .vgse-dark-mode #vgse-wrapper .vg-toolbar .button-container:not(.require-click-to-expand):hover .toolbar-submenu-holder, .vgse-dark-mode #vgse-wrapper .vg-toolbar .button-container.expand-submenu .toolbar-submenu, .vgse-dark-mode .select2-container--default.select2-container--focus .select2-selection--multiple, .vgse-dark-mode .select2-container--default .select2-selection--multiple, .vgse-dark-mode hr, .vgse-dark-mode .select2-container--default .select2-selection--single .vgse-dark-mode #vgse-wrapper .vg-toolbar .toolbar-submenu .button-container, .vgse-dark-mode #vgse-wrapper input[type=color], .vgse-dark-mode #vgse-wrapper input[type=date], .vgse-dark-mode #vgse-wrapper input[type=datetime-local], .vgse-dark-mode #vgse-wrapper input[type=datetime], .vgse-dark-mode #vgse-wrapper input[type=email], .vgse-dark-mode #vgse-wrapper input[type=month], .vgse-dark-mode #vgse-wrapper input[type=number], .vgse-dark-mode #vgse-wrapper input[type=password], .vgse-dark-mode #vgse-wrapper input[type=search], .vgse-dark-mode #vgse-wrapper input[type=tel], .vgse-dark-mode #vgse-wrapper input[type=text], .vgse-dark-mode #vgse-wrapper input[type=time], .vgse-dark-mode #vgse-wrapper input[type=url], .vgse-dark-mode #vgse-wrapper input[type=week], .vgse-dark-mode #vgse-wrapper select, .vgse-dark-mode #vgse-wrapper textarea, .vgse-dark-mode .remodal input[type=color], .vgse-dark-mode .remodal input[type=date], .vgse-dark-mode .remodal input[type=datetime-local], .vgse-dark-mode .remodal input[type=datetime], .vgse-dark-mode .remodal input[type=email], .vgse-dark-mode .remodal input[type=month], .vgse-dark-mode .remodal input[type=number], .vgse-dark-mode .remodal input[type=password], .vgse-dark-mode .remodal input[type=search], .vgse-dark-mode .remodal input[type=tel], .vgse-dark-mode .remodal input[type=text], .vgse-dark-mode .remodal input[type=time], .vgse-dark-mode .remodal input[type=url], .vgse-dark-mode .remodal input[type=week], .vgse-dark-mode .remodal select, .vgse-dark-mode .remodal textarea {
     border-color: #777;
 }
 
@@ -3313,7 +3263,7 @@ html.wpse-loading-tinymce iframe#editpost_ifr {
     font-size: 13px;
     font-family: monospace;
     max-height: 90vh;
-    overflow-y: scroll;
+    overflow-y: auto;
     border: 1px solid #999;
     padding: 10px;
 }
@@ -3470,6 +3420,334 @@ span.select2-dropdown.select2-dropdown--below {
 
 .modal-columns-visibility .column-settings {
     clear: both;
+}
+
+.vgse-spin-animation {
+    position: relative;
+}
+
+.modal-columns-visibility .column-lists {
+    max-height: 70vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.sheet-header .viewer-users-container {
+    margin-left: 10px !important;
+}
+
+.active-users-remodal .active-users-list {
+    text-align: left;
+    margin: 20px auto 0;
+}
+
+.active-users-remodal .active-users-list img {
+    float: left;
+}
+
+.active-users-remodal .active-users-list div {
+    border-bottom: 1px solid #a8a8a8;
+    margin-top: 5px;
+}
+
+.vgse-dark-mode .active-users-remodal .active-users-list div {
+    border-bottom: 1px solid #444;
+}
+
+.active-users-remodal {
+    max-width: 300px !important;
+}
+
+.viewer-users-container span.viewer-user-icon {
+    border-bottom: 0;
+    line-height: 15px;
+}
+
+.viewer-users-container img {
+    width: 15px;
+    height: 15px;
+    -webkit-border-radius: 50%;
+       -moz-border-radius: 50%;
+            border-radius: 50%;
+}
+
+/* Add a 15% space around the dropdowns in toolbars so they don't close as easily when they move the mouse outside the dropdown */
+#vgse-wrapper .vg-toolbar .button-container .toolbar-submenu:before {
+content: "";
+background-color: transparent;
+width: 130%;
+height: 130%;
+position: absolute;
+left: -15%;
+}
+
+#vgse-wrapper .vg-toolbar .button-container .toolbar-submenu {
+overflow: visible !important;
+}
+
+#vgse-wrapper .quick_search-container.button-container input {
+margin-right: 0;
+}
+
+#vgse-wrapper .run_filters-container .toolbar-submenu ul,
+#vgse-wrapper .run_filters-container button.wpse-start-quick-search {
+position: relative;
+clear: both;
+}
+
+#vgse-wrapper .toolbar-submenu button {
+cursor: pointer;
+}
+
+.modal-error-log .wpse-error-log-list {
+list-style: none;
+padding: 0;
+margin: 0;
+text-align: left;
+}
+
+.modal-error-log .wpse-error-log-list li {
+padding: 15px;
+border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-error-log .wpse-error-log-list li:last-child {
+border-bottom: none;
+}
+
+.modal-error-log .wpse-error-log-list button {
+margin-left: 10px;
+cursor: pointer;
+padding: 2px 8px;
+vertical-align: middle;
+}
+
+.modal-error-log .wpse-error-log-list pre {
+margin-top: 10px;
+padding: 10px;
+-webkit-border-radius: 4px;
+   -moz-border-radius: 4px;
+        border-radius: 4px;
+word-break: break-all;
+white-space: pre-wrap;
+}
+
+/* Virtual list */
+/* The single, invisible sizer that creates the scrollbar */
+.modal-columns-visibility .virtual-shared-sizer {
+position: absolute;
+top: 0;
+left: 0;
+width: 1px;
+height: 100%;
+visibility: hidden;
+z-index: -1;
+}
+
+/* The content "window" for each list */
+.modal-columns-visibility .virtual-content {
+position: absolute;
+    /* top: 0; */
+left: 10px;
+width: calc(100% - 20px);
+}
+
+.modal-columns-visibility .vgse-sorter-section {
+position: relative;
+}
+
+@media only screen and (min-width: 641px) {
+.remodal-is-opened.modal-columns-visibility {
+    max-width: 55% !important;
+}
+}
+
+#vgse-wrapper .button-container.run_filters-container .select2,
+#vgse-wrapper .button-container.run_filters-container input:not([type="checkbox"]),
+#vgse-wrapper .button-container.run_filters-container textarea {
+    width: 100% !important;
+}
+
+#vgse-wrapper .button-container.run_filters-container .select2 input {
+    background: transparent;
+}
+
+#vgse-wrapper .button-container.run_filters-container ul {
+    margin: 0;
+}
+
+/*#vgse-wrapper .vg-toolbar .button-container.run_filters-container .toolbar-submenu {
+    overflow-y: auto !important;
+    overflow-x: visible !important;
+}*/
+/*Remodal fixed*/
+/* Styling for the new dock/undock buttons */
+.remodal-dock-toggle,
+.remodal-undock-toggle {
+    position: absolute;
+    top: 50px;
+    font-size: 18px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #868686;
+    padding: 5px 10px;
+    line-height: 1;
+    z-index: 10;
+    /* Ensure it's above other content */
+}
+
+.remodal-dock-toggle {
+    right: 0;
+}
+
+.remodal-undock-toggle {
+    left: 10px;
+}
+
+.remodal-dock-toggle:hover,
+.remodal-undock-toggle:hover {
+    color: #333;
+}
+
+/* This is the key class that transforms the modal */
+.remodal-is-docked,
+.remodal-child-is-docked {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: auto !important;
+    height: 100vh !important;
+    max-width: none !important;
+    /* Override remodal's max-width */
+    -webkit-transform: none !important;
+            transform: none !important;
+    /* Override remodal's centering transform */
+    margin: 0 !important;
+    /* Optional: add a nice shadow */
+    max-width: 20vw !important;
+    min-width: 500px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.remodal-is-docked {
+    -webkit-box-shadow: -5px 0px 15px rgba(0, 0, 0, 0.15);
+            box-shadow: -5px 0px 15px rgba(0, 0, 0, 0.15);
+    border-left: 1px solid #d4d4d4;
+}
+
+/* Hide the remodal overlay when the modal is docked */
+.remodal-is-docked-body.remodal-is-locked .remodal-overlay {
+    display: none !important;
+}
+
+/* Ensure body is scrollable when modal is docked */
+html.remodal-is-locked.remodal-is-docked-body {
+    overflow: auto !important;
+}
+
+.wp-toolbar .remodal-is-docked.remodal-draggable i.drag-modal {
+    display: none;
+}
+
+.remodal-is-docked-body.remodal-is-locked #vgse-wrapper div#post-data {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    min-height: auto !important;
+}
+
+.remodal-is-docked-body.remodal-is-locked #vgse-wrapper .sheet-header {
+    width: calc(100vw - max(20vw, 500px));
+}
+
+.remodal table {
+    width: 100%;
+}
+
+.remodal table {
+    border-collapse: collapse;
+    border: 1px solid #cccccc;
+}
+
+.remodal table:not(.handsontable) td,
+.remodal table:not(.handsontable) th {
+    border-top: 1px solid #cccccc;
+    padding: 4px
+}
+
+.sheet-header .button-container li.select2-search.select2-search--inline {
+    width: 100%;
+}
+
+.remodal-ai-completions-log table {
+    text-align: left;
+}
+
+.vgse-dark-mode code {
+    background: black;
+}
+
+.vgse-dark-mode #vgse-wrapper .vg-toolbar .toolbar-submenu .button[disabled="disabled"] {
+    background-color: transparent !important;
+}
+
+.remodal-previous-imports table {
+    margin: 20px 0;
+}
+
+.remodal-previous-imports .import-details {
+    text-align: left;
+}
+
+.remodal-previous-imports label {
+    display: block;
+}
+
+.remodal-previous-imports .data-input {
+    margin: 10px 0;
+}
+
+.import-csv-form .dynamic-columns-ui .dynamic-column-settings {
+    width: 40%;
+    float: left;
+}
+
+.import-csv-form .dynamic-columns-ui .dynamic-column-settings label {
+    clear: both;
+    display: block;
+}
+
+.import-csv-form .dynamic-columns-ui .field-wrap input:not([type="checkbox"]),
+.import-csv-form .dynamic-columns-ui .field-wrap select,
+.import-csv-form .dynamic-columns-ui .field-wrap textarea {
+    width: 100%;
+    min-width: initial;
+}
+
+.import-csv-form .map-template.dynamic-column-template {
+    overflow: auto;
+}
+.remodal-bulk-edit select,
+.remodal-bulk-edit textarea,
+.remodal-bulk-edit input:not([type="image" i], [type="range" i], [type="checkbox" i], [type="radio" i]) {
+    max-width: 400px;
+    width: 100%;
+}
+.remodal-bulk-edit .select2-container {
+    min-width: 400px;
+}
+.setup-screen.whats-new-content img {
+    max-width: 100%;
+    height: auto;
+}
+#vgse-wrapper .whats-new-content h2 {
+    font-size: 28px;
+    margin: 40px auto;
+    display: block;
+    border-top: 1px solid #50575e;
+    padding-top: 40px;
 }
 .be-loading-anim {
     position: relative;

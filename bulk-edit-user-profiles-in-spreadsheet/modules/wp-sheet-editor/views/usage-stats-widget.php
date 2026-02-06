@@ -51,7 +51,7 @@
 	<?php
 	if (VGSE()->helpers->user_can_manage_options()) {
 		?>
-		<p><?php _e('Thank you for using our spreadsheet editor', 'vg_sheet_editor' ); ?></p>
+		<p><?php esc_html_e('Thank you for using our spreadsheet editor', 'vg_sheet_editor' ); ?></p>
 
 		<?php
 		$editions_count = (int) get_option('vgse_editions_counter', 0);
@@ -59,13 +59,13 @@
 
 		if ($processed_count > 0) {
 			?>
-			<h2><?php _e('Usage stats', 'vg_sheet_editor' ); ?></h2>
+			<h2><?php esc_html_e('Usage stats', 'vg_sheet_editor' ); ?></h2>
 
 			<?php
 			$minutes_saved = ( $editions_count * 1.4 ) / 60;
 			$stats = array(
 				'total_editions' => array(
-					'label' => __('Modified rows', 'vg_sheet_editor' ),
+					'label' => esc_html__('Modified rows', 'vg_sheet_editor' ),
 					'count' => number_format($processed_count),
 				),
 				'time_saved' => array(
@@ -84,7 +84,7 @@
 				?>
 				<ul class="stats-list">
 					<?php foreach ($stats as $key => $stat) { ?>
-						<li><div class="count"><?php echo is_numeric($stat['count']) ? (int) $stat['count'] : sanitize_text_field($stat['count']); ?></div><div class="label"><?php echo wp_kses_post($stat['label']); ?></div></li>
+						<li><div class="count"><?php echo is_numeric($stat['count']) ? (int) $stat['count'] : esc_html($stat['count']); ?></div><div class="label"><?php echo wp_kses_post($stat['label']); ?></div></li>
 					<?php } ?>
 				</ul>
 				<?php
@@ -93,14 +93,18 @@
 		?>
 		<div class="clear"></div>
 		<hr>
-		<h2><?php _e('Extend the spreadsheet', 'vg_sheet_editor' ); ?></h2>
-		<p><?php _e('Edit WooCommerce products, WooCommerce Variations and Attributes.<br/>Edit hundreds of posts at once using formulas, copy information between posts,<br/>Edit custom post types and custom fields, Edit User Profiles, and More', 'vg_sheet_editor' ); ?> </p>
-		<a href="<?php echo VGSE()->get_trigger_link('extensions', admin_url('admin.php?page=vg_sheet_editor_extensions&vgse_only_inactive=1'), 'usage-widget'); ?>" class="button button-primary" style="margin-bottom: 20px; display: inline-block;"><?php _e('View extensions', 'vg_sheet_editor' ); ?></a>
+		<h2><?php esc_html_e('Extend the spreadsheet', 'vg_sheet_editor' ); ?></h2>
+		<p>
+		<?php esc_html_e('Edit WooCommerce products, WooCommerce Variations and Attributes.', 'vg_sheet_editor'); ?><br/>
+		<?php esc_html_e('Edit hundreds of posts at once using formulas, copy information between posts,', 'vg_sheet_editor'); ?><br/>
+		<?php esc_html_e('Edit custom post types and custom fields, Edit User Profiles, and More', 'vg_sheet_editor'); ?>
+		</p>
+		<a href="<?php echo esc_url( VGSE()->get_trigger_link('extensions', admin_url('admin.php?page=vg_sheet_editor_extensions&vgse_only_inactive=1'), 'usage-widget') ); ?>" class="button button-primary" style="margin-bottom: 20px; display: inline-block;"><?php esc_html_e('View extensions', 'vg_sheet_editor' ); ?></a>
 
 		<div class="clear"></div>
 		<hr>
 	<?php } ?>
-	<h2><?php _e('Open the Spreadsheet Editor', 'vg_sheet_editor' ); ?></h2>
+	<h2><?php esc_html_e('Open the Spreadsheet Editor', 'vg_sheet_editor' ); ?></h2>
 	<div class="post-types-enabled">
 		<?php
 		$post_types = VGSE()->helpers->get_enabled_post_types();
@@ -111,8 +115,9 @@
 					$key = $post_type_name;
 				}
 				?>
-				<a class="button post-type-<?php echo esc_attr($key); ?>" href="<?php echo VGSE()->helpers->get_editor_url($key);
-				?>"><?php _e('Edit ' . esc_html($post_type_name) . 's', 'vg_sheet_editor' ); ?></a>		
+				<a class="button post-type-<?php echo esc_attr($key); ?>" href="<?php echo esc_url( VGSE()->helpers->get_editor_url($key) ); ?>"><?php 
+				// translators: 1: post type name
+				printf( esc_html__('Edit %s', 'vg_sheet_editor' ), esc_html($post_type_name) ); ?></a>		
 				   <?php
 			   }
 		   }
@@ -123,7 +128,7 @@
 	// Only admins can request help from WP Sheet Editor
 	if (VGSE()->helpers->user_can_manage_options()) {
 		?>
-		<h2><?php _e('Help', 'vg_sheet_editor' ); ?></h2>
+		<h2><?php esc_html_e('Help', 'vg_sheet_editor' ); ?></h2>
 		<?php
 		$support_links = VGSE()->get_support_links(null, '', 'usage-stats-help');
 

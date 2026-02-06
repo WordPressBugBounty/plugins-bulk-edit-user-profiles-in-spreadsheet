@@ -3,11 +3,12 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 
 	class WP_Sheet_Editor_Factory {
 
-		public $args               = array();
-		var $provider              = null;
-		static $registered_menus   = array();
-		public $registered_columns = false;
-		public $editor_settings    = array();
+		public $args                    = array();
+		public $provider                = null;
+		public static $registered_menus = array();
+		public $registered_columns      = false;
+		public $registered_toolbars     = false;
+		public $editor_settings         = array();
 
 		function __construct( $args = array() ) {
 			$defaults       = array(
@@ -40,8 +41,6 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 			if ( VGSE()->helpers->is_editor_page() && ! in_array( $current_provider_in_page, $this->args['enabled_post_types'] ) ) {
 				return;
 			}
-
-			do_action( 'vg_sheet_editor/editor/before_init', $this );
 
 			$class_key = VGSE()->helpers->get_data_provider_class_key( $this->args['provider'] );
 			if ( isset( VGSE()->editors[ $class_key ] ) ) {
@@ -85,12 +84,39 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 			return $this->args['columns']->get_provider_items( $provider, $run_callbacks, $skip_filters );
 		}
 
+		function init_toolbars() {
+			if ( ! $this->registered_toolbars ) {
+				// The flag must be set above the filter, to prevent infinite loops
+				// in case the functions hooked to the filter call the get_provider_items() method
+				$this->registered_toolbars = true;
+
+				if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
+					WPSE_Profiler_Obj()->record( 'Before  vg_sheet_editor/editor/before_init' );
+				}
+
+				do_action( 'vg_sheet_editor/editor/before_init', $this );
+
+				if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
+					WPSE_Profiler_Obj()->record( 'After  vg_sheet_editor/editor/before_init' );
+				}
+			}
+		}
+
 		function get_columns() {
 			if ( ! $this->registered_columns ) {
 				// The flag must be set above the filter, to prevent infinite loops
 				// in case the functions hooked to the filter call the get_provider_items() method
 				$this->registered_columns = true;
+
+				if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
+					WPSE_Profiler_Obj()->record( 'Before ' . __CLASS__ . '::' . __FUNCTION__ );
+				}
+
 				do_action( 'vg_sheet_editor/editor/register_columns', $this );
+
+				if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
+					WPSE_Profiler_Obj()->record( 'After ' . __CLASS__ . '::' . __FUNCTION__ );
+				}
 			}
 		}
 
@@ -158,6 +184,11 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 				'eate_dashboard',
 				// Script added by MULTILOCA - WooCommerce Multi Locations Inventory Manager
 				'wcmlim_google_map',
+				'mylisting-google-maps',
+				'google-maps',
+				// Plugin ag-woocommerce-authipay-payment-gateway-premium
+				'AG_fraud_css',
+				'alpine',
 			);
 
 			if ( ! empty( VGSE()->options['be_disable_heartbeat'] ) ) {
@@ -180,8 +211,10 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 			$post_type_key       = VGSE()->helpers->get_provider_from_query_string();
 			$required_capability = VGSE()->helpers->get_edit_spreadsheet_capability( $post_type_key );
 			if ( ! WP_Sheet_Editor_Helpers::current_user_can( $required_capability ) ) {
-				wp_die( __( 'You dont have enough permissions to view this page.', 'vg_sheet_editor' ) );
+				wp_die( esc_html__( 'You dont have enough permissions to view this page.', 'vg_sheet_editor' ) );
 			}
+
+			$this->init_toolbars();
 
 			require VGSE_DIR . '/views/editor-page.php';
 		}
@@ -229,7 +262,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 			// Indicate that help comments can be deactivated
 			foreach ( $columsFormat as $key => $column ) {
 				if ( ! empty( $column['comment'] ) && ! empty( $column['comment']['value'] ) ) {
-					$columsFormat[ $key ]['comment']['value'] .= __( "\n(You can remove these help messages in the advanced settings)", 'vg_sheet_editor' );
+					$columsFormat[ $key ]['comment']['value'] .= esc_html__( "\n(You can remove these help messages in the advanced settings)", 'vg_sheet_editor' );
 				}
 			}
 
@@ -248,8 +281,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 				'gutenberg_cell_template'                 => VGSE()->helpers->get_gutenberg_cell_content(),
 				'handsontable_cell_template'              => '<a class="button button-handsontable button-custom-modal-editor" data-existing="{value}" data-modal-settings="{modal_settings}"><i class="fa fa-edit"></i> {button_label}</a>',
 				'lock_cell_template'                      => '<i class="fa fa-lock vg-cell-blocked vg-readonly-lock"></i> {value}',
-				'lock_cell_template_pro'                  => '<i class="fa fa-lock vg-cell-blocked vg-premium-column"></i> {value} <a href="' . VGSE()->get_buy_link( 'sheet-locked-column-{post_type}' ) . '" target="_blank" class="vg-premium-column-link">(' . __( 'Pro', 'vg_sheet_editor' ) . ')</a>',
-				'enable_lock_cell_template'               => '<i class="fa fa-lock vg-cell-blocked vg-safety-lock"></i> {value} <a href="#" class="wpse-enable-locked-cell">(' . __( 'Enable', 'vg_sheet_editor' ) . ')</a>',
+				'lock_cell_template_pro'                  => '<i class="fa fa-lock vg-cell-blocked vg-premium-column"></i> {value} <a href="' . VGSE()->get_buy_link( 'sheet-locked-column-{post_type}' ) . '" target="_blank" class="vg-premium-column-link">(' . esc_html__( 'Pro', 'vg_sheet_editor' ) . ')</a>',
+				'enable_lock_cell_template'               => '<i class="fa fa-lock vg-cell-blocked vg-safety-lock"></i> {value} <a href="#" class="wpse-enable-locked-cell">(' . esc_html__( 'Enable', 'vg_sheet_editor' ) . ')</a>',
 				'lockedColumnsManuallyEnabled'            => array(),
 				'startRows'                               => 0,
 				'startCols'                               => count( $columsFormat ),
@@ -292,7 +325,10 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 				'tinymce_preview_characters_limit'        => VGSE()->get_option( 'tinymce_preview_characters_limit', 30 ),
 				'duplicate_batch_size'                    => VGSE()->get_option( 'duplicate_batch_size' ),
 				'color_mode'                              => VGSE()->get_option( 'color_mode' ),
+				'default_advanced_filter_field'           => VGSE()->get_option( 'default_advanced_filter_field' ),
+				'active_users_tracking'                   => VGSE()->get_option( 'active_users_tracking', '' ),
 				'is_backend'                              => is_admin(),
+				'scandb_url'                              => $current_provider_in_page ? VGSE()->helpers->get_scandb_url( $current_provider_in_page ) : '',
 			);
 
 			$all_settings = wp_parse_args( $settings, $this->args );
@@ -306,116 +342,138 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 			}
 
 			$texts = array(
-				'bulk_edit_paused'                  => __( 'Paused', 'vg_sheet_editor' ),
-				'formula_preview_button'                  => __( 'Show preview', 'vg_sheet_editor' ),
-				'formula_preview_sample_row_id'           => __( 'Sample row ID', 'vg_sheet_editor' ),
-				'formula_preview_old_value'               => __( 'Old value', 'vg_sheet_editor' ),
-				'formula_preview_new_value'               => __( 'New value', 'vg_sheet_editor' ),
-				'formula_preview_failed'                  => __( 'We couldn\'t generate a preview. Please try again with different parameters or try again later.', 'vg_sheet_editor' ),
-				'please_select_rows_with_checkboxes'      => __( 'Please select some rows with the checkboxes.', 'vg_sheet_editor' ),
-				'variation_rows_missing_parent'           => __( 'Some variation rows are missing a parent product. Please add a value to the "Parent" column in the row IDs: {variation_ids}', 'vg_sheet_editor' ),
-				'variations_not_found_for_selected_products' => __( 'These product IDs don\'t have variations to display: {ids}', 'vg_sheet_editor' ),
-				'variations_displayed_for_selected_products' => __( 'Displayed variations for {parentProductsWithVariationsCount} product(s), {parentProductsWithoutVariationsCount} product(s) don\'t have variations to display', 'vg_sheet_editor' ),
-				'variations_displayed_successfully_for_selected_products' => __( 'Displayed variations for {parentProductsWithVariationsCount} product(s)', 'vg_sheet_editor' ),
-				'cm_disable_column_tip'                   => __( 'Disable column. You can enable it later.', 'vg_sheet_editor' ),
-				'cm_enable_column_tip'                    => __( 'Enable column', 'vg_sheet_editor' ),
-				'cm_read_role_tip'                        => __( 'The column will appear in the spreadsheet and exports if the user has a role with the required capability.', 'vg_sheet_editor' ),
-				'cm_edit_role_tip'                        => __( 'The column will be read only if the user doesn\'t have a role with the required capability.', 'vg_sheet_editor' ),
-				'cm_readonly_tip'                         => __( 'Read-only columns will display a lock and it won\'t be possible to edit them anywhere in the spreadsheet. This is not a security feature because people still can edit in the regular WP screens.', 'vg_sheet_editor' ),
-				'cm_requires_reload'                      => __( 'Enabling this column requires a page reload', 'vg_sheet_editor' ),
-				'cm_delete_tip'                           => __( 'Remove column completely. If you want to use it later you can disable it by dragging and dropping to the right column', 'vg_sheet_editor' ),
-				'import_all_columns_ignored'              => __( 'Please select at least one column to import', 'vg_sheet_editor' ),
-				'show_column_key'                         => __( 'Show column key', 'vg_sheet_editor' ),
-				'column_key_description'                  => __( 'This is the dynamic tag for this column. You can copy this and use it in the bulk edit tool', 'vg_sheet_editor' ),
-				'import_show_all_columns_rows'            => __( 'Click here to show all columns again', 'vg_sheet_editor' ),
+				'delete_word_uppercase'                   => esc_html__( 'DELETE', 'vg_sheet_editor' ),
+				'export_name_field_label_optional'        => esc_html__( 'Name of this export (optional)', 'vg_sheet_editor' ),
+				'export_name_field_label_required'        => esc_html__( 'Name of this export', 'vg_sheet_editor' ),
+				'bulk_edit_paused'                        => esc_html__( 'Paused', 'vg_sheet_editor' ),
+				'formula_preview_button'                  => esc_html__( 'Show preview', 'vg_sheet_editor' ),
+				'formula_preview_sample_row_id'           => esc_html__( 'Sample row ID', 'vg_sheet_editor' ),
+				'formula_preview_old_value'               => esc_html__( 'Old value', 'vg_sheet_editor' ),
+				'formula_preview_new_value'               => esc_html__( 'New value', 'vg_sheet_editor' ),
+				'formula_preview_failed'                  => esc_html__( 'We couldn\'t generate a preview. Please try again with different parameters or try again later.', 'vg_sheet_editor' ),
+				'please_select_rows_with_checkboxes'      => esc_html__( 'Please select some rows with the checkboxes.', 'vg_sheet_editor' ),
+				'variation_rows_missing_parent'           => esc_html__( 'Some variation rows are missing a parent product. Please add a value to the "Parent" column in the row IDs: {variation_ids}', 'vg_sheet_editor' ),
+				'variations_not_found_for_selected_products' => esc_html__( 'These product IDs don\'t have variations to display: {ids}', 'vg_sheet_editor' ),
+				'variations_displayed_for_selected_products' => esc_html__( 'Displayed variations for {parentProductsWithVariationsCount} product(s), {parentProductsWithoutVariationsCount} product(s) don\'t have variations to display', 'vg_sheet_editor' ),
+				'variations_displayed_successfully_for_selected_products' => esc_html__( 'Displayed variations for {parentProductsWithVariationsCount} product(s)', 'vg_sheet_editor' ),
+				'cm_disable_column_tip'                   => esc_html__( 'Disable column. You can enable it later.', 'vg_sheet_editor' ),
+				'cm_enable_column_tip'                    => esc_html__( 'Enable column', 'vg_sheet_editor' ),
+				'cm_read_role_tip'                        => esc_html__( 'The column will appear in the spreadsheet and exports if the user has a role with the required capability. This is not a security feature because people still can edit in the regular WP screens.', 'vg_sheet_editor' ),
+				'cm_edit_role_tip'                        => esc_html__( 'The column will be read only if the user doesn\'t have a role with the required capability. This is not a security feature because people still can edit in the regular WP screens.', 'vg_sheet_editor' ),
+				'cm_readonly_tip'                         => esc_html__( 'Read-only columns will display a lock and it won\'t be possible to edit them anywhere in the spreadsheet. This is not a security feature because people still can edit in the regular WP screens.', 'vg_sheet_editor' ),
+				'cm_requires_reload'                      => esc_html__( 'Enabling this column requires a page reload', 'vg_sheet_editor' ),
+				'cm_delete_tip'                           => esc_html__( 'Remove column completely. If you want to use it later you can disable it by dragging and dropping to the right column', 'vg_sheet_editor' ),
+				'import_all_columns_ignored'              => esc_html__( 'Please select at least one column to import', 'vg_sheet_editor' ),
+				'show_column_key'                         => esc_html__( 'Show column key', 'vg_sheet_editor' ),
+				'column_key_description'                  => esc_html__( 'This is the dynamic tag for this column. You can copy this and use it in the bulk edit tool', 'vg_sheet_editor' ),
+				'import_show_all_columns_rows'            => esc_html__( 'Click here to show all columns again', 'vg_sheet_editor' ),
+				/* translators: %1$s: Settings page URL, %2$s: Documentation URL for increasing WordPress memory limit, %3$s: Contact support URL */
 				'import_failed_server_error_tips'         => sprintf( __( 'The last import batch failed due to a server error, it\'s more likely that the server got overloaded.<br>1- You can try <a href="%1$s" target="_blank">importing fewer rows</a> per batch (i.e. import 2 rows every few seconds).<br>2- You can start a new import, sometimes trying again works (use the "advanced settings" in the step 1 of the import to start from a specific row).<br>3- You can increase the php memory <a href="%2$s" target="_blank">following this tutorial</a><br>4- If the problem happens after trying with 1 row per batch, you can <a href="%3$s" target="_blank">contact us</a> and we will make it work for you', 'vg_sheet_editor' ), VGSE()->helpers->get_settings_page_url(), 'https://docs.woocommerce.com/document/increasing-the-wordpress-memory-limit/', VGSE()->get_support_links( 'contact_us', 'url', 'import-server-error' ) ),
-				'import_failed_retry_server_error'        => __( 'Your server was not able to process this batch. Do you want to try again? You can retry 3 times, If 3 attempts fail we will stop the import completely.', 'vg_sheet_editor' ),
-				'import_data_issue_correct_restart'       => __( 'Please correct the error in the file and start a new import. You can use the "Advanced options" in the step 1 of the import to start from this specific row.', 'vg_sheet_editor' ),
-				'import_finished'                         => __( '<p>The import has finished</p>', 'vg_sheet_editor' ),
-				'export_name_input_required'              => __( 'Name of this export', 'vg_sheet_editor' ),
-				'confirm_delete_columns_manager_item'     => __( 'Are you sure you want to delete this columns view?', 'vg_sheet_editor' ),
-				'export_name_input_optional'              => __( 'Name of this export (optional)', 'vg_sheet_editor' ),
-				'process_finished'                        => __( '<p>The process has finished</p>', 'vg_sheet_editor' ),
-				'product_without_variations'              => __( 'The selected product does not have variations', 'vg_sheet_editor' ),
-				'empty'                                   => __( 'empty', 'vg_sheet_editor' ),
-				'clicks_that_will_be_saved'               => __( 'This will save you {clicks_count} clicks :)', 'vg_sheet_editor' ),
-				'apply_action_to_similar_columns'         => __( 'We found similar columns. Do you want to apply the same action to them? {columns}', 'vg_sheet_editor' ),
-				'column_for_variations_only'              => ( empty( VGSE()->options['hide_cell_comments'] ) ) ? __( 'This column is only for variation rows, parent products don\'t use this field', 'vg_sheet_editor' ) : '',
-				'formulas_starting_edit_single_field'     => __( '<b>Editing the field: {field_label}</b>', 'vg_sheet_editor' ),
-				'column_not_found'                        => __( 'Column not found. Try with another search criteria.', 'vg_sheet_editor' ),
-				'column_for_parent_products_only'         => ( empty( VGSE()->options['hide_cell_comments'] ) ) ? __( 'This column is for parent products only, variations don\'t use this field', 'vg_sheet_editor' ) : '',
-				'how_to_paste'                            => __( 'Paste using keyboard: Ctrl+V', 'vg_sheet_editor' ),
-				'realign_cells'                           => __( 'Realign cells', 'vg_sheet_editor' ),
-				'remove_all_filters'                      => __( 'Remove all filters', 'vg_sheet_editor' ),
-				'auto_resize_columns'                     => __( 'Resize columns based on the values', 'vg_sheet_editor' ),
-				'delete_row'                              => __( 'Delete row', 'vg_sheet_editor' ),
-				'confirm_delete_row'                      => __( 'Do you want to delete {rows_number} rows from the database completely? If you want to restore them later, you should make a backup before.', 'vg_sheet_editor' ),
-				'duplicate_row'                           => __( 'Duplicate row', 'vg_sheet_editor' ),
-				'hide_column'                             => __( 'Hide column', 'vg_sheet_editor' ),
-				'bulk_edit_column'                        => __( 'Bulk edit column', 'vg_sheet_editor' ),
-				'create_variations'                       => __( 'Create variations', 'vg_sheet_editor' ),
-				'copy_variations'                         => __( 'Copy variations from this product', 'vg_sheet_editor' ),
-				'enter_column_name'                       => __( 'Rename column', 'vg_sheet_editor' ),
-				'delete_meta_key'                         => __( 'Delete field from database', 'vg_sheet_editor' ),
-				'delete_meta_key_confirmation'            => __( 'We will delete this meta field from the database and you will lose the values saved in this field on all the rows. You should make a backup to be able to restore in the future. Do you want to continue with the deletion?', 'vg_sheet_editor' ),
-				'delete_serialized_meta_key'              => __( 'Delete serialized field', 'vg_sheet_editor' ),
-				'delete_serialized_meta_key_confirmation' => __( 'We will delete this serialized field, which includes all its subfields, from the database and you will lose the values saved in this field on all the rows. You should make a backup to be able to restore in the future. Do you want to continue with the deletion?', 'vg_sheet_editor' ),
-				'edit_meta_key'                           => __( 'Edit meta key', 'vg_sheet_editor' ),
-				'new_value_empty_or_equal'                => __( 'Error: The new value is empty or is equal to the old value', 'vg_sheet_editor' ),
-				'last_session_filters_notice'             => __( 'Showing rows from your last session.', 'vg_sheet_editor' ),
-				'export_column'                           => __( 'Export column', 'vg_sheet_editor' ),
-				'formula_execution_failed'                => __( '<p>The bulk edit was not applied completely. The process was canceled due to an error.</p><p>You can close this window.</p>', 'vg_sheet_editor' ),
-				'process_execution_failed'                => __( '<p>The process did not finish. The process was canceled due to an error.</p><p>You can close this window.</p>', 'vg_sheet_editor' ),
-				'formula_retry_batch'                     => __( 'Your server was not able to process this batch. Do you want to try again?', 'vg_sheet_editor' ),
-				'formula_execution_complete'              => __( 'The bulk edit was executed successfully. You can close this window', 'vg_sheet_editor' ),
-				'open_columns_visibility'                 => __( 'Add new column', 'vg_sheet_editor' ),
-				'confirm_column_reload_page'              => __( 'ENABLE COLUMNS. These columns require a page reload: {columns}. Do you want to reload now? We will reload automatically', 'vg_sheet_editor' ),
-				'column_removed'                          => __( 'Column removed. Go to "settings > hide/display columns" to enable it again', 'vg_sheet_editor' ),
-				'save_changes_before_remove_filter'       => __( 'You have modified rows. Please save the changes because we will refresh the spreadsheet.', 'vg_sheet_editor' ),
-				'save_changes_before_remove_column'       => __( 'You have modified rows. Please save the changes before removing columns from the spreadsheet.', 'vg_sheet_editor' ),
-				'save_changes_before_we_reload'           => __( 'You have modified rows. Please save the changes because we will refresh the spreadsheet. Do you want to refresh now?', 'vg_sheet_editor' ),
-				'save_changes_reload_optional'            => __( 'Some rows were modified in the background. Please save the changes and reload the spreadsheet to see the changes', 'vg_sheet_editor' ),
-				'save_changes_before_using_tool'          => __( 'Some rows were modified in the spreadsheet. Please save the changes before using this feature.', 'vg_sheet_editor' ),
-				'no_rows_for_formula'                     => __( "We didn't find rows to update from the search query. Please try another search query.", 'vg_sheet_editor' ),
-				'no_rows_for_export'                      => __( "We didn't find rows for the export. Please try another search query.", 'vg_sheet_editor' ),
-				'settings_moved_submenu'                  => __( 'You can find all the settings here, like columns visibility, etc.', 'vg_sheet_editor' ),
-				'posts_not_found'                         => __( 'Oops, nothing found', 'vg_sheet_editor' ),
-				'add_posts_here'                          => __( 'You can create new items here', 'vg_sheet_editor' ),
-				'use_other_image'                         => __( 'Upload image', 'vg_sheet_editor' ),
-				'view_image'                              => __( 'View Gallery', 'vg_sheet_editor' ),
-				'no_options_available'                    => __( 'No options available', 'vg_sheet_editor' ),
-				'posts_loaded'                            => __( 'Items loaded in the spreadsheet', 'vg_sheet_editor' ),
-				'new_rows_added'                          => __( 'New rows added', 'vg_sheet_editor' ),
-				'formula_applied'                         => __( 'The bulk edit has been executed. Do you want to reload the page to see the changes?', 'vg_sheet_editor' ),
-				'saving_stop_error'                       => __( '<p>The changes were not saved completely. The process was canceled due to an error .</p><p>You can close this popup.</p>', 'vg_sheet_editor' ),
-				'auto_saving_stop_error'                  => __( '<p>The automatic saving failed. Your changes were not saved completely due to an error. You can try again later, if the error persists contact our support team and keep this tab opened</p>', 'vg_sheet_editor' ),
-				'merged_attributes_message'               => __( '{updated} attributes have been merged.', 'vg_sheet_editor' ),
-				'paged_batch_saved'                       => __( '{updated} items saved of {total} items that need saving.', 'vg_sheet_editor' ),
-				'ai_add_new_progress_text'                => __( '{created} items created successfully, {failed} items failed because the AI returned invalid data.', 'vg_sheet_editor' ),
-				'ai_add_new_progress_text_successful'     => __( '{created} items created successfully', 'vg_sheet_editor' ),
-				'paged_copy_variations_preparation'       => __( 'Scanning variations to be created. {updated} products of {total} products have been processed.', 'vg_sheet_editor' ),
-				'duplicates_removed_text'                 => __( '{deleted} duplicates have been removed.', 'vg_sheet_editor' ),
-				'everything_saved'                        => __( 'All items have been saved.', 'vg_sheet_editor' ),
-				'save_changes_on_leave'                   => __( 'Please check if you have unsaved changes. If you have, please save them or they will be dismissed.', 'vg_sheet_editor' ),
-				'no_changes_to_save'                      => __( 'Everything is already saved.', 'vg_sheet_editor' ),
-				'http_error_400'                          => __( 'The server did not accept our request. Bad request, please try refresh the page and try again.', 'vg_sheet_editor' ),
-				'http_error_403'                          => __( 'The server didn\'t accept our request. You don\'t have permission to do this action. Please log in again.', 'vg_sheet_editor' ),
-				'http_error_500_502_505'                  => __( 'The server is not available or overloaded. Please try again later.', 'vg_sheet_editor' ),
-				'http_error_try_now'                      => __( 'The server is not available or overloaded. Do you want to try again?', 'vg_sheet_editor' ),
-				'auto_saving_http_error_try_now'          => __( 'The auto saving failed: the server is not available or overloaded. Do you want to try again?', 'vg_sheet_editor' ),
-				'http_error_503'                          => __( 'The server wasn\'t able to process our request. Server error. Please try again later.', 'vg_sheet_editor' ),
-				'http_error_509'                          => __( 'The server has exceeded its allocated resources and is not able to process our request.', 'vg_sheet_editor' ),
-				'http_error_504'                          => __( 'The server is busy and took too long to respond to our request. Please try again later.', 'vg_sheet_editor' ),
-				'http_error_default'                      => __( 'The server could not process our request. Please try again later.', 'vg_sheet_editor' ),
-				'change_background_color'                 => __( 'Change background color', 'vg_sheet_editor' ),
+				'import_failed_retry_server_error'        => esc_html__( 'Your server was not able to process this batch. Do you want to try again? You can retry 3 times, If 3 attempts fail we will stop the import completely.', 'vg_sheet_editor' ),
+				'import_fix_data_issue_restart'           => esc_html__( 'Please correct the error in the file and start a new import. You can use the "Advanced options" in the step 1 of the import to start from this specific row.', 'vg_sheet_editor' ),
+				'import_finished'                         => '<p>' . esc_html__( 'The import has finished', 'vg_sheet_editor' ) . '</p>',
+				'export_name_input_required'              => esc_html__( 'Name of this export', 'vg_sheet_editor' ),
+				'confirm_delete_columns_manager_item'     => esc_html__( 'Are you sure you want to delete this columns view?', 'vg_sheet_editor' ),
+				'confirm_delete_saved_search'             => esc_html__( 'Are you sure you want to delete this search?', 'vg_sheet_editor' ),
+				'export_name_input_optional'              => esc_html__( 'Name of this export (optional)', 'vg_sheet_editor' ),
+				'process_finished'                        => '<p>' . esc_html__( 'The process has finished', 'vg_sheet_editor' ) . '</p>',
+				'product_without_variations'              => esc_html__( 'The selected product does not have variations', 'vg_sheet_editor' ),
+				'empty'                                   => esc_html__( 'empty', 'vg_sheet_editor' ),
+				'clicks_that_will_be_saved'               => esc_html__( 'This will save you {clicks_count} clicks :)', 'vg_sheet_editor' ),
+				'apply_action_to_similar_columns'         => esc_html__( 'We found similar columns. Do you want to apply the same action to them? {columns}', 'vg_sheet_editor' ),
+				'column_for_variations_only'              => ( empty( VGSE()->options['hide_cell_comments'] ) ) ? esc_html__( 'This column is only for variation rows, parent products don\'t use this field', 'vg_sheet_editor' ) : '',
+				'formulas_starting_edit_single_field'     => '<b>' . esc_html__( 'Editing the field: {field_label}', 'vg_sheet_editor' ) . '</b>',
+				'column_not_found'                        => esc_html__( 'Column not found. Try with another search criteria.', 'vg_sheet_editor' ),
+				'column_for_parent_products_only'         => ( empty( VGSE()->options['hide_cell_comments'] ) ) ? esc_html__( 'This column is for parent products only, variations don\'t use this field', 'vg_sheet_editor' ) : '',
+				'how_to_paste'                            => esc_html__( 'Paste using keyboard: Ctrl+V', 'vg_sheet_editor' ),
+				'realign_cells'                           => esc_html__( 'Realign cells', 'vg_sheet_editor' ),
+				'remove_all_filters'                      => esc_html__( 'Remove all filters', 'vg_sheet_editor' ),
+				'auto_resize_columns'                     => esc_html__( 'Resize columns based on the values', 'vg_sheet_editor' ),
+				'delete_row'                              => esc_html__( 'Delete row', 'vg_sheet_editor' ),
+				'confirm_delete_row'                      => esc_html__( 'Do you want to delete {rows_number} rows from the database completely? If you want to restore them later, you should make a backup before.', 'vg_sheet_editor' ),
+				'duplicate_row'                           => esc_html__( 'Duplicate row', 'vg_sheet_editor' ),
+				'hide_column'                             => esc_html__( 'Hide column', 'vg_sheet_editor' ),
+				'bulk_edit_column'                        => esc_html__( 'Bulk edit column', 'vg_sheet_editor' ),
+				'create_variations'                       => esc_html__( 'Create variations', 'vg_sheet_editor' ),
+				'copy_variations'                         => esc_html__( 'Copy variations from this product', 'vg_sheet_editor' ),
+				'enter_column_name'                       => esc_html__( 'Rename column', 'vg_sheet_editor' ),
+				'delete_meta_key'                         => esc_html__( 'Delete field from database', 'vg_sheet_editor' ),
+				'delete_meta_key_confirmation'            => esc_html__( 'We will delete this meta field from the database and you will lose the values saved in this field on all the rows. You should make a backup to be able to restore in the future. Do you want to continue with the deletion?', 'vg_sheet_editor' ),
+				'delete_serialized_meta_key'              => esc_html__( 'Delete serialized field', 'vg_sheet_editor' ),
+				'delete_serialized_meta_key_confirmation' => esc_html__( 'We will delete this serialized field, which includes all its subfields, from the database and you will lose the values saved in this field on all the rows. You should make a backup to be able to restore in the future. Do you want to continue with the deletion?', 'vg_sheet_editor' ),
+				'edit_meta_key'                           => esc_html__( 'Edit meta key', 'vg_sheet_editor' ),
+				'new_value_empty_or_equal'                => esc_html__( 'Error: The new value is empty or is equal to the old value', 'vg_sheet_editor' ),
+				'column_title_saved'                      => esc_html__( 'Column title saved', 'vg_sheet_editor' ),
+				'column_title_not_saved'                  => esc_html__( 'We were unable to save the new column title. Please reload the page and try again', 'vg_sheet_editor' ),
+				'column_sizes_saved'                      => esc_html__( 'Column sizes have been saved', 'vg_sheet_editor' ),
+				'column_sizes_not_saved'                  => esc_html__( 'We were unable to save the new column sizes. Please reload the page and try again.', 'vg_sheet_editor' ),
+				'last_session_filters_notice'             => esc_html__( 'Showing rows from your last session.', 'vg_sheet_editor' ),
+				'export_column'                           => esc_html__( 'Export column', 'vg_sheet_editor' ),
+				'formula_execution_failed'                => '<p>' . esc_html__( 'The bulk edit was not applied completely. The process was canceled due to an error. You can close this window.', 'vg_sheet_editor' ) . '</p>',
+				'process_execution_failed'                => '<p>' . esc_html__( 'The process did not finish. The process was canceled due to an error. You can close this window.', 'vg_sheet_editor' ) . '</p>',
+				'formula_retry_batch'                     => esc_html__( 'Your server was not able to process this batch. Do you want to try again?', 'vg_sheet_editor' ),
+				'formula_execution_complete'              => esc_html__( 'The bulk edit was executed successfully. You can close this window', 'vg_sheet_editor' ),
+				'cell_formula_execution_complete'         => esc_html__( 'Cells edited successfully but they\'re not saved yet. Close this popup and continue editing, and "Save" all modified cells when you finish editing. You can undo the cell changes pressing ctrl + z.', 'vg_sheet_editor' ),
+				'open_columns_visibility'                 => esc_html__( 'Add new column', 'vg_sheet_editor' ),
+				'confirm_column_reload_page'              => esc_html__( 'ENABLE COLUMNS. These columns require a page reload: {columns}. Do you want to reload now? We will reload automatically', 'vg_sheet_editor' ),
+				'column_removed'                          => esc_html__( 'Column removed. Go to "settings > hide/display columns" to enable it again', 'vg_sheet_editor' ),
+				'save_changes_before_remove_filter'       => esc_html__( 'You have modified rows. Please save the changes because we will refresh the spreadsheet.', 'vg_sheet_editor' ),
+				'save_changes_before_remove_column'       => esc_html__( 'You have modified rows. Please save the changes before removing columns from the spreadsheet.', 'vg_sheet_editor' ),
+				'save_changes_before_we_reload'           => esc_html__( 'You have modified rows. Please save the changes because we will refresh the spreadsheet. Do you want to refresh now?', 'vg_sheet_editor' ),
+				'bulk_edit_previous_selection_missing'    => esc_html__( 'You have selected to bulk edit the same selection of rows as your previous bulk edit, but we have no records of your previous selection. Please change your rows selection to something else.', 'vg_sheet_editor' ),
+				'save_changes_reload_optional'            => esc_html__( 'Some rows were modified in the background. Please save the changes and reload the spreadsheet to see the changes', 'vg_sheet_editor' ),
+				'save_changes_before_using_tool'          => esc_html__( 'Some rows were modified in the spreadsheet. Please save the changes before using this feature.', 'vg_sheet_editor' ),
+				'no_rows_for_formula'                     => esc_html__( "We didn't find rows to update from the search query. Please try another search query.", 'vg_sheet_editor' ),
+				'no_rows_for_export'                      => esc_html__( "We didn't find rows for the export. Please try another search query.", 'vg_sheet_editor' ),
+				'settings_moved_submenu'                  => esc_html__( 'You can find all the settings here, like columns visibility, etc.', 'vg_sheet_editor' ),
+				'posts_not_found'                         => esc_html__( 'Oops, nothing found', 'vg_sheet_editor' ),
+				'add_posts_here'                          => esc_html__( 'You can create new items here', 'vg_sheet_editor' ),
+				'use_other_image'                         => esc_html__( 'Upload image', 'vg_sheet_editor' ),
+				'view_image'                              => esc_html__( 'View Gallery', 'vg_sheet_editor' ),
+				'no_options_available'                    => esc_html__( 'No options available', 'vg_sheet_editor' ),
+				'posts_loaded'                            => esc_html__( 'Items loaded in the spreadsheet', 'vg_sheet_editor' ),
+				'new_rows_added'                          => esc_html__( 'New rows added', 'vg_sheet_editor' ),
+				'formula_applied'                         => esc_html__( 'The bulk edit has been executed. Do you want to reload the page to see the changes?', 'vg_sheet_editor' ),
+				'saving_stop_error'                       => '<p>' . esc_html__( 'The changes were not saved completely. The process was canceled due to an error. You can close this popup.', 'vg_sheet_editor' ) . '</p>',
+				'auto_saving_stop_error'                  => '<p>' . esc_html__( 'The automatic saving failed. Your changes were not saved completely due to an error. You can try again later, if the error persists contact our support team and keep this tab opened', 'vg_sheet_editor' ) . '</p>',
+				'merged_attributes_message'               => esc_html__( '{updated} attributes have been merged.', 'vg_sheet_editor' ),
+				'paged_batch_saved'                       => esc_html__( '{updated} items saved of {total} items that need saving.', 'vg_sheet_editor' ),
+				'ai_add_new_progress_text'                => esc_html__( '{created} items created successfully, {failed} items failed because the AI returned invalid data.', 'vg_sheet_editor' ),
+				'ai_add_new_progress_text_successful'     => esc_html__( '{created} items created successfully', 'vg_sheet_editor' ),
+				'paged_copy_variations_preparation'       => esc_html__( 'Scanning variations to be created. {updated} products of {total} products have been processed.', 'vg_sheet_editor' ),
+				'duplicates_removed_text'                 => esc_html__( '{deleted} duplicates have been removed.', 'vg_sheet_editor' ),
+				'everything_saved'                        => esc_html__( 'All items have been saved.', 'vg_sheet_editor' ),
+				'save_changes_on_leave'                   => esc_html__( 'Please check if you have unsaved changes. If you have, please save them or they will be dismissed.', 'vg_sheet_editor' ),
+				'no_changes_to_save'                      => esc_html__( 'Everything is already saved.', 'vg_sheet_editor' ),
+				'http_error_400'                          => esc_html__( 'The server did not accept our request. Bad request, please refresh the page and try again.', 'vg_sheet_editor' ),
+				'http_error_403'                          => esc_html__( 'The server didn\'t accept our request. You don\'t have permission to do this action. Please log in again.', 'vg_sheet_editor' ),
+				'http_error_500_502_505'                  => esc_html__( 'The server is not available or overloaded. Please try again later.', 'vg_sheet_editor' ),
+				'http_error_try_now'                      => esc_html__( 'The server is not available or overloaded. Do you want to try again?', 'vg_sheet_editor' ),
+				'auto_saving_http_error_try_now'          => esc_html__( 'The auto saving failed: the server is not available or overloaded. Do you want to try again?', 'vg_sheet_editor' ),
+				'http_error_503'                          => esc_html__( 'The server wasn\'t able to process our request. Server error. Please try again later.', 'vg_sheet_editor' ),
+				'http_error_509'                          => esc_html__( 'The server has exceeded its allocated resources and is not able to process our request.', 'vg_sheet_editor' ),
+				'http_error_504'                          => esc_html__( 'The server is busy and took too long to respond to our request. Please try again later.', 'vg_sheet_editor' ),
+				'http_error_default'                      => esc_html__( 'The server could not process our request. Please try again later.', 'vg_sheet_editor' ),
+				'change_background_color'                 => esc_html__( 'Change background color', 'vg_sheet_editor' ),
 				'hint_missing_column_on_scroll'           => ( defined( 'VGSE_ANY_PREMIUM_ADDON' ) && VGSE_ANY_PREMIUM_ADDON && VGSE()->helpers->user_can_manage_options() && is_admin() ) ? __( '<h3>Missing column?</h3><button class="button show-column-missing-tips"  data-remodal-target="modal-columns-visibility">Open columns manager</button> or <button class="button">Close this</button>', 'vg_sheet_editor' ) : '',
-				'open_regular_editor'                     => __( 'WP Editor', 'vg_sheet_editor' ),
-				'view_row'                     => __( 'View', 'vg_sheet_editor' ),
+				'open_regular_editor'                     => esc_html__( 'WP Editor', 'vg_sheet_editor' ),
+				'view_row'                                => esc_html__( 'View', 'vg_sheet_editor' ),
+				'show_trace'                              => esc_html__( 'Show trace', 'vg_sheet_editor' ),
+				'hide_trace'                              => esc_html__( 'Hide trace', 'vg_sheet_editor' ),
+				'dock_right'                              => esc_html__( 'Dock to the right', 'vg_sheet_editor' ),
+				'restore_regular_modal'                   => esc_html__( 'Restore to regular modal', 'vg_sheet_editor' ),
+				'formula_select_valid_product_type'       => esc_html__( 'Please select the type of product that you want to edit', 'vg_sheet_editor' ),
+				'only_one_duplicate_filter_allowed'       => esc_html__( 'You can use only one "contains duplicate values" filter at a time because it\'s a heavy search for the database.', 'vg_sheet_editor' ),
+				'find_rows_with_same_value'               => esc_html__( 'Find rows with same value', 'vg_sheet_editor' ),
+				'confirm_delete_saved_import'             => esc_html__( 'Are you sure you want to delete this saved import?', 'vg_sheet_editor' ),
+				'invalid_file_for_repeat_import'          => esc_html__( 'You uploaded a file containing different columns than the previous import, so you can\'t run this previous import. Please upload a file with same columns as the previous import, or go to the import tool and make a new import.', 'vg_sheet_editor' ),
+				'active_filters_url_copied'               => esc_html__( 'URL copied to your clipboard', 'vg_sheet_editor' ),
 			);
 
 			$extension            = VGSE()->helpers->get_extension_by_post_type( $current_provider_in_page );
 			$review_tip_dismissed = (bool) get_option( 'vgse_dismiss_review_tip' );
-			$texts['ask_review']  = ( VGSE()->helpers->is_happy_user() && $extension && ! $review_tip_dismissed && ! empty( $extension['wp_org_slug'] ) ) ? sprintf( __( '<span class="review-tip">Do we deserve a 5-star review? <a href="%s" target="_blank" class="dismiss-review-tip">Yes, you deserve it</a> . - . <a href=""  class="dismiss-review-tip">No</a></span>', 'vg_sheet_editor' ), 'https://wordpress.org/support/plugin/' . $extension['wp_org_slug'] . '/reviews/?filter=5#new-post' ) : '';
+			/* translators: review URL */
+			$texts['ask_review'] = ( VGSE()->helpers->is_happy_user() && $extension && ! $review_tip_dismissed && ! empty( $extension['wp_org_slug'] ) ) ? sprintf( __( '<span class="review-tip">Do we deserve a 5-star review? <a href="%s" target="_blank" class="dismiss-review-tip">Yes, you deserve it</a> . - . <a href=""  class="dismiss-review-tip">No</a></span>', 'vg_sheet_editor' ), 'https://wordpress.org/support/plugin/' . $extension['wp_org_slug'] . '/reviews/?filter=5#new-post' ) : '';
 
 			$all_settings['texts'] = $texts;
 

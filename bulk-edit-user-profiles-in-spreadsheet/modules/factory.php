@@ -9,7 +9,7 @@ if ( !class_exists( 'WPSE_Sheet_Factory' ) ) {
     class WPSE_Sheet_Factory {
         public $args = array();
 
-        var $sheets_bootstrap = null;
+        public $sheets_bootstrap = null;
 
         function __construct( $args = array() ) {
             $defaults = array(
@@ -94,7 +94,7 @@ if ( !class_exists( 'WPSE_Sheet_Factory' ) ) {
             add_action( 'vg_sheet_editor/editor/register_columns', array($this, 'register_columns'), 60 );
             add_action( 'vg_sheet_editor/editor/register_columns', array($this, 'lock_disallowed_columns'), 90 );
             add_action( 'vg_sheet_editor/editor/register_columns', array($this, 'remove_columns'), 90 );
-            add_action( 'vg_sheet_editor/editor/before_init', array($this, 'register_toolbars'), 10 );
+            add_action( 'vg_sheet_editor/editor/before_init', array($this, 'register_toolbars_from_factory'), 10 );
             add_filter(
                 'vg_sheet_editor/custom_columns/teaser/allow_to_lock_column',
                 array($this, 'dont_lock_allowed_columns'),
@@ -193,19 +193,18 @@ if ( !class_exists( 'WPSE_Sheet_Factory' ) ) {
         /**
          * Register spreadsheet columns
          */
-        function register_toolbars( $editor ) {
+        function register_toolbars_from_factory( $editor ) {
             $post_types = array_intersect( $editor->args['enabled_post_types'], $this->get_prop( 'post_type' ) );
             if ( !$post_types || !in_array( $editor->args['provider'], $post_types, true ) ) {
                 return;
             }
             if ( $this->toolbars ) {
                 $toolbars = ( is_callable( $this->toolbars ) ? call_user_func( $this->get_prop( 'toolbars' ) ) : $this->get_prop( 'toolbars' ) );
-                if ( empty( $toolbars ) ) {
-                    return;
-                }
-                foreach ( $post_types as $post_type ) {
-                    foreach ( $toolbars as $key => $toolbar ) {
-                        $editor->args['toolbars']->register_item( $key, $toolbar, $post_type );
+                if ( !empty( $toolbars ) ) {
+                    foreach ( $post_types as $post_type ) {
+                        foreach ( $toolbars as $key => $toolbar ) {
+                            $editor->args['toolbars']->register_item( $key, $toolbar, $post_type );
+                        }
                     }
                 }
             }
@@ -213,7 +212,7 @@ if ( !class_exists( 'WPSE_Sheet_Factory' ) ) {
                 foreach ( $post_types as $post_type ) {
                     $editor->args['toolbars']->register_item( 'wpse_license', array(
                         'type'                  => 'button',
-                        'content'               => __( 'My license', 'vg_sheet_editor' ),
+                        'content'               => esc_html__( 'My license', 'vg_sheet_editor' ),
                         'url'                   => $this->args['fs_object']->get_account_url(),
                         'toolbar_key'           => 'secondary',
                         'extra_html_attributes' => ' target="_blank" ',

@@ -7,8 +7,8 @@ if (!class_exists('WP_Sheet_Editor_Coupons_Teaser')) {
 	 */
 	class WP_Sheet_Editor_Coupons_Teaser {
 
-		static private $instance = false;
-		var $post_type = 'shop_coupon';
+		private static $instance = false;
+		public $post_type = 'shop_coupon';
 
 		private function __construct() {
 			
@@ -17,6 +17,9 @@ if (!class_exists('WP_Sheet_Editor_Coupons_Teaser')) {
 		function init() {
 
 			if (class_exists('WP_Sheet_Editor_WC_Coupons')) {
+				return;
+			}
+			if(VGSE()->get_option('be_disable_extension_offerings')){
 				return;
 			}
 			add_action('admin_notices', array($this, 'render_notice'));
@@ -30,15 +33,15 @@ if (!class_exists('WP_Sheet_Editor_Coupons_Teaser')) {
 			$install_url = VGSE()->get_plugin_install_url('WooCommerce Bulk Edit Coupons - WP Sheet Editor');
 			$sheets[$this->post_type] = array(
 				'key' => $this->post_type,
-				'label' => __('WooCommerce Coupons', 'vg_sheet_editor' ),
+				'label' => esc_html__('WooCommerce Coupons', 'vg_sheet_editor' ),
 				'is_disabled' => true,
-				'description' => '<small><a href="' . esc_url($install_url) . '" target="_blank">' . __('(Install free extension)', 'vg_sheet_editor' ) . '</a></small>',
+				'description' => '<small><a href="' . esc_url($install_url) . '" target="_blank">' . esc_html__('(Install free extension)', 'vg_sheet_editor' ) . '</a></small>',
 			);
 			return $sheets;
 		}
 
 		function render_notice() {
-			if (empty($_GET['post_type']) || $_GET['post_type'] !== 'shop_coupon') {
+			if ( strpos( $_SERVER['REQUEST_URI'], 'post_type=shop_coupon' ) === false ) {
 				return;
 			}
 			$notice_key = 'wpse_hide_coupons_teaser_notice';
@@ -48,7 +51,14 @@ if (!class_exists('WP_Sheet_Editor_Coupons_Teaser')) {
 			$nonce = wp_create_nonce('bep-nonce');
 			?>
 			<div class="notice notice-success is-dismissible wpse-notice" data-key="<?php echo esc_attr($notice_key); ?>">
-				<p><?php printf(__('Edit Coupons in a Spreadsheet.<br/>Edit coupon codes, amounts, status, restrictions, and more. Make advanced searches. The spreadsheet is in sync with your site, no need to import/export. <a href="%s" class="" target="_blank">Download Plugin</a>', 'vg_sheet_editor' ), 'https://wpsheeteditor.com/extensions/woocommerce-coupons-spreadsheet/?utm_source=wp-admin&utm_medium=admin-notice&utm_campaign=coupons'); ?></p>
+				<p>
+					<?php esc_html_e('Edit Coupons in a Spreadsheet.', 'vg_sheet_editor'); ?>
+					<br/>
+					<?php esc_html_e('Edit coupon codes, amounts, status, restrictions, and more. Make advanced searches. The spreadsheet is in sync with your site, no need to import/export.', 'vg_sheet_editor'); ?> 
+					<a href="https://wpsheeteditor.com/extensions/woocommerce-coupons-spreadsheet/?utm_source=wp-admin&utm_medium=admin-notice&utm_campaign=coupons" class="" target="_blank">
+						<?php esc_html_e('Download Plugin', 'vg_sheet_editor'); ?>
+					</a>
+				</p>
 			</div>
 			<script>
 				jQuery(window).on('load', function () {
