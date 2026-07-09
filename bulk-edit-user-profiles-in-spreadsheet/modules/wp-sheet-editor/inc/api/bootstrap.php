@@ -40,6 +40,13 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 						unset( $args['enabled_post_types'][ $products_index ] );
 					}
 				}
+				// If this is the post types plugin and there is a premium wc orders plugin, exclude the orders sheet from the post types initialization so it loads the orders sheet from the premium orders plugin
+				if ( function_exists( 'wpsewco_fs' ) && wpsewco_fs()->can_use_premium_code__premium_only() ) {
+					$orders_index = array_search( 'shop_order', $args['enabled_post_types'] );
+					if ( $orders_index !== false && isset( $args['enabled_post_types'][ $orders_index ] ) ) {
+						unset( $args['enabled_post_types'][ $orders_index ] );
+					}
+				}
 			}
 			$this->settings = apply_filters( 'vg_sheet_editor/bootstrap/settings', $args );
 
@@ -102,13 +109,14 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 			$screen               = get_current_screen();
 			$is_posts_list        = $screen->base === 'edit' && ! empty( $screen->post_type );
 			$is_media_upload_page = $screen->base === 'upload';
+
 			if ( ! $this->quick_access_rendered && ( $is_posts_list || $is_media_upload_page ) && in_array( $screen->post_type, $this->enabled_post_types ) ) {
 				$transient_key               = VGSE()->helpers->get_current_query_session_id();
 				$url                         = esc_url(
 					add_query_arg(
 						array(
 							'wpse_session_query'       => $transient_key,
-							'wpse_custom_filters_nonce' => wp_create_nonce( 'bep-nonce' ),
+							'wpse_custom_filters_nonce' => $transient_key ? wp_create_nonce( 'bep-nonce' ) : null,
 						),
 						VGSE()->helpers->get_editor_url( $screen->post_type )
 					)
@@ -631,9 +639,24 @@ if ( ! class_exists( 'WP_Sheet_Editor_Bootstrap' ) ) {
 						'data_type'         => 'post_data',
 						'column_width'      => 212,
 						'title'             => esc_html__( 'Modified Date', 'vg_sheet_editor' ),
-						'supports_formulas' => true,
 						'is_locked'         => true,
 						'lock_template_key' => 'enable_lock_cell_template',
+						'supports_formulas'     => true,
+						// SQL formulas not supported because we need to automatically save the gmt date too (additional field)
+						'supports_sql_formulas' => false,
+						'formatted'             => array(
+							'editor'           => 'wp_datetime',
+							'type'             => 'date',
+							'dateFormatPhp'    => 'Y-m-d H:i:s',
+							'correctFormat'    => true,
+							'defaultDate'      => gmdate( 'Y-m-d H:i:s' ),
+							'datePickerConfig' => array(
+								'firstDay'       => 0,
+								'showWeekNumber' => true,
+								'numberOfMonths' => 1,
+								'yearRange'      => array( 1900, (int) gmdate( 'Y' ) + 20 ),
+							),
+						),
 						'value_type'        => 'date',
 					)
 				);

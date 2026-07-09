@@ -27,6 +27,7 @@ if ( ! class_exists( 'WPSE_Custom_Tables_Serialized_Fields' ) ) {
 			$provider  = VGSE()->helpers->get_current_provider();
 			$post_type = $provider->get_sheet_key();
 			$id_column = $provider->get_post_data_table_id_key( $post_type );
+			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnsupportedIdentifierPlaceholder
 			$raw_value = $wpdb->get_var( $wpdb->prepare( 'SELECT %i FROM %i WHERE %i = %d', $key, $post_type, $id_column, $post_id ) );
 			$data      = $raw_value && is_serialized( $raw_value ) ? maybe_unserialize( $raw_value ) : array();
 			if ( ! is_array( $data ) ) {

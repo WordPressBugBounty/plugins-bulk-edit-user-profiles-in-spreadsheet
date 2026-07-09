@@ -238,7 +238,12 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 			global $wp_query;
 			$out = false;
 
-			if ( ! is_object( $wp_query ) || empty( $wp_query->query_vars ) || ! isset( $_GET['post_type'] ) ) {
+			if ( ! is_object( $wp_query ) || empty( $wp_query->query_vars ) || ! isset( $wp_query->query_vars['post_type'] ) ) {
+				return $out;
+			}
+
+			// Exit if the current URL has zero params or only contains a post type param
+			if ( empty( $_GET ) || ( count( $_GET ) === 1 && ! empty( $_GET['post_type'] ) ) ) {
 				return $out;
 			}
 			$wp_query_vars = json_encode( array_filter( $wp_query->query_vars ) );
@@ -1001,7 +1006,9 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 
 			$is_async_action_runner = wp_doing_ajax() && ! empty( $_REQUEST['action'] ) && in_array( $_REQUEST['action'], array( 'as_async_request_queue_runner', 'ashp_create_additional_runners', 'mailpoet-cron-action-scheduler-run' ), true );
 
-			return ! is_user_logged_in() && ( wp_doing_cron() || $is_cli || $is_async_action_runner );
+			// phpcs:ignore wp_function_not_compatible_with_requires_wp
+			$doing_cron = function_exists( 'wp_doing_cron' ) ? wp_doing_cron() : ( defined( 'DOING_CRON' ) && DOING_CRON );
+			return ! is_user_logged_in() && ( $doing_cron || $is_cli || $is_async_action_runner );
 		}
 
 		public function get_uuid() {
@@ -1177,21 +1184,25 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 						$qry['orderby'] .= ' ID';
 					}
 				} else {
-					$orderby_meta_field = $order_numeric ? 'meta_value_num' : 'meta_value';
-					$qry['orderby']     = $orderby_meta_field . ' ID';
 					if ( ! isset( $qry['meta_query'] ) ) {
 						$qry['meta_query'] = array();
 					}
 					$qry['meta_query']['wpse_meta_sort_clause'] = array(
-						'relation' => 'OR',
+						'relation'                       => 'OR',
 						array(
 							'key'     => $custom_order_by,
 							'compare' => 'NOT EXISTS',
 						),
-						array(
+						'wpse_meta_sort_clause_internal' => array(
 							'key'     => $custom_order_by,
 							'compare' => 'EXISTS',
+							// Let WP handle the numeric/string casting here. Using DECIMAL instead of NUMERIC so it works with decimal numbers, NUMERIC truncates the decimals during the sorting
+							'type'    => $order_numeric ? 'DECIMAL(10,2)' : 'CHAR',
 						),
+					);
+					$qry['orderby']                             = array(
+						'wpse_meta_sort_clause_internal' => $custom_order,
+						'ID'                             => $custom_order, // Fallback to ID to prevent jumping
 					);
 				}
 			}
@@ -1219,6 +1230,20 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 		public function post_type_supports_parent( $post_type ) {
 				$parent_supported = ( post_type_supports( $post_type, 'page-attributes' ) && $post_type !== 'attachment' ) || ( $post_type === apply_filters( 'vg_sheet_editor/woocommerce/product_post_type_key', 'product' ) && class_exists( 'WooCommerce' ) );
 				return $parent_supported;
+		}
+
+		
+		/**
+		 * Wrapper for set_time_limit to see if it is enabled.
+		 *
+		 * @since 2.6.0
+		 * @param int $limit Time limit.
+		 * @return void
+		 */
+		function set_time_limit( $limit = 0 ) {
+			if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) { // phpcs:ignore PHPCompatibility.IniDirectives.RemovedIniDirectives.safe_modeDeprecatedRemoved
+				@set_time_limit( $limit ); // @codingStandardsIgnoreLine
+			}
 		}
 
 		public function get_rows( $settings = array() ) {
@@ -1271,6 +1296,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 				);
 			}
 
+			$is_streaming = ! empty( $settings['stream_callback'] ) && is_callable( $settings['stream_callback'] );
+
 			if ( ! empty( $query->posts ) ) {
 
 				$count = 0;
@@ -1285,24 +1312,6 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 					WPSE_Profiler_Obj()->record( 'After vg_sheet_editor/load_rows/found_posts ' . __FUNCTION__ );
 				}
 
-				$data = apply_filters( 'vg_sheet_editor/load_rows/preload_data', $data, $posts, $wp_query_args, $settings, $spreadsheet_columns );
-
-				if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
-					WPSE_Profiler_Obj()->record( 'After vg_sheet_editor/load_rows/preload_data ' . __FUNCTION__ );
-				}
-
-				$post_ids = wp_list_pluck( $posts, 'ID' );
-
-				if ( empty( VGSE()->options['be_disable_data_prefetch'] ) ) {
-					VGSE()->helpers->get_current_provider()->prefetch_data( $post_ids, $settings['post_type'], $spreadsheet_columns );
-				}
-
-				if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
-					WPSE_Profiler_Obj()->record( 'Before $posts foreach ' . __FUNCTION__ );
-				}
-
-				$can_setup_postdata = apply_filters( 'vg_sheet_editor/load_rows/can_setup_postdata', false, $posts, $wp_query_args, $spreadsheet_columns, $settings );
-
 				$referenced_post_types    = array_unique( wp_list_pluck( $posts, 'post_type' ) );
 				$allowed_columns_per_type = array();
 				if ( count( $referenced_post_types ) > 1 ) {
@@ -1315,145 +1324,430 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 					}
 				}
 
-				foreach ( $posts as $post ) {
-
-					$GLOBALS['post'] = & $post;
-
-					if ( isset( $post->post_title ) && $can_setup_postdata ) {
-						setup_postdata( $post );
+				$column_metadata = array();
+				foreach ( $spreadsheet_columns as $column_key => $column_settings ) {
+					$is_checkbox             = ! empty( $column_settings['formatted']['type'] ) && $column_settings['formatted']['type'] === 'checkbox';
+					$allowed_checkbox_values = array();
+					$should_be_integers      = false;
+					if ( $is_checkbox ) {
+						$allowed_checkbox_values = array( $column_settings['formatted']['checkedTemplate'], $column_settings['formatted']['uncheckedTemplate'] );
+						$should_be_integers      = is_numeric( implode( '', $allowed_checkbox_values ) );
+						if ( $should_be_integers ) {
+							$allowed_checkbox_values = array_map( 'intval', $allowed_checkbox_values );
+						}
 					}
 
-					$post_id = $post->ID;
+					$is_plain_select = isset( $column_settings['formatted'] ) && isset( $column_settings['formatted']['editor'] ) && isset( $column_settings['formatted']['selectOptions'] ) && $column_settings['formatted']['editor'] === 'select' && is_array( $column_settings['formatted']['selectOptions'] ) && ! is_callable( $column_settings['formatted']['selectOptions'] ) && ! isset( $column_settings['formatted']['selectOptions'][0] );
 
-					$data[ $post_id ]['post_type'] = $post->post_type;
-					$data[ $post_id ]['provider']  = $post->post_type;
+					$column_metadata[ $column_key ] = array(
+						'is_checkbox'             => $is_checkbox,
+						'allowed_checkbox_values' => $allowed_checkbox_values,
+						'should_be_integers'      => $should_be_integers,
+						'is_plain_select'         => $is_plain_select,
+					);
+				}
 
-					// Allow other plugins to filter the fields for every post, so we can optimize
-					// the process and avoid retrieving unnecessary data
-					if ( count( $referenced_post_types ) > 1 && isset( $allowed_columns_per_type[ $post->post_type ] ) ) {
-						$allowed_columns_for_post = $allowed_columns_per_type[ $post->post_type ];
-					} else {
-						$allowed_columns_for_post = $spreadsheet_columns;
+				if ( $is_streaming ) {
+					$this->set_time_limit( 0 );
+					$master_keys = array_unique( array_merge( array( 'ID', 'post_type', 'provider' ), array_keys( $spreadsheet_columns ) ) );
+					sort( $master_keys );
+
+					$number_of_pages = ceil( (int) $query->found_posts / $wp_query_args['posts_per_page'] );
+					$dummy_out       = array(
+						'rows'       => array(),
+						'request'    => VGSE()->helpers->user_can_manage_options() && is_object( $query ) && property_exists( $query, 'request' ) ? $query->request : null,
+						'total'      => (int) $query->found_posts,
+						'message'    => apply_filters( 'vg_sheet_editor/load_rows/rows_found_message', esc_html__( 'Items loaded in the spreadsheet', 'vg_sheet_editor' ), $wp_query_args, $spreadsheet_columns, $settings ),
+						'pagination' => null,
+						'max_pages'  => $number_of_pages,
+					);
+
+					if ( ! empty( VGSE()->options['enable_pagination'] ) ) {
+						if ( ! class_exists( 'WPSE_Pagination_Links_Generator' ) ) {
+							require_once VGSE_DIR . '/inc/pagination-links-generator.php';
+						}
+						$dummy_out['pagination'] = WPSE_Pagination_Links_Generator::create( $wp_query_args['paged'], $number_of_pages, 3, '<button class="load-more button" data-pagination="%d">%d</button>' );
 					}
 
-					if ( VGSE()->helpers->get_current_provider()->is_post_type ) {
-						$external_button_variables_search  = array(
-							'{ID}',
-							'{post_title}',
-							'{post_content}',
-							'{post_type}',
-							'{post_status}',
-							'{post_url}',
-							'{parent_post_url}',
-							'{post_parent}',
-						);
-						$external_button_variables_replace = array(
-							$post->ID,
-							$post->post_title,
-							$post->post_content,
-							$post->post_type,
-							$post->post_status,
-							get_permalink( $post->ID ),
-							get_permalink( $post->post_parent ),
-							$post->post_parent,
-						);
-					} else {
-						$external_button_variables_search  = array(
-							'{ID}',
-							'{post_type}',
-						);
-						$external_button_variables_replace = array(
-							$post->ID,
-							$post->post_type,
-						);
+					try {
+						$dummy_out = apply_filters( 'vg_sheet_editor/load_rows/full_output', $dummy_out, $wp_query_args, $spreadsheet_columns, $settings );
+					} catch ( Exception $e ) {
+						// ignore
 					}
 
-					foreach ( $allowed_columns_for_post as $column_key => $column_settings ) {
-						if ( isset( $data[ $post_id ][ $column_key ] ) ) {
-							continue;
+					$meta_data = array();
+					foreach ( $dummy_out as $key => $val ) {
+						if ( $key !== 'rows' ) {
+							$meta_data[ $key ] = $val;
+						}
+					}
+
+					$meta_out = array(
+						'type'    => 'metadata',
+						'success' => true,
+						'data'    => $meta_data,
+					);
+					call_user_func( $settings['stream_callback'], $meta_out );
+
+					$post_chunks = array_chunk( $posts, 40 );
+					foreach ( $post_chunks as $chunk_posts ) {
+						$chunk_data = array();
+						$chunk_data = apply_filters( 'vg_sheet_editor/load_rows/preload_data', $chunk_data, $chunk_posts, $wp_query_args, $settings, $spreadsheet_columns );
+
+						$chunk_post_ids = wp_list_pluck( $chunk_posts, 'ID' );
+						if ( empty( VGSE()->options['be_disable_data_prefetch'] ) ) {
+							VGSE()->helpers->get_current_provider()->prefetch_data( $chunk_post_ids, $settings['post_type'], $spreadsheet_columns );
 						}
 
-						// Use column callback to retrieve the cell value
-						if ( ! empty( $column_settings['get_value_callback'] ) && is_callable( $column_settings['get_value_callback'] ) ) {
-							$column_settings['request_settings'] = $settings;
-							$data[ $post_id ][ $column_key ]     = call_user_func( $column_settings['get_value_callback'], $post, $column_key, $column_settings );
-							$data[ $post_id ][ $column_key ]     = $this->prepare_raw_value_for_display( $data[ $post_id ][ $column_key ], $post, $column_settings );
-							continue;
+						$can_setup_postdata = apply_filters( 'vg_sheet_editor/load_rows/can_setup_postdata', false, $chunk_posts, $wp_query_args, $spreadsheet_columns, $settings );
+
+						foreach ( $chunk_posts as $post ) {
+							$GLOBALS['post'] = & $post;
+							if ( isset( $post->post_title ) && $can_setup_postdata ) {
+								setup_postdata( $post );
+							}
+							$post_id = $post->ID;
+							$chunk_data[ $post_id ]['post_type'] = $post->post_type;
+							$chunk_data[ $post_id ]['provider']  = $post->post_type;
+
+							if ( count( $referenced_post_types ) > 1 && isset( $allowed_columns_per_type[ $post->post_type ] ) ) {
+								$allowed_columns_for_post = $allowed_columns_per_type[ $post->post_type ];
+							} else {
+								$allowed_columns_for_post = $spreadsheet_columns;
+							}
+
+							$external_button_variables_search  = null;
+							$external_button_variables_replace = null;
+
+							foreach ( $allowed_columns_for_post as $column_key => $column_settings ) {
+								if ( isset( $chunk_data[ $post_id ][ $column_key ] ) ) {
+									continue;
+								}
+
+								if ( ! empty( $column_settings['get_value_callback'] ) && is_callable( $column_settings['get_value_callback'] ) ) {
+									$column_settings['request_settings'] = $settings;
+									$chunk_data[ $post_id ][ $column_key ]     = call_user_func( $column_settings['get_value_callback'], $post, $column_key, $column_settings );
+									$chunk_data[ $post_id ][ $column_key ]     = $this->prepare_raw_value_for_display( $chunk_data[ $post_id ][ $column_key ], $post, $column_settings );
+									continue;
+								}
+
+								if ( $column_settings['type'] === 'handsontable' && $column_settings['use_new_handsontable_renderer'] ) {
+									$raw_value = apply_filters( 'vg_sheet_editor/handsontable_cell_content/existing_value', maybe_unserialize( VGSE()->helpers->get_current_provider()->get_item_meta( $post->ID, $column_key, true, 'read' ) ), $post, $column_key, $column_settings );
+									if ( empty( $raw_value ) ) {
+										$raw_value = array();
+									}
+									$chunk_data[ $post_id ][ $column_key ] = json_encode( $raw_value );
+								} elseif ( ! empty( $column_settings['data_type'] ) ) {
+									if ( $column_settings['data_type'] === 'post_data' ) {
+										$chunk_data[ $post_id ][ $column_key ] = VGSE()->data_helpers->get_post_data( $column_key, $post->ID );
+									}
+									if ( $column_settings['data_type'] === 'meta_data' ) {
+										$chunk_data[ $post_id ][ $column_key ] = VGSE()->helpers->get_current_provider()->get_item_meta( $post->ID, $column_key, true, 'read' );
+									}
+									if ( $column_settings['data_type'] === 'post_terms' ) {
+										$chunk_data[ $post_id ][ $column_key ] = VGSE()->helpers->get_current_provider()->get_item_terms( $post->ID, $column_key );
+									}
+
+									$chunk_data[ $post_id ][ $column_key ] = $this->prepare_raw_value_for_display( $chunk_data[ $post_id ][ $column_key ], $post, $column_settings );
+
+									if ( $column_settings['type'] === 'boton_gallery' ) {
+										$chunk_data[ $post_id ][ $column_key ] = VGSE()->helpers->get_gallery_cell_content( $post->ID, $column_key, $column_settings['data_type'], $chunk_data[ $post_id ][ $column_key ] );
+									}
+									if ( $column_settings['type'] === 'boton_gallery_multiple' ) {
+										$chunk_data[ $post_id ][ $column_key ] = VGSE()->helpers->get_gallery_cell_content( $post->ID, $column_key, $column_settings['data_type'], $chunk_data[ $post_id ][ $column_key ] );
+									}
+								} else {
+									if ( $column_settings['type'] === 'external_button' && ! empty( $column_settings['external_button_template'] ) ) {
+										if ( is_null( $external_button_variables_search ) ) {
+											if ( VGSE()->helpers->get_current_provider()->is_post_type ) {
+												$external_button_variables_search  = array(
+													'{ID}',
+													'{post_title}',
+													'{post_content}',
+													'{post_type}',
+													'{post_status}',
+													'{post_url}',
+													'{parent_post_url}',
+													'{post_parent}',
+												);
+												$external_button_variables_replace = array(
+													$post->ID,
+													$post->post_title,
+													$post->post_content,
+													$post->post_type,
+													$post->post_status,
+													get_permalink( $post->ID ),
+													get_permalink( $post->post_parent ),
+													$post->post_parent,
+												);
+											} else {
+												$external_button_variables_search  = array(
+													'{ID}',
+													'{post_type}',
+												);
+												$external_button_variables_replace = array(
+													$post->ID,
+													$post->post_type,
+												);
+											}
+										}
+										$chunk_data[ $post_id ][ $column_key ] = str_replace( $external_button_variables_search, $external_button_variables_replace, $column_settings['external_button_template'] );
+									}
+									if ( in_array( $column_settings['type'], apply_filters( 'vg_sheet_editor/get_rows/cell_content/custom_modal_editor_types', array( 'metabox', 'handsontable' ) ) ) ) {
+										$chunk_data[ $post_id ][ $column_key ] = VGSE()->helpers->get_custom_modal_editor_cell_content( $post->ID, $column_key, $column_settings );
+									}
+								}
+
+								$meta = isset( $column_metadata[ $column_key ] ) ? $column_metadata[ $column_key ] : null;
+								if ( $meta && $meta['is_checkbox'] && ! empty( $chunk_data[ $post_id ][ $column_key ] ) ) {
+									if ( $meta['should_be_integers'] ) {
+										$chunk_data[ $post_id ][ $column_key ] = intval( $chunk_data[ $post_id ][ $column_key ] );
+									}
+									if ( ! in_array( $chunk_data[ $post_id ][ $column_key ], $meta['allowed_checkbox_values'], true ) ) {
+										$chunk_data[ $post_id ][ $column_key ] = $column_settings['default_value'];
+									}
+								}
+								$is_value_empty = ( empty( $chunk_data[ $post_id ][ $column_key ] ) && ! is_string( $chunk_data[ $post_id ][ $column_key ] ) ) || ( is_string( $chunk_data[ $post_id ][ $column_key ] ) && strlen( $chunk_data[ $post_id ][ $column_key ] ) === 0 );
+								if ( $is_value_empty && isset( $column_settings['default_value'] ) && $chunk_data[ $post_id ][ $column_key ] !== $column_settings['default_value'] ) {
+									$chunk_data[ $post_id ][ $column_key ] = $column_settings['default_value'];
+								}
+
+								$is_plain_select = $meta && $meta['is_plain_select'] && is_string( $chunk_data[ $post_id ][ $column_key ] ) && isset( $column_settings['formatted']['selectOptions'][ $chunk_data[ $post_id ][ $column_key ] ] );
+								if ( $is_plain_select ) {
+									$chunk_data[ $post_id ][ $column_key ] = $column_settings['formatted']['selectOptions'][ $chunk_data[ $post_id ][ $column_key ] ];
+								}
+
+								if ( is_array( $chunk_data[ $post_id ][ $column_key ] ) || is_object( $chunk_data[ $post_id ][ $column_key ] ) ) {
+									$chunk_data[ $post_id ][ $column_key ] = '';
+								}
+							}
+							++$count;
 						}
 
-							// Tmp. We use the new handsontable renderer only for _default_attributes for now
-							// we will use it for all in the future
-						if ( $column_settings['type'] === 'handsontable' && $column_settings['use_new_handsontable_renderer'] ) {
+						wp_reset_postdata();
 
-							$raw_value = apply_filters( 'vg_sheet_editor/handsontable_cell_content/existing_value', maybe_unserialize( VGSE()->helpers->get_current_provider()->get_item_meta( $post->ID, $column_key, true, 'read' ) ), $post, $column_key, $column_settings );
+						do_action( 'vg_sheet_editor/load_rows/after_processing', $chunk_data, $wp_query_args, $spreadsheet_columns, $settings, '' );
 
-							if ( empty( $raw_value ) ) {
-								$raw_value = array();
-							}
-							$data[ $post_id ][ $column_key ] = json_encode( $raw_value );
-						} elseif ( ! empty( $column_settings['data_type'] ) ) {
+						$chunk_data = apply_filters( 'vg_sheet_editor/load_rows/output', $chunk_data, $wp_query_args, $spreadsheet_columns, $settings );
 
-							if ( $column_settings['data_type'] === 'post_data' ) {
-								$data[ $post_id ][ $column_key ] = VGSE()->data_helpers->get_post_data( $column_key, $post->ID );
+						foreach ( $chunk_data as $post_id => $row ) {
+							foreach ( $row as $column_key => $value ) {
+								if ( is_array( $value ) || is_object( $value ) ) {
+									$chunk_data[ $post_id ][ $column_key ] = '';
+								}
 							}
-							if ( $column_settings['data_type'] === 'meta_data' ) {
-								$data[ $post_id ][ $column_key ] = VGSE()->helpers->get_current_provider()->get_item_meta( $post->ID, $column_key, true, 'read' );
-							}
-							if ( $column_settings['data_type'] === 'post_terms' ) {
-								$data[ $post_id ][ $column_key ] = VGSE()->helpers->get_current_provider()->get_item_terms( $post->ID, $column_key );
-							}
+						}
 
-							$data[ $post_id ][ $column_key ] = $this->prepare_raw_value_for_display( $data[ $post_id ][ $column_key ], $post, $column_settings );
+						$batch_out = array(
+							'rows'       => $chunk_data,
+							'request'    => $dummy_out['request'],
+							'total'      => $dummy_out['total'],
+							'message'    => $dummy_out['message'],
+							'pagination' => $dummy_out['pagination'],
+							'max_pages'  => $dummy_out['max_pages'],
+						);
+						foreach ( $dummy_out as $key => $val ) {
+							if ( ! isset( $batch_out[ $key ] ) ) {
+								$batch_out[ $key ] = $val;
+							}
+						}
 
-							if ( $column_settings['type'] === 'boton_gallery' ) {
-								$data[ $post_id ][ $column_key ] = VGSE()->helpers->get_gallery_cell_content( $post->ID, $column_key, $column_settings['data_type'], $data[ $post_id ][ $column_key ] );
+						try {
+							$batch_out = apply_filters( 'vg_sheet_editor/load_rows/full_output', $batch_out, $wp_query_args, $spreadsheet_columns, $settings );
+						} catch ( Exception $e ) {
+							// Handle error
+						}
+
+						// Optimize batch payload to avoid repeating keys
+						$all_keys = $master_keys;
+						foreach ( $batch_out['rows'] as $row ) {
+							if ( is_array( $row ) ) {
+								$all_keys = array_merge( $all_keys, array_keys( $row ) );
 							}
-							if ( $column_settings['type'] === 'boton_gallery_multiple' ) {
-								$data[ $post_id ][ $column_key ] = VGSE()->helpers->get_gallery_cell_content( $post->ID, $column_key, $column_settings['data_type'], $data[ $post_id ][ $column_key ] );
+						}
+						$all_keys = array_unique( $all_keys );
+						sort( $all_keys );
+						$value_rows = array();
+						foreach ( $batch_out['rows'] as $row ) {
+							$row_values = array();
+							foreach ( $all_keys as $key ) {
+								if ( array_key_exists( $key, $row ) ) {
+									$row_values[] = $row[ $key ];
+								} else {
+									$row_values[] = 'wpsep';
+								}
 							}
+							$value_rows[] = $row_values;
+						}
+
+						call_user_func( $settings['stream_callback'], array(
+							'type'  => 'batch',
+							'keys'  => array_values( $all_keys ),
+							'batch' => $value_rows,
+						) );
+					}
+
+					if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
+						WPSE_Profiler_Obj()->record( 'Before out ' . __FUNCTION__ );
+						WPSE_Profiler_Obj()->finish();
+					}
+
+					$out = $dummy_out;
+					$out['rows'] = array();
+					return $out;
+
+				} else {
+					$data = apply_filters( 'vg_sheet_editor/load_rows/preload_data', $data, $posts, $wp_query_args, $settings, $spreadsheet_columns );
+
+					if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
+						WPSE_Profiler_Obj()->record( 'After vg_sheet_editor/load_rows/preload_data ' . __FUNCTION__ );
+					}
+
+					$post_ids = wp_list_pluck( $posts, 'ID' );
+
+					if ( empty( VGSE()->options['be_disable_data_prefetch'] ) ) {
+						VGSE()->helpers->get_current_provider()->prefetch_data( $post_ids, $settings['post_type'], $spreadsheet_columns );
+					}
+
+					if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
+						WPSE_Profiler_Obj()->record( 'Before $posts foreach ' . __FUNCTION__ );
+					}
+
+					$can_setup_postdata = apply_filters( 'vg_sheet_editor/load_rows/can_setup_postdata', false, $posts, $wp_query_args, $spreadsheet_columns, $settings );
+
+					foreach ( $posts as $post ) {
+
+						$GLOBALS['post'] = & $post;
+
+						if ( isset( $post->post_title ) && $can_setup_postdata ) {
+							setup_postdata( $post );
+						}
+
+						$post_id = $post->ID;
+
+						$data[ $post_id ]['post_type'] = $post->post_type;
+						$data[ $post_id ]['provider']  = $post->post_type;
+
+						if ( count( $referenced_post_types ) > 1 && isset( $allowed_columns_per_type[ $post->post_type ] ) ) {
+							$allowed_columns_for_post = $allowed_columns_per_type[ $post->post_type ];
 						} else {
-							if ( $column_settings['type'] === 'external_button' && ! empty( $column_settings['external_button_template'] ) ) {
-								$data[ $post_id ][ $column_key ] = str_replace( $external_button_variables_search, $external_button_variables_replace, $column_settings['external_button_template'] );
-							}
-							if ( in_array( $column_settings['type'], apply_filters( 'vg_sheet_editor/get_rows/cell_content/custom_modal_editor_types', array( 'metabox', 'handsontable' ) ) ) ) {
-								$data[ $post_id ][ $column_key ] = VGSE()->helpers->get_custom_modal_editor_cell_content( $post->ID, $column_key, $column_settings );
-							}
+							$allowed_columns_for_post = $spreadsheet_columns;
 						}
 
-						$is_checkbox = ! empty( $column_settings['formatted']['type'] ) && $column_settings['formatted']['type'] === 'checkbox';
-						// Make sure checkboxes have allowed values only
-						if ( $is_checkbox && ! empty( $data[ $post_id ][ $column_key ] ) ) {
-							$allowed_checkbox_values = array( $column_settings['formatted']['checkedTemplate'], $column_settings['formatted']['uncheckedTemplate'] );
-							$should_be_integers      = is_numeric( implode( '', $allowed_checkbox_values ) );
-							if ( $should_be_integers ) {
-								$allowed_checkbox_values         = array_map( 'intval', $allowed_checkbox_values );
-								$data[ $post_id ][ $column_key ] = intval( $data[ $post_id ][ $column_key ] );
+						$external_button_variables_search  = null;
+						$external_button_variables_replace = null;
+
+						foreach ( $allowed_columns_for_post as $column_key => $column_settings ) {
+							if ( isset( $data[ $post_id ][ $column_key ] ) ) {
+								continue;
 							}
-							if ( ! in_array( $data[ $post_id ][ $column_key ], $allowed_checkbox_values, true ) ) {
+
+							if ( ! empty( $column_settings['get_value_callback'] ) && is_callable( $column_settings['get_value_callback'] ) ) {
+								$column_settings['request_settings'] = $settings;
+								$data[ $post_id ][ $column_key ]     = call_user_func( $column_settings['get_value_callback'], $post, $column_key, $column_settings );
+								$data[ $post_id ][ $column_key ]     = $this->prepare_raw_value_for_display( $data[ $post_id ][ $column_key ], $post, $column_settings );
+								continue;
+							}
+
+							if ( $column_settings['type'] === 'handsontable' && $column_settings['use_new_handsontable_renderer'] ) {
+
+								$raw_value = apply_filters( 'vg_sheet_editor/handsontable_cell_content/existing_value', maybe_unserialize( VGSE()->helpers->get_current_provider()->get_item_meta( $post->ID, $column_key, true, 'read' ) ), $post, $column_key, $column_settings );
+
+								if ( empty( $raw_value ) ) {
+									$raw_value = array();
+								}
+								$data[ $post_id ][ $column_key ] = json_encode( $raw_value );
+							} elseif ( ! empty( $column_settings['data_type'] ) ) {
+
+								if ( $column_settings['data_type'] === 'post_data' ) {
+									$data[ $post_id ][ $column_key ] = VGSE()->data_helpers->get_post_data( $column_key, $post->ID );
+								}
+								if ( $column_settings['data_type'] === 'meta_data' ) {
+									$data[ $post_id ][ $column_key ] = VGSE()->helpers->get_current_provider()->get_item_meta( $post->ID, $column_key, true, 'read' );
+								}
+								if ( $column_settings['data_type'] === 'post_terms' ) {
+									$data[ $post_id ][ $column_key ] = VGSE()->helpers->get_current_provider()->get_item_terms( $post->ID, $column_key );
+								}
+
+								$data[ $post_id ][ $column_key ] = $this->prepare_raw_value_for_display( $data[ $post_id ][ $column_key ], $post, $column_settings );
+
+								if ( $column_settings['type'] === 'boton_gallery' ) {
+									$data[ $post_id ][ $column_key ] = VGSE()->helpers->get_gallery_cell_content( $post->ID, $column_key, $column_settings['data_type'], $data[ $post_id ][ $column_key ] );
+								}
+								if ( $column_settings['type'] === 'boton_gallery_multiple' ) {
+									$data[ $post_id ][ $column_key ] = VGSE()->helpers->get_gallery_cell_content( $post->ID, $column_key, $column_settings['data_type'], $data[ $post_id ][ $column_key ] );
+								}
+							} else {
+								if ( $column_settings['type'] === 'external_button' && ! empty( $column_settings['external_button_template'] ) ) {
+									if ( is_null( $external_button_variables_search ) ) {
+										if ( VGSE()->helpers->get_current_provider()->is_post_type ) {
+											$external_button_variables_search  = array(
+												'{ID}',
+												'{post_title}',
+												'{post_content}',
+												'{post_type}',
+												'{post_status}',
+												'{post_url}',
+												'{parent_post_url}',
+												'{post_parent}',
+											);
+											$external_button_variables_replace = array(
+												$post->ID,
+												$post->post_title,
+												$post->post_content,
+												$post->post_type,
+												$post->post_status,
+												get_permalink( $post->ID ),
+												get_permalink( $post->post_parent ),
+												$post->post_parent,
+											);
+										} else {
+											$external_button_variables_search  = array(
+												'{ID}',
+												'{post_type}',
+											);
+											$external_button_variables_replace = array(
+												$post->ID,
+												$post->post_type,
+											);
+										}
+									}
+									$data[ $post_id ][ $column_key ] = str_replace( $external_button_variables_search, $external_button_variables_replace, $column_settings['external_button_template'] );
+								}
+								if ( in_array( $column_settings['type'], apply_filters( 'vg_sheet_editor/get_rows/cell_content/custom_modal_editor_types', array( 'metabox', 'handsontable' ) ) ) ) {
+									$data[ $post_id ][ $column_key ] = VGSE()->helpers->get_custom_modal_editor_cell_content( $post->ID, $column_key, $column_settings );
+								}
+							}
+
+							$meta = isset( $column_metadata[ $column_key ] ) ? $column_metadata[ $column_key ] : null;
+							if ( $meta && $meta['is_checkbox'] && ! empty( $data[ $post_id ][ $column_key ] ) ) {
+								if ( $meta['should_be_integers'] ) {
+									$data[ $post_id ][ $column_key ] = intval( $data[ $post_id ][ $column_key ] );
+								}
+								if ( ! in_array( $data[ $post_id ][ $column_key ], $meta['allowed_checkbox_values'], true ) ) {
+									$data[ $post_id ][ $column_key ] = $column_settings['default_value'];
+								}
+							}
+							$is_value_empty = ( empty( $data[ $post_id ][ $column_key ] ) && ! is_string( $data[ $post_id ][ $column_key ] ) ) || ( is_string( $data[ $post_id ][ $column_key ] ) && strlen( $data[ $post_id ][ $column_key ] ) === 0 );
+							if ( $is_value_empty && isset( $column_settings['default_value'] ) && $data[ $post_id ][ $column_key ] !== $column_settings['default_value'] ) {
 								$data[ $post_id ][ $column_key ] = $column_settings['default_value'];
 							}
-						}
-						// Use default value if the field is empty
-						$is_value_empty = ( empty( $data[ $post_id ][ $column_key ] ) && ! is_string( $data[ $post_id ][ $column_key ] ) ) || ( is_string( $data[ $post_id ][ $column_key ] ) && strlen( $data[ $post_id ][ $column_key ] ) === 0 );
-						if ( $is_value_empty && isset( $column_settings['default_value'] ) && $data[ $post_id ][ $column_key ] !== $column_settings['default_value'] ) {
-							$data[ $post_id ][ $column_key ] = $column_settings['default_value'];
+
+							$is_plain_select = $meta && $meta['is_plain_select'] && is_string( $data[ $post_id ][ $column_key ] ) && isset( $column_settings['formatted']['selectOptions'][ $data[ $post_id ][ $column_key ] ] );
+							if ( $is_plain_select ) {
+								$data[ $post_id ][ $column_key ] = $column_settings['formatted']['selectOptions'][ $data[ $post_id ][ $column_key ] ];
+							}
+
+							if ( is_array( $data[ $post_id ][ $column_key ] ) || is_object( $data[ $post_id ][ $column_key ] ) ) {
+								$data[ $post_id ][ $column_key ] = '';
+							}
 						}
 
-						// If it's a select field and the db value is the key of the select options, replace the key with the label as value
-						$is_plain_select = is_string( $data[ $post_id ][ $column_key ] ) && isset( $column_settings['formatted'] ) && isset( $column_settings['formatted']['editor'] ) && isset( $column_settings['formatted']['selectOptions'] ) && $column_settings['formatted']['editor'] === 'select' && is_array( $column_settings['formatted']['selectOptions'] ) && ! is_callable( $column_settings['formatted']['selectOptions'] ) && ! isset( $column_settings['formatted']['selectOptions'][0] ) && isset( $column_settings['formatted']['selectOptions'][ $data[ $post_id ][ $column_key ] ] );
-						if ( $is_plain_select ) {
-							$data[ $post_id ][ $column_key ] = $column_settings['formatted']['selectOptions'][ $data[ $post_id ][ $column_key ] ];
-						}
-
-						// Catch all columns registered by mistake having arrays/objects as values
-						if ( is_array( $data[ $post_id ][ $column_key ] ) || is_object( $data[ $post_id ][ $column_key ] ) ) {
-							$data[ $post_id ][ $column_key ] = '';
-						}
+						++$count;
 					}
-					++$count;
-				}
-				if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
-					WPSE_Profiler_Obj()->record( 'After $posts foreach ' . __FUNCTION__ );
+					if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
+						WPSE_Profiler_Obj()->record( 'After $posts foreach ' . __FUNCTION__ );
+					}
 				}
 			} else {
 
@@ -1488,8 +1782,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 			}
 			$data = apply_filters( 'vg_sheet_editor/load_rows/output', $data, $wp_query_args, $spreadsheet_columns, $settings );
 
-			// Set all the unsupported column values (arrays or objects) to an empty string
-			foreach ( $data as $post_id => $row ) {
+			foreach ( $data as $post_id => &$row ) {
+				ksort($row);
 				foreach ( $row as $column_key => $value ) {
 					if ( is_array( $value ) || is_object( $value ) ) {
 						$data[ $post_id ][ $column_key ] = '';
@@ -1520,11 +1814,11 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 
 			try {
 				$out = apply_filters( 'vg_sheet_editor/load_rows/full_output', $out, $wp_query_args, $spreadsheet_columns, $settings );
-
 			} catch ( Exception $e ) {
 				$exception_message = $e->getMessage();
 				$out               = new WP_Error( 'wpse', $exception_message );
 			}
+
 			return $out;
 		}
 
@@ -1739,7 +2033,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 						}
 					}
 					$this->urls_to_file_ids_cache[ $cache_id ] = (int) $new_id;
-				} elseif ( ! str_starts_with( $id, '*' ) && str_ends_with( $id, '*' ) && strpos( $id, '[' ) === false && strpos( $id, '/' ) === false ) {
+				} elseif ( 0 !== strpos( $id, '*' ) && '*' === substr( $id, -1 ) && strpos( $id, '[' ) === false && strpos( $id, '/' ) === false ) {
 					// If the $id contains a string with the format "xxx*", use the first image from the media library matching the file name by prefix
 					$file_name_prefix = str_replace( '*', '', $id );
 					$sql              = "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_wp_attached_file' AND meta_value LIKE %s LIMIT 1";
@@ -1928,7 +2222,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 
 				// Detect extension if the file path doesn't contain extension
 				if ( strpos( $save_as, '.' ) === false ) {
-					$mime_type   = wp_get_image_mime( $file_path );
+					// phpcs:ignore wp_function_not_compatible_with_requires_wp
+					$mime_type   = function_exists( 'wp_get_image_mime' ) ? wp_get_image_mime( $file_path ) : false;
 					$mime_to_ext = apply_filters(
 						'getimagesize_mimes_to_exts',
 						array(
@@ -2340,7 +2635,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 		 */
 		public function remove_array_item_by_value( $value, $array ) {
 			$key = array_search( $value, $array );
-			if ( $key ) {
+			if ( false !== $key ) {
 				unset( $array[ $key ] );
 			}
 			return $array;
@@ -2601,6 +2896,10 @@ if ( ! class_exists( 'WP_Sheet_Editor_Helpers' ) ) {
 			if ( empty( $attachment_url ) ) {
 				return;
 			}
+
+			// Remove query args
+			$attachment_url = strtok( $attachment_url, '?' );
+
 			// Get the upload directory paths
 			$upload_dir_paths = wp_upload_dir();
 			// Make sure the upload path base directory exists in the attachment URL, to verify that we're working with a media library image

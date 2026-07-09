@@ -196,12 +196,12 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 				$internal_join = 'OR';
 			}
 
-			$checks          = array();
 			$search_columns  = array( 'post_title', 'post_content', 'post_excerpt' );
 			$phrases         = array_map( 'trim', explode( ';', $raw_keywords ) );
 			$prepared_values = array();
 			$phrase_checks   = array();
 			foreach ( $phrases as $phrase ) {
+				$word_checks_for_phrase = array();
 				$words = explode( ' ', $phrase );
 				if ( empty( $words ) ) {
 					continue;
@@ -210,7 +210,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 				foreach ( $words as $word ) {
 					$word_checks = array();
 					foreach ( $search_columns as $search_column ) {
-						$word_checks[]   = $wpdb->posts . '.%i ' . $operator . ' %s';
+						$word_checks[] = $wpdb->posts . '.%i ' . $operator . ' %s';
 						$prepared_values = array_merge( $prepared_values, array( $search_column, '%' . $wpdb->esc_like( $word ) . '%' ) );
 					}
 					if ( is_numeric( $phrase ) ) {
@@ -218,14 +218,16 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 						$prepared_values[] = 'ID';
 						$prepared_values[] = intval( $phrase );
 					}
-					$phrase_checks[] = '( ' . implode( " $internal_join ", $word_checks ) . ' )';
+					$word_checks_for_phrase[] = '( ' . implode( " $internal_join ", $word_checks ) . ' )';
 				}
-				$all_checks = implode( ' AND ', $phrase_checks );
-				$checks     = apply_filters( 'vg_sheet_editor/filters/search_by_keyword_clauses/keyword_check', $all_checks, $phrase, $clauses, $raw_keywords, $operator, $internal_join );
+				$all_checks = implode( ' AND ', $word_checks_for_phrase );
+
+				$phrase_checks[] = apply_filters( 'vg_sheet_editor/filters/search_by_keyword_clauses/keyword_check', $all_checks, $phrase, $clauses, $raw_keywords, $operator, $internal_join );
 			}
+			$checks = '( ' . implode( $operator === 'NOT LIKE' ? ' AND ' : ' OR ', $phrase_checks ) . ' )';
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$checks            = $wpdb->prepare( $checks, $prepared_values );
-			$clauses['where'] .= ' AND ( ( ' . $checks . ' ) ) ';
+			$clauses['where'] .= ' AND ( ' . $checks . ' ) ';
 			return apply_filters( 'vg_sheet_editor/filteres/search_by_keyword_clauses', $clauses, $raw_keywords, $operator, $internal_join );
 		}
 

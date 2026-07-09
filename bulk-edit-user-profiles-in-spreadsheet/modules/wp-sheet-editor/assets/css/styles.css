@@ -23,6 +23,26 @@ select,
 textarea {
     border: 1px solid #ccc;
     height: 28px;
+    min-height: 30px;
+}
+
+.wp-core-ui select {
+    min-height: 30px;
+    line-height: 30px;
+    vertical-align: top;
+}
+
+textarea {
+    line-height: 20px;
+}
+
+input[type="checkbox"]:checked::before, input[type="radio"]:checked::before {
+    margin-top: 3px;
+    margin-left: 3px;
+}
+
+input[type=checkbox]:checked {
+    background: transparent;
 }
 
 /*Reset css modified by WP core end*/
@@ -2491,10 +2511,6 @@ a[data-wpse-remodal-target] {
     display: none !important;
 }
 
-.remodal .view-log {
-    display: none;
-}
-
 #vgse-wrapper .sheet-header {
     position: sticky;
     position: -webkit-sticky;
@@ -3748,6 +3764,16 @@ html.remodal-is-locked.remodal-is-docked-body {
     display: block;
     border-top: 1px solid #50575e;
     padding-top: 40px;
+}
+#vgse-wrapper .vgse-remove-enabled-sheet {
+    border-left: 1px solid #ddd !important;
+}
+#ohsnap .alert .button {
+    background-color: #f3f3f3 !important;
+    color: black !important;
+}
+#wpwrap #vgse-wrapper .vg-toolbar .toolbar-submenu .button[data-saved-item].wpse-active-group {
+    font-weight: bold;
 }
 .be-loading-anim {
     position: relative;

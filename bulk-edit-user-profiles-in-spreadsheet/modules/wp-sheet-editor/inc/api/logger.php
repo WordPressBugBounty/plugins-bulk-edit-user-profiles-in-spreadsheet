@@ -92,6 +92,7 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 		function trim_large_file( $file, $keep_lines ) {
 			// First pass: count total lines
 			$total_lines = 0;
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
 			$handle      = fopen( $file, 'r' );
 
 			if ( ! $handle ) {
@@ -100,9 +101,11 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 
 			// Count lines in chunks to avoid loading entire file
 			while ( ! feof( $handle ) ) {
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread
 				$buffer       = fread( $handle, 8192 );
 				$total_lines += substr_count( $buffer, "\n" );
 			}
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 			fclose( $handle );
 
 			// If we don't need to trim, exit early
@@ -115,14 +118,18 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 
 			// Second pass: copy only the lines we want to keep
 			$temp_file     = $file . '.tmp';
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
 			$input_handle  = fopen( $file, 'r' );
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
 			$output_handle = fopen( $temp_file, 'w' );
 
 			if ( ! $input_handle || ! $output_handle ) {
 				if ( $input_handle ) {
+					// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 					fclose( $input_handle );
 				}
 				if ( $output_handle ) {
+					// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 					fclose( $output_handle );
 				}
 				return;
@@ -140,14 +147,18 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 			while ( ! feof( $input_handle ) ) {
 				$line = fgets( $input_handle );
 				if ( $line !== false ) {
+					// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
 					fwrite( $output_handle, $line );
 				}
 			}
 
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 			fclose( $input_handle );
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 			fclose( $output_handle );
 
 			// Replace original file with trimmed version
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename
 			rename( $temp_file, $file );
 		}
 
@@ -255,18 +266,30 @@ if ( ! class_exists( 'WPSE_Logger' ) ) {
 		}
 
 		function mask_private_values( $message ) {
+			// Regex pattern to match a URL. It will not match URLs surrounded by quotes or in html tags.
+			$url_pattern = '/https?:\/\/[^\s<>"\'`]+/i';
 			// Regex pattern to match a UUID
-			$pattern = '/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/';
+			$uuid_pattern = '/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/';
 
-			// Apply the replacement
-			$message = preg_replace_callback(
-				$pattern,
-				function ( $matches ) {
-					return substr( $matches[0], 0, -10 ) . 'xxxxxxxxxx';
-				},
-				$message
-			);
-			return $message;
+			$non_url_parts = preg_split( $url_pattern, $message );
+			preg_match_all( $url_pattern, $message, $url_matches );
+			$url_parts = ! empty( $url_matches[0] ) ? $url_matches[0] : array();
+
+			$result = '';
+			foreach ( $non_url_parts as $i => $part ) {
+				$masked_part = preg_replace_callback(
+					$uuid_pattern,
+					function ( $matches ) {
+						return substr( $matches[0], 0, -10 ) . 'xxxxxxxxxx';
+					},
+					$part
+				);
+				$result     .= $masked_part;
+				if ( isset( $url_parts[ $i ] ) ) {
+					$result .= $url_parts[ $i ];
+				}
+			}
+			return $result;
 		}
 
 		function debug( $variables ) {

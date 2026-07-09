@@ -218,7 +218,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns_Visibility' ) ) {
 		public function update_columns_settings() {
 			if ( ! empty( $_POST['extra_data'] ) ) {
 				// When we render the form in the spreadsheet editor, we send the form data as JSON in extra_data because some servers have low limits for form post fields
-				$extra_data = json_decode( html_entity_decode( wp_unslash( $_POST['extra_data'] ) ), true );
+				$extra_data = json_decode( wp_unslash( $_POST['extra_data'] ), true );
+				
 				if ( ! is_array( $extra_data ) ) {
 					wp_send_json_error( array( 'message' => esc_html__( 'We received invalid column data. Please make sure that your column titles don\'t contain special characters.', 'vg_sheet_editor' ) ) );
 				}

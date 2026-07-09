@@ -1,9 +1,9 @@
 === Bulk Edit and Create User Profiles - WP Sheet Editor ===
 Contributors: wpsheeteditor,vegacorp,josevega
 Tags: woocommerce, bulk edit, users, spreadsheet, buddypress
-Stable tag: 1.5.43
+Stable tag: 1.6.0
 Requires at least: 4.7
-Tested up to: 6.9
+Tested up to: 7.0
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -140,6 +140,10 @@ Yes. You can set up the number of posts to save per batch and the waiting betwee
 1. bulk editor
 
 == Changelog ==
+= V 1.6.0 - 2026-07-09 =
+* NEW - USERS - Improve learndash integration
+
+
 = V 1.5.43 - 2026-01-18 =
 * Updated to CORE v2.26.1
 

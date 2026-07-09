@@ -51,6 +51,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Toolbar' ) ) {
 				'required_capability'        => null,
 				'require_click_to_expand'    => false,
 				'live_refresh'               => 0, // Number of seconds for the interval to get the toolbar content via ajax
+				'order'                      => 10,
 			);
 
 			$args = wp_parse_args( $args, $defaults );
@@ -108,7 +109,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Toolbar' ) ) {
 			if ( $item['type'] === 'button' ) {
 				$content .= '<button name="' . esc_attr( $item['key'] ) . '" class="button ' . esc_attr( $item['css_class'] ) . '" ' . $item['extra_html_attributes'] . '  id="' . esc_attr( $item['id'] ) . '" >';
 				if ( ! empty( $item['icon'] ) ) {
-					$content .= '<i class="' . esc_attr( $item['icon'] ) . '"></i> ';
+					$content .= '<i aria-hidden="true" class="' . esc_attr( $item['icon'] ) . '"></i> ';
 				}
 				$content .= esc_html( wp_unslash( $item['content'] ) ) . '</button>';
 
@@ -158,6 +159,17 @@ if ( ! class_exists( 'WP_Sheet_Editor_Toolbar' ) ) {
 				$child_items = wp_list_filter( $all_flat_items, array( 'parent' => $item['key'] ) );
 
 				if ( ! empty( $child_items ) ) {
+					// Order $child_items by order key and alphabetically
+					uasort(
+						$child_items,
+						function ( $a, $b ) {
+							if ( $a['order'] === $b['order'] && is_string( $a['content'] ) && is_string( $b['content'] ) ) {
+								return strcasecmp( $a['content'], $b['content'] );
+							}
+							return ( $a['order'] < $b['order'] ) ? -1 : 1;
+						}
+					);
+
 					$rendered_children = '';
 					foreach ( $child_items as $child_item ) {
 						$rendered_children .= $this->get_rendered_item( $child_item['key'], $provider, $child_item['toolbar_key'] );
@@ -172,7 +184,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Toolbar' ) ) {
 					function ( $current_post_type ) use ( $item ) {
 						if ( ! empty( $item['footer_callback_cache'] ) ) {
 							$cache_seed = get_option( 'vgse_toolbar_cache_seed' );
-							if ( ! $cache_seed ){
+							if ( ! $cache_seed ) {
 								$cache_seed = time();
 								update_option( 'vgse_toolbar_cache_seed', $cache_seed, false );
 							}

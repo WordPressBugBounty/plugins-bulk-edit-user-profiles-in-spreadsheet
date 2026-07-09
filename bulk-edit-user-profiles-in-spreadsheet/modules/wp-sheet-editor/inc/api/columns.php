@@ -172,8 +172,12 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 			}
 
 			// If updating existing column, merge new args with existing args. If column doesn't exist, use the new args only
-			if ( $update_existing && $this->has_item( $key, $provider ) ) {
-				$args = wp_parse_args( $args, $this->get_item( $key, $provider, false, true ) );
+			if ( $update_existing ) {
+				if ( $this->has_item( $key, $provider ) ) {
+					$args = wp_parse_args( $args, $this->get_item( $key, $provider, false, true ) );
+				} elseif ( ! isset( $args['data_type'] ) ) {
+					$args['data_type'] = 'meta_data';
+				}
 			}
 
 			$args['provider'] = $provider;
@@ -293,6 +297,12 @@ if ( ! class_exists( 'WP_Sheet_Editor_Columns' ) ) {
 				'allow_numeric_select_value'               => false, // When we save a friendly select, we allow the user to enter the friendly value and we replace it with the value key to save in the database, we only allow string keys but you can enable this if you want to save int keys as the select value
 				'checkpoint_field_type'                    => '', // Indicate type of field for checkpoints: post_data, meta, terms, user_data, term_data, columns (if custom table sheet)
 				'checkpoint_key'                           => '',
+				// Validation
+				'validate_data'                            => false,
+				'validation_min_length'                    => null,
+				'validation_max_length'                    => null,
+				'validation_required_keywords'             => null,
+				'validation_value_required'                => false,
 			);
 
 			$args = wp_parse_args( $args, $defaults );

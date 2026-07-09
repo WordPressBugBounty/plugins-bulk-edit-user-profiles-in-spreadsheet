@@ -429,7 +429,7 @@ ORDER BY user_login ASC",
 			$statuses                       = array_keys( VGSE()->helpers->get_current_provider()->get_statuses() );
 			$statuses_in_query_placeholders = implode( ', ', array_fill( 0, count( $statuses ), '%s' ) );
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$results = $wpdb->get_results( $wpdb->prepare( "SELECT post_title FROM $wpdb->posts WHERE post_type = %s AND post_status IN ($statuses_in_query_placeholders) ", array_merge( array( $post_type ), $statuses ) ), $output );
+			$results = $wpdb->get_results( $wpdb->prepare( "SELECT post_title FROM $wpdb->posts WHERE post_type = %s AND post_status IN ($statuses_in_query_placeholders) ORDER BY post_title ASC", array_merge( array( $post_type ), $statuses ) ), $output );
 
 			if ( $flatten ) {
 				$results = VGSE()->helpers->array_flatten( $results, array() );

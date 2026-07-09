@@ -91,9 +91,14 @@ if ($welcome_url) {
 							$key = $post_type_name;
 						}
 						?>
-						<a class="button post-type-<?php echo esc_attr($key); ?>" href="<?php echo esc_url( VGSE()->helpers->get_editor_url($key) ); ?>"><?php 
-						// translators: 1: post type name
-						printf( esc_html__('Edit %s', 'vg_sheet_editor' ), esc_html( $post_type_name ) ); ?></a>		
+						<div class="button-group" style="display: inline-flex; margin-right: 5px; margin-bottom: 5px;">
+							<a class="button post-type-<?php echo esc_attr($key); ?>" href="<?php echo esc_url( VGSE()->helpers->get_editor_url($key) ); ?>"><?php 
+							// translators: 1: post type name
+							printf( esc_html__('Edit %s', 'vg_sheet_editor' ), esc_html( $post_type_name ) ); ?></a>		
+							<?php if (VGSE()->helpers->user_can_manage_options()) { ?>
+								<button class="button vgse-remove-enabled-sheet" data-post-type="<?php echo esc_attr($key); ?>" data-wpse-tooltip="down" aria-label="<?php esc_attr_e('Deactivate sheet. Your data will remain saved and you can enable the sheet again in the future', 'vg_sheet_editor'); ?>">x</button>
+							<?php } ?>
+						</div>
 						   <?php
 					   }
 				   }

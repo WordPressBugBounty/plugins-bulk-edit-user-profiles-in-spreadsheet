@@ -29,6 +29,13 @@ if ( ! class_exists( 'WPSE_Options_Page' ) ) {
 						'default'  => 40,
 					),
 					array(
+						'id'      => 'stream_get_rows',
+						'type'    => 'switch',
+						'title'   => esc_html__( 'Stream rows in the table instead of rendering all rows at once', 'vg_sheet_editor' ),
+						'desc'    => esc_html__( 'Activate this option to render the rows as they are loaded without freezing the page, and you can work while the other rows are being loaded. Useful when you have a high number configured in the option above.', 'vg_sheet_editor' ),
+						'default' => false,
+					),
+					array(
 						'id'       => 'export_page_size',
 						'type'     => 'text',
 						'validate' => 'numeric',
@@ -130,6 +137,13 @@ if ( ! class_exists( 'WPSE_Options_Page' ) ) {
 				'icon'   => 'el-icon-cogs',
 				'title'  => esc_html__( 'Solution to weird errors', 'vg_sheet_editor' ),
 				'fields' => array(
+					array(
+						'id'      => 'enable_no_conflict_mode',
+						'type'    => 'switch',
+						'title'   => esc_html__( 'Enable no-conflict mode', 'vg_sheet_editor' ),
+						'desc'    => esc_html__( 'If you enable this option, we will remove all the css/js of other plugins when loading the sheet editor page, with the goal of loading the sheet correctly when other plugins have conflicting js breaking the page.', 'vg_sheet_editor' ),
+						'default' => false,
+					),
 					array(
 						'id'       => 'be_columns_limit',
 						'type'     => 'text',
@@ -331,6 +345,13 @@ if ( ! class_exists( 'WPSE_Options_Page' ) ) {
 						'type'    => 'switch',
 						'title'   => esc_html__( 'Enable simple mode?', 'vg_sheet_editor' ),
 						'desc'    => esc_html__( 'If you enable this option, we will simplify the spreadsheet options and remove advanced examples, tips, and options rarely used in the search tool, bulk edit tool, import tool, export tool, and other places.', 'vg_sheet_editor' ),
+						'default' => false,
+					),
+					array(
+						'id'      => 'be_disable_unsaved_changes_popup',
+						'type'    => 'switch',
+						'title'   => esc_html__( 'Disable the "Unsaved changes detected" popup?', 'vg_sheet_editor' ),
+						'desc'    => esc_html__( 'When you leave the page with unsaved changes, we save a backup. When you visit the page again, we ask if you want to restore the unsaved changes. You can disable this popup.', 'vg_sheet_editor' ),
 						'default' => false,
 					),
 					array(

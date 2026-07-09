@@ -34,9 +34,20 @@ if ( ! class_exists( 'WP_Sheet_Editor_Infinite_Serialized_Field' ) ) {
 		}
 
 		function array_to_dot( $myArray ) {
+			if ( ! is_array( $myArray ) ) {
+				return array();
+			}
+			foreach ( $myArray as $index => $value ) {
+				if ( is_object( $value ) ) {
+					unset( $myArray[ $index ] );
+				}
+			}
 			$ritit  = new RecursiveIteratorIterator( new RecursiveArrayIterator( $myArray ) );
 			$result = array();
 			foreach ( $ritit as $leafValue ) {
+				if ( is_object( $leafValue ) ) {
+					continue;
+				}
 				$keys = array();
 				foreach ( range( 0, $ritit->getDepth() ) as $depth ) {
 					$keys[] = $ritit->getSubIterator( $depth )->key();

@@ -205,6 +205,7 @@ if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
 								)
 							);
 
+							// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 							$term_count = (int) $wpdb->get_var( $query );
 							set_transient( $transient_key, $term_count, DAY_IN_SECONDS );
 						}
@@ -212,7 +213,7 @@ if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
 						if ( $term_count ) {
 							echo '<span class="notice-text" style="color: red;">';
 							// translators: 1: term separator
-							echo sprintf( esc_html__( 'Warning: You are using a conflicting taxonomy term separator (%s).', 'vg_sheet_editor' ), $term_separator );
+							echo sprintf( esc_html__( 'Warning: You are using a conflicting taxonomy term separator (%s).', 'vg_sheet_editor' ), esc_html( $term_separator ) );
 							echo ' <a href="https://wpsheeteditor.com/fix-taxonomy-term-separator-warning/" target="_blank">' . esc_html__( 'Learn more', 'vg_sheet_editor' ) . '</a>';
 							echo '</span>';
 						}
@@ -391,7 +392,10 @@ if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
 			<h3 class="post-title-modal"><?php esc_html_e( 'Editing:', 'vg_sheet_editor' ); ?> <span class="post-title"></span></h3>
 			<?php do_action( 'vg_sheet_editor/editor_page/tinymce/before_editor', $current_post_type ); ?>
 			<?php
-			wp_enqueue_editor();
+			if ( function_exists( 'wp_enqueue_editor' ) ) {
+				// phpcs:ignore wp_function_not_compatible_with_requires_wp
+				wp_enqueue_editor();
+			}
 
 			// This is required to make WP render the tinyMCEPreInit variable with all the tinymce settings that we can use in the JS initialization
 			_WP_Editors::editor_settings( 'editpost', _WP_Editors::parse_settings( 'editpost', array() ) );
@@ -470,6 +474,23 @@ if ( function_exists( 'WPSE_Profiler_Obj' ) ) {
 		</div>
 		<br>
 	</div>
+
+	<!--Unsaved changes modal-->
+	<?php if ( ! VGSE()->get_option( 'be_disable_unsaved_changes_popup' ) ) { ?>
+	<div class="remodal" id="vgse-unsaved-changes-modal" data-remodal-id="vgse-unsaved-changes-modal" data-remodal-options="closeOnOutsideClick: false, hashTracking: false">
+		<div class="modal-content">
+			<h2><?php esc_html_e( 'Unsaved changes detected', 'vg_sheet_editor' ); ?></h2>
+			<p class="unsaved-changes-message"></p>
+			<button class="remodal-confirm restore-backup"><?php esc_html_e( 'Restore and Save', 'vg_sheet_editor' ); ?></button>
+			<button class="remodal-cancel discard-backup"><?php esc_html_e( 'Discard', 'vg_sheet_editor' ); ?></button>
+			<?php if ( VGSE()->helpers->user_can_manage_options() ) { ?>
+			<p><small>
+				<?php echo wp_kses_post( sprintf( __( 'You can disable this popup in the <a href="%s" target="_blank">advanced settings</a>', 'vg_sheet_editor' ), esc_url( VGSE()->helpers->get_settings_page_url() ) ) ); ?>
+			</small></p>
+			<?php } ?>
+		</div>
+	</div>
+	<?php } ?>
 	<!--Used for featured image previews-->
 	<div class="vi-preview-wrapper"></div>
 

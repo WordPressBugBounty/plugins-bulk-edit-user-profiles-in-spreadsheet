@@ -14,6 +14,7 @@ if (!class_exists('WP_Sheet_Editor_WooCommerce_Teaser')) {
 		public $variation_post_type = 'product_variation';
 		public $variation_columns = array();
 		public $variation_only_columns = array();
+		public $posts_to_inject_query = null;
 
 		private function __construct() {
 			
@@ -414,7 +415,7 @@ if (!class_exists('WP_Sheet_Editor_WooCommerce_Teaser')) {
 		function notify_variations_arent_allowed($post_type) {
 			if ($post_type === $this->post_type) {
 				echo '<span class="wpse-lite-version-message">';
-				_e('. <b>Lite version.</b> Showing all products and all fields as columns, 15 columns are editable and the rest are read only. <br><b>Upgrade:</b> Edit in Excel/Google Sheets, export, import, bulk edit thousands of products at once.', 'vg_sheet_editor' );
+				echo wp_kses_post( __( '. <b>Lite version.</b> Showing all products and all fields as columns, 15 columns are editable and the rest are read only. <br><b>Upgrade:</b> Edit in Excel/Google Sheets, export, import, bulk edit thousands of products at once.', 'vg_sheet_editor' ) );
 				echo '</span>';
 			}
 		}
@@ -471,12 +472,14 @@ if (!class_exists('WP_Sheet_Editor_WooCommerce_Teaser')) {
 			$editor->args['columns']->register_item('post_excerpt', $post_type, array(
 				'title' => esc_html__('Short description', 'vg_sheet_editor' ),
 				'default_title' => esc_html__('Short description', 'vg_sheet_editor' ),
-				'column_width' => 150
-					), true);
+				'column_width' => 150,
+				'data_type' => 'post_data',
+					));
 			$editor->args['columns']->register_item('comment_status', $post_type, array(
 				'title' => esc_html__('Enable reviews', 'vg_sheet_editor' ),
 				'default_title' => esc_html__('Enable reviews', 'vg_sheet_editor' ),
-					), true);
+				'data_type' => 'post_data',
+					));
 
 			$spreadsheet_columns = $editor->get_provider_items($post_type);
 			// Increase column width for disabled columns, so the "premium" message fits

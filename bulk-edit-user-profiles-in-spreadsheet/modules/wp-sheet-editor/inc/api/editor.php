@@ -132,6 +132,65 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 					! in_array( $_GET['page'], $pages_to_load_assets ) ) {
 				return;
 			}
+			if ( ! empty( VGSE()->options['enable_no_conflict_mode'] ) ) {
+				global $wp_scripts, $wp_styles;
+
+				$allowed_keywords = array( 'sheet', 'bulk', 'wpse', '/woocommerce/', '/wp-admin/', '/wp-includes/' );
+
+				if ( ! empty( $wp_scripts->registered ) ) {
+					foreach ( $wp_scripts->registered as $handle => $script ) {
+						// Don't remove core scripts
+						if ( ! is_string( $script->src ) || empty( $script->src ) || strpos( $script->src, '/wp-admin/' ) !== false || strpos( $script->src, '/wp-includes/' ) !== false ) {
+							continue;
+						}
+
+						$src_to_check = $script->src;
+						if ( strpos( $src_to_check, 'http' ) === 0 ) {
+							$src_to_check = (string) wp_parse_url( $src_to_check, PHP_URL_PATH );
+						}
+
+						$found = false;
+						foreach ( $allowed_keywords as $keyword ) {
+							if ( stripos( $src_to_check, $keyword ) !== false ) {
+								$found = true;
+								break;
+							}
+						}
+
+						if ( ! $found ) {
+							wp_dequeue_script( $handle );
+							wp_deregister_script( $handle );
+						}
+					}
+				}
+
+				if ( ! empty( $wp_styles->registered ) ) {
+					foreach ( $wp_styles->registered as $handle => $style ) {
+						// Don't remove core styles
+						if ( ! is_string( $style->src ) || empty( $style->src ) || strpos( $style->src, '/wp-admin/' ) !== false || strpos( $style->src, '/wp-includes/' ) !== false ) {
+							continue;
+						}
+
+						$src_to_check = $style->src;
+						if ( strpos( $src_to_check, 'http' ) === 0 ) {
+							$src_to_check = (string) wp_parse_url( $src_to_check, PHP_URL_PATH );
+						}
+
+						$found = false;
+						foreach ( $allowed_keywords as $keyword ) {
+							if ( stripos( $src_to_check, $keyword ) !== false ) {
+								$found = true;
+								break;
+							}
+						}
+
+						if ( ! $found ) {
+							wp_dequeue_style( $handle );
+							wp_deregister_style( $handle );
+						}
+					}
+				}
+			}
 
 			$this->_remove_conflicting_assets();
 		}
@@ -189,6 +248,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 				// Plugin ag-woocommerce-authipay-payment-gateway-premium
 				'AG_fraud_css',
 				'alpine',
+				'cmb2-conditionals',
+				'lp-admin',
 			);
 
 			if ( ! empty( VGSE()->options['be_disable_heartbeat'] ) ) {
@@ -295,6 +356,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 				'delete_posts_per_page'                   => ( ! empty( VGSE()->options['delete_posts_per_page'] ) ) ? (int) VGSE()->options['delete_posts_per_page'] : 500,
 				'delete_attached_images_when_post_delete' => ! empty( VGSE()->options['delete_attached_images_when_post_delete'] ),
 				'disable_automatic_loading_rows'          => ( ! empty( VGSE()->options['be_disable_automatic_loading_rows'] ) ) ? true : false,
+				'be_disable_unsaved_changes_popup'        => ! empty( VGSE()->options['be_disable_unsaved_changes_popup'] ),
+				'enable_simple_mode'                      => ! empty( VGSE()->options['enable_simple_mode'] ),
 				'enable_auto_saving'                      => ( ! empty( VGSE()->options['enable_auto_saving'] ) ) ? true : false,
 				'watch_cells_to_lock'                     => false,
 				'final_spreadsheet_columns_settings'      => $all_spreadsheet_columns_settings,
@@ -304,6 +367,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 				'rest_base_url'                           => rest_url(),
 				'taxonomy_terms_separator'                => VGSE()->helpers->get_term_separator(),
 				'export_page_size'                        => ( ! empty( VGSE()->options['export_page_size'] ) ) ? (int) VGSE()->options['export_page_size'] : 100,
+				'stream_get_rows'                         => ! empty( VGSE()->options['stream_get_rows'] ),
 				'wc_products_variation_copy_batch_size'   => ( ! empty( VGSE()->options['wc_products_variation_copy_batch_size'] ) ) ? (int) VGSE()->options['wc_products_variation_copy_batch_size'] : 50,
 				'dont_display_file_names_image_columns'   => ( ! empty( VGSE()->options['dont_display_file_names_image_columns'] ) ) ? (bool) VGSE()->options['dont_display_file_names_image_columns'] : false,
 				'enable_pagination'                       => ( ! empty( VGSE()->options['enable_pagination'] ) ) ? true : false,
@@ -443,10 +507,16 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 				'paged_copy_variations_preparation'       => esc_html__( 'Scanning variations to be created. {updated} products of {total} products have been processed.', 'vg_sheet_editor' ),
 				'duplicates_removed_text'                 => esc_html__( '{deleted} duplicates have been removed.', 'vg_sheet_editor' ),
 				'everything_saved'                        => esc_html__( 'All items have been saved.', 'vg_sheet_editor' ),
+				'formula_replace_bad_syntax'              => esc_html__( 'Syntax error. REPLACE parameters must be wrapped in double double-quotes:', 'vg_sheet_editor' ),
+				'ai_auto_fill_context_menu_label'         => esc_html__( 'AI - Auto fill blank cells', 'vg_sheet_editor_ai' ),
+				'ai_auto_fill_file_context_menu_label'    => esc_html__( 'AI - Auto fill blank cells from a file', 'vg_sheet_editor_ai' ),
+				'ai_auto_fill_no_empty_cells'             => esc_html__( 'No empty cells found in the selection.', 'vg_sheet_editor_ai' ),
+				'ai_auto_fill_finished'                   => esc_html__( 'Finished: {successes} successful, {fails} failed. The blank cells were auto filled but not saved, close the popup and check the cells, and if satisfied, click on the save button to save the changes.', 'vg_sheet_editor_ai' ),
 				'save_changes_on_leave'                   => esc_html__( 'Please check if you have unsaved changes. If you have, please save them or they will be dismissed.', 'vg_sheet_editor' ),
 				'no_changes_to_save'                      => esc_html__( 'Everything is already saved.', 'vg_sheet_editor' ),
 				'http_error_400'                          => esc_html__( 'The server did not accept our request. Bad request, please refresh the page and try again.', 'vg_sheet_editor' ),
 				'http_error_403'                          => esc_html__( 'The server didn\'t accept our request. You don\'t have permission to do this action. Please log in again.', 'vg_sheet_editor' ),
+				'import_upload_failed_403'                => esc_html__( 'Your server rejected the file upload. Make sure that your firewall is not blocking our ajax request, or that your log in session has not expired, and try again.', 'vg_sheet_editor' ),
 				'http_error_500_502_505'                  => esc_html__( 'The server is not available or overloaded. Please try again later.', 'vg_sheet_editor' ),
 				'http_error_try_now'                      => esc_html__( 'The server is not available or overloaded. Do you want to try again?', 'vg_sheet_editor' ),
 				'auto_saving_http_error_try_now'          => esc_html__( 'The auto saving failed: the server is not available or overloaded. Do you want to try again?', 'vg_sheet_editor' ),
@@ -468,12 +538,22 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 				'confirm_delete_saved_import'             => esc_html__( 'Are you sure you want to delete this saved import?', 'vg_sheet_editor' ),
 				'invalid_file_for_repeat_import'          => esc_html__( 'You uploaded a file containing different columns than the previous import, so you can\'t run this previous import. Please upload a file with same columns as the previous import, or go to the import tool and make a new import.', 'vg_sheet_editor' ),
 				'active_filters_url_copied'               => esc_html__( 'URL copied to your clipboard', 'vg_sheet_editor' ),
+				'unsaved_changes_message'                 => esc_html__( 'You have unsaved changes from a previous session ({date}). There are {rows} rows and {cells} cells pending to save. Do you want to restore and save these changes?', 'vg_sheet_editor' ),
+				'formula_eval_options'                    => esc_html__( 'Available Options:', 'vg_sheet_editor' ),
+				'formula_eval_basic_math'                 => esc_html__( 'Basic Math (+, -, *, /)', 'vg_sheet_editor' ),
+				'formula_eval_result'                     => esc_html__( 'Result:', 'vg_sheet_editor' ),
+				'formula_eval_value_not_found'            => esc_html__( '#VALUE! Not found', 'vg_sheet_editor' ),
+				'formula_eval_max_nested_levels'          => esc_html__( 'Nested formulas are not allowed', 'vg_sheet_editor' ),
+				'formula_eval_column_not_found'           => esc_html__( 'Column {colName} not found.', 'vg_sheet_editor' ),
+				'formula_eval_invalid_chars'              => esc_html__( 'Invalid characters in formula.', 'vg_sheet_editor' ),
+				'formula_eval_tooltip'                    => esc_html__( 'You can reference other columns using the syntax $Column title$. Nested formulas are not allowed.', 'vg_sheet_editor' ),
+				'formula_eval_error'                      => esc_html__( '#ERROR: ', 'vg_sheet_editor' ),
 			);
 
 			$extension            = VGSE()->helpers->get_extension_by_post_type( $current_provider_in_page );
 			$review_tip_dismissed = (bool) get_option( 'vgse_dismiss_review_tip' );
 			/* translators: review URL */
-			$texts['ask_review'] = ( VGSE()->helpers->is_happy_user() && $extension && ! $review_tip_dismissed && ! empty( $extension['wp_org_slug'] ) ) ? sprintf( __( '<span class="review-tip">Do we deserve a 5-star review? <a href="%s" target="_blank" class="dismiss-review-tip">Yes, you deserve it</a> . - . <a href=""  class="dismiss-review-tip">No</a></span>', 'vg_sheet_editor' ), 'https://wordpress.org/support/plugin/' . $extension['wp_org_slug'] . '/reviews/?filter=5#new-post' ) : '';
+			$texts['ask_review'] = ( VGSE()->helpers->is_happy_user() && $extension && ! $review_tip_dismissed && ! empty( $extension['wp_org_slug'] ) ) ? sprintf( __( '<span class="review-tip">Do we deserve a 5-star review? <a href="%s" target="_blank" class="dismiss-review-tip">Yes, you deserve it</a> . - . <a href=""  class="dismiss-review-tip">No</a></span>', 'vg_sheet_editor' ), 'https://wordpress.org/support/plugin/' . $extension['wp_org_slug'] . '/reviews/' ) : '';
 
 			$all_settings['texts'] = $texts;
 
@@ -507,6 +587,10 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 					$d[ $k ] = $this->_fix_utf8( $v );
 				}
 			} elseif ( is_string( $d ) ) {
+				if ( function_exists( 'mb_convert_encoding' ) ) {
+					return mb_convert_encoding( $d, 'UTF-8', 'ISO-8859-1' );
+				}
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.utf8_encode_utf8_encode, wp_function_not_compatible_with_requires_wp
 				return utf8_encode( $d );
 			}
 			return $d;
@@ -526,10 +610,10 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 				$final_settings = $this->_fix_utf8( $final_settings );
 			}
 			?>
-			<script>
-				var vgse_editor_settings = <?php echo json_encode( $final_settings ); ?>
-			</script>
-			<?php
+<script>
+var vgse_editor_settings = <?php echo json_encode( $final_settings ); ?>
+</script>
+<?php
 		}
 
 		/**

@@ -95,7 +95,8 @@ class VGSE_Provider_Post extends VGSE_Provider_Abstract {
 			$post_type = array( $post_type );
 		}
 		$post_types_in_query_placeholders = implode( ', ', array_fill( 0, count( $post_type ), '%s' ) );
-		$sql                              = $wpdb->prepare(
+		// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$sql = $wpdb->prepare(
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			"UPDATE $meta_table_name pm LEFT JOIN $wpdb->posts p ON p.ID = pm.post_id SET pm.meta_key = %s
 WHERE p.post_type IN ($post_types_in_query_placeholders) AND pm.meta_key = %s",
@@ -283,10 +284,10 @@ WHERE p.post_type IN ($post_types_in_query_placeholders) AND pm.meta_key = %s",
 
 		// Find posts from original list that are missing from the mysql results, so we assume
 		// that they don't have any meta for the required field keys, so we auto generate the array with empty values.
-		$posts_missing_meta = array_diff( $post_ids, array_map( 'intval', explode( ',', preg_replace( '/[^0-9,]/', '', implode( ',', array_keys( $post_meta ) ) ) ) ) );
-		if ( ! empty( $posts_missing_meta ) ) {
-			foreach ( $posts_missing_meta as $post_id ) {
-				$post_meta[ 'item' . $post_id ] = array();
+		foreach ( $post_ids as $post_id ) {
+			$key = 'item' . $post_id;
+			if ( ! isset( $post_meta[ $key ] ) ) {
+				$post_meta[ $key ] = array();
 			}
 		}
 
@@ -365,6 +366,12 @@ ORDER BY t.name ASC",
 				if ( isset( $post_terms[ $post_key ][ $taxonomy_key ] ) && strlen( $post_terms[ $post_key ][ $taxonomy_key ] ) >= 1024 ) {
 					unset( $post_terms[ $post_key ][ $taxonomy_key ] );
 				}
+				// Sort terms alphabetically during prefetch
+				if ( isset( $post_terms[ $post_key ][ $taxonomy_key ] ) && ! empty( $post_terms[ $post_key ][ $taxonomy_key ] ) ) {
+					$terms_arr = array_map( 'trim', explode( $separator, $post_terms[ $post_key ][ $taxonomy_key ] ) );
+					sort( $terms_arr );
+					$post_terms[ $post_key ][ $taxonomy_key ] = implode( $separator . ' ', $terms_arr );
+				}
 			}
 		}
 
@@ -384,16 +391,16 @@ ORDER BY t.name ASC",
 					)
 				)
 			);
+			// Sort terms alphabetically
+			if ( ! empty( $raw_value ) ) {
+				$separator = VGSE()->helpers->get_term_separator();
+				$terms     = array_map( 'trim', explode( $separator, $raw_value ) );
+				sort( $terms );
+				$raw_value = implode( $separator . ' ', $terms );
+			}
 			self::$data_store['terms'][ 'item' . $post_id ][ $taxonomy ] = $raw_value;
 		}
 
-		// Sort terms alphabetically
-		if ( ! empty( $raw_value ) ) {
-			$separator = VGSE()->helpers->get_term_separator();
-			$terms     = array_map( 'trim', explode( $separator, $raw_value ) );
-			sort( $terms );
-			$raw_value = implode( $separator . ' ', $terms );
-		}
 		$post_type = $this->get_item_data( $post_id, 'post_type' );
 		return apply_filters( 'vg_sheet_editor/provider/post/get_items_terms/' . $post_type, $raw_value, $post_id, $taxonomy );
 	}
@@ -523,7 +530,7 @@ ORDER BY t.name ASC",
 		}
 
 		$ids_in_query_placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET post_modified = %s, post_modified_gmt = %s WHERE ID IN (" . $ids_in_query_placeholders . ')', array_merge( array( current_time( 'mysql', false ), current_time( 'mysql', true ) ), array_filter( array_map( 'intval', $ids ) ) ) ) );
 
 		$user_id = get_current_user_id();
@@ -686,9 +693,12 @@ ORDER BY t.name ASC",
 				}
 
 				// wp_insert_post expects content to be slashed when saving gutenberg blocks
-				if ( isset( $values['post_content'] ) && strpos( $values['post_content'], '\\' ) !== false && strpos( $values['post_content'], '<!-- wp:' ) !== false && VGSE()->get_option( 'be_allow_raw_content_unfiltered_html_capability' ) ) {
+				// Slash all content before saving because other users also had issues when saving unicode characters
+				// if ( isset( $values['post_content'] ) && strpos( $values['post_content'], '\\' ) !== false && strpos( $values['post_content'], '<!-- wp:' ) !== false && VGSE()->get_option( 'be_allow_raw_content_unfiltered_html_capability' ) ) {
+				if ( isset( $values['post_content'] ) && VGSE()->get_option( 'be_allow_raw_content_unfiltered_html_capability' ) ) {
 					$values['post_content'] = wp_slash( $values['post_content'] );
 				}
+				// }
 				$out = wp_update_post( $values, $wp_error );
 				if ( isset( $values['guid'] ) ) {
 					// Update the GUID in the $wpdb->posts table. We use $wpdb because wp_update_post does not update the GUID.
@@ -948,6 +958,7 @@ ORDER BY t.name ASC",
 				// Prepare placeholders for the IN clause
 				$placeholders = implode( ',', array_fill( 0, count( $post_ids ), '%d' ) );
 
+				// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 				$meta_keys = $wpdb->get_col(
 					$wpdb->prepare(
 						"SELECT DISTINCT meta_key 

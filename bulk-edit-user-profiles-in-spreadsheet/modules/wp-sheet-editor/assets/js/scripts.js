@@ -356,10 +356,10 @@ function beAddRowsFilter(filter, overwrite) {
 	if (!filter) {
 		return false;
 	}
-	if( typeof filter === 'string' && filter[0] === '{'){
+	if (typeof filter === 'string' && filter[0] === '{') {
 		filter = JSON.parse(filter);
 	}
-	if(overwrite){
+	if (overwrite) {
 		Alpine.store('vgseFilters').setDefaultFilters();
 	}
 	const currentFilters = JSON.parse(JSON.stringify(Alpine.store('vgseFilters').activeFilters));
@@ -648,6 +648,12 @@ jQuery(document).ajaxComplete(function (event, xhr, ajaxOptions, thrownError) {
  * @param bool customInsert If we want to load rows but use custom success controller.
  */
 function beLoadPosts(data, callback, customInsert, removeExisting) {
+	var postsPerPage = (data && data.posts_per_page) || vgse_editor_settings.posts_per_page || 40;
+	var useStream = vgse_editor_settings.stream_get_rows && postsPerPage > 10;
+	if (useStream) {
+		return beLoadPostsStream(data, callback, customInsert, removeExisting);
+	}
+
 	loading_ajax(true);
 
 	var timeoutId = setTimeout(function () {
@@ -715,6 +721,7 @@ function beLoadPosts(data, callback, customInsert, removeExisting) {
 				var successMessage = response.data.message || vgse_editor_settings.texts.posts_loaded;
 				notification({ mensaje: successMessage, tipo: 'info' });
 				loading_ajax(false);
+				vgseCheckLocalBackup();
 			} else {
 				// Disable loading screen and notify of error
 				loading_ajax(false);
@@ -740,6 +747,240 @@ function beLoadPosts(data, callback, customInsert, removeExisting) {
 	return window.beLastLoadRowsAjax;
 }
 
+function beLoadPostsStream(data, callback, customInsert, removeExisting) {
+	loading_ajax(true);
+
+	var timeoutId = setTimeout(function () {
+		jQuery('.wpse-stuck-loading').css('display', 'block');
+	}, 5000);
+
+	jQuery('.automatic-loading-rows-disabled').remove();
+
+	if (!customInsert) {
+		customInsert = true;
+	}
+	if (!removeExisting) {
+		removeExisting = false;
+	}
+	data.action = 'vgse_load_data_stream';
+	data.wpse_source_suffix = vgse_editor_settings.wpse_source_suffix || '';
+
+	if (!data.paged) {
+		data.paged = 1;
+	}
+
+	window.beCurrentPage = data.paged;
+
+	data.filters = vgseGetFiltersJson();
+	window.vgseFiltersUsedInLastLoadRows = data.filters ? JSON.parse(data.filters) : {};
+
+	if (window.beLastLoadRowsAbortController) {
+		window.beLastLoadRowsAbortController.abort();
+	}
+	window.beLastLoadRowsAbortController = new AbortController();
+
+	var accumulatedRows = [];
+	var firstBatchInserted = false;
+	var metadata = null;
+	var donePayload = null;
+
+	fetch(vgse_global_data.ajax_url, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+		},
+		body: jQuery.param(data),
+		signal: window.beLastLoadRowsAbortController.signal
+	})
+	.then(function (response) {
+		if (!response.ok) {
+			throw new Error('HTTP error, status = ' + response.status);
+		}
+		var reader = response.body.getReader();
+		var decoder = new TextDecoder('utf-8');
+		var buffer = '';
+
+		async function decompressZlib(base64Data) {
+			var binaryString = atob(base64Data);
+			var len = binaryString.length;
+			var bytes = new Uint8Array(len);
+			for (var i = 0; i < len; i++) {
+				bytes[i] = binaryString.charCodeAt(i);
+			}
+
+			var stream = new ReadableStream({
+				start: function(controller) {
+					controller.enqueue(bytes);
+					controller.close();
+				}
+			});
+
+			var decompressedStream = stream.pipeThrough(new DecompressionStream('deflate'));
+			return await new Response(decompressedStream).text();
+		}
+
+		async function processLine(line) {
+			if (!line.trim()) return;
+			try {
+				var chunk = JSON.parse(line);
+				if (chunk.compressed) {
+					var decompressedStr = await decompressZlib(chunk.data);
+					chunk = JSON.parse(decompressedStr);
+				}
+				handleChunk(chunk);
+			} catch (e) {
+				console.error('Failed to parse line', line, e);
+			}
+		}
+
+		function read() {
+			return reader.read().then(async function (result) {
+				var done = result.done;
+				var value = result.value;
+
+				if (value) {
+					buffer += decoder.decode(value, { stream: !done });
+					var lines = buffer.split('\n');
+					buffer = lines.pop();
+
+					for (var i = 0; i < lines.length; i++) {
+						await processLine(lines[i]);
+					}
+				}
+
+				if (done) {
+					if (buffer.trim()) {
+						await processLine(buffer);
+					}
+					finishStream();
+					return;
+				}
+
+				return read();
+			});
+		}
+
+		function handleChunk(chunk) {
+			if (chunk.type === 'metadata') {
+				metadata = chunk;
+				vgseAddFoundRowsCount(metadata.data.total);
+				if (chunk.data && chunk.data.pagination) {
+					jQuery('.pagination-links').empty().append(chunk.data.pagination);
+					jQuery('.pagination-jump input').attr('max', chunk.data.max_pages);
+				}
+
+				jQuery('#vgse-wrapper').css('min-width', jQuery('#post-data .wtHider').width());
+
+				var mockResponse = {
+					success: chunk.success,
+					data: {
+						total: chunk.data.total,
+						message: chunk.data.message,
+						pagination: chunk.data.pagination,
+						max_pages: chunk.data.max_pages,
+						rows: []
+					}
+				};
+				jQuery('body').trigger('vgSheetEditor:beforeRowsInsert', [mockResponse, data, callback, customInsert, removeExisting]);
+			} else if (chunk.type === 'batch') {
+				var batch = chunk.batch;
+				var keys = chunk.keys;
+				if (batch && batch.length && keys && keys.length) {
+					var reconstructedBatch = [];
+					for (var r = 0; r < batch.length; r++) {
+						var values = batch[r];
+						var rowObj = {};
+						for (var k = 0; k < keys.length; k++) {
+							if (values[k] !== 'wpsep') {
+								rowObj[keys[k]] = values[k];
+							}
+						}
+						reconstructedBatch.push(rowObj);
+					}
+					batch = reconstructedBatch;
+				}
+				if (batch && batch.length) {
+					accumulatedRows = accumulatedRows.concat(batch);
+					vgAddRowsToSheet(batch, null, removeExisting);
+					jQuery('#vgse-wrapper').css('min-width', jQuery('#post-data .wtHider').width());
+					if (!firstBatchInserted) {
+						firstBatchInserted = true;
+						loading_ajax(false);
+					}
+				}
+			} else if (chunk.type === 'done') {
+				donePayload = chunk;
+			}
+		}
+
+		function finishStream() {
+			jQuery('.wpse-stuck-loading').hide();
+			clearTimeout(timeoutId);
+
+			if (metadata && metadata.success) {
+				if (typeof callback === 'function') {
+					var finalResponse = {
+						success: true,
+						data: {
+							total: metadata.data.total,
+							message: metadata.data.message,
+							pagination: metadata.data.pagination,
+							max_pages: metadata.data.max_pages,
+							rows: accumulatedRows,
+							deleted: (donePayload && donePayload.deleted) ? donePayload.deleted : []
+						}
+					};
+					callback(finalResponse);
+				}
+
+				var successMessage = (metadata.data && metadata.data.message) || vgse_editor_settings.texts.posts_loaded;
+				notification({ mensaje: successMessage, tipo: 'info' });
+				loading_ajax(false);
+				vgseCheckLocalBackup();
+			} else {
+				loading_ajax(false);
+				var errMsg = (metadata && metadata.data && metadata.data.message) || 'Unknown error occurred';
+				notification({ mensaje: errMsg, tipo: 'info' });
+				vgseAddFoundRowsCount(0);
+			}
+		}
+
+		return read();
+	})
+	.catch(function (error) {
+		if (error.name === 'AbortError') {
+			console.log('Stream request aborted');
+			return;
+		}
+		console.error('Streaming failed:', error);
+		jQuery('.wpse-stuck-loading').hide();
+		clearTimeout(timeoutId);
+		loading_ajax(false);
+
+		var reducePerPageNumber = vgse_editor_settings.posts_per_page >= 100;
+		if (reducePerPageNumber) {
+			window.vgseDontNotifyServerError = true;
+			vgse_editor_settings.posts_per_page = 10;
+			data.wpse_reset_posts_per_page = vgse_editor_settings.posts_per_page;
+			beLoadPosts(data, callback, customInsert, removeExisting);
+			setTimeout(function () {
+				loading_ajax(true);
+			}, 200);
+		} else {
+			notification({ mensaje: vgse_editor_settings.texts.http_error_default, tipo: 'error', tiempo: 60000 });
+		}
+	});
+
+	var promise = Promise.resolve();
+	promise.abort = function () {
+		if (window.beLastLoadRowsAbortController) {
+			window.beLastLoadRowsAbortController.abort();
+		}
+	};
+	window.beLastLoadRowsAjax = promise;
+	return promise;
+}
+
 /**
  * Converts a string into a slug.
  * A slug contains only lowercase letters, numbers, and hyphens.
@@ -748,17 +989,17 @@ function beLoadPosts(data, callback, customInsert, removeExisting) {
  * @returns {string} The resulting slug.
  */
 function vgseConvertToSlug(text) {
-  if (typeof text !== 'string') {
-    return '';
-  }
+	if (typeof text !== 'string') {
+		return '';
+	}
 
-  return text
-    .toLowerCase()                     // 1. Convert to lowercase
-    .replace(/\s+/g, '-')              // 2. Replace spaces with a hyphen
-    .replace(/[^\w\-]+/g, '')          // 3. Remove all non-word chars except hyphens
-    .replace(/\-\-+/g, '-')            // 4. Replace multiple hyphens with a single one
-    .replace(/^-+/, '')                // 5. Trim hyphens from the start
-    .replace(/-+$/, '');               // 6. Trim hyphens from the end
+	return text
+		.toLowerCase()                     // 1. Convert to lowercase
+		.replace(/\s+/g, '-')              // 2. Replace spaces with a hyphen
+		.replace(/[^\w\-]+/g, '')          // 3. Remove all non-word chars except hyphens
+		.replace(/\-\-+/g, '-')            // 4. Replace multiple hyphens with a single one
+		.replace(/^-+/, '')                // 5. Trim hyphens from the start
+		.replace(/-+$/, '');               // 6. Trim hyphens from the end
 }
 
 
@@ -1284,7 +1525,8 @@ function vgseInitSelect2($selects) {
 						action: jQuery(this).data('action'),
 						global_search: jQuery(this).data('global-search') || '',
 						output_format: jQuery(this).data('output-format'),
-						taxonomies: jQuery(this).data('taxonomies'),
+						// For some reason, .data() returns empty but .attr() works
+						taxonomies: jQuery(this).attr('data-taxonomies'),
 						post_type: jQuery(this).data('post-type') || jQuery('#post-data').data('post-type'),
 						nonce: vgse_global_data.nonce,
 					}
@@ -1389,6 +1631,10 @@ function vgseInputToFormattedColumnField(selectedField, $fields, valueFieldSelec
 		var $value = $fields.find(valueFieldSelector);
 		var valueName = $value.attr('name');
 		var valueClasses = $value.attr('class');
+
+		if ($value.data('skip-formatting')) {
+			return;
+		}
 
 		// if the field is not a text input, it means it's already formatted, exit
 		if (!$value || (!$value.is('input') && !$value.is('textarea')) || ($value.attr('type') && $value.attr('type') !== 'text')) {
@@ -1700,20 +1946,20 @@ function vgseConvertLocalDateToUTC(localDate) {
 	return localDate ? new Date(localDate).toISOString().replace('T', ' ').replace(/\.\d+Z$/, '') : '';
 }
 function vgseGetLocalFormattedDateTime() {
-  const now = new Date();
+	const now = new Date();
 
-  // Get date components
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-  const day = String(now.getDate()).padStart(2, '0');
+	// Get date components
+	const year = now.getFullYear();
+	const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+	const day = String(now.getDate()).padStart(2, '0');
 
-  // Get time components
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
+	// Get time components
+	const hours = String(now.getHours()).padStart(2, '0');
+	const minutes = String(now.getMinutes()).padStart(2, '0');
+	const seconds = String(now.getSeconds()).padStart(2, '0');
 
-  // Combine into the desired format
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+	// Combine into the desired format
+	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
 function vgseConvertUTCToLocalDate(utcDate) {
@@ -1749,7 +1995,7 @@ function vgseIsOurRequest(ajaxOptions) {
 
 	var isOurRequest = (url && (url.indexOf('sheet-editor') > -1 || url.indexOf('vgse_') > -1)) ||
 		(data && (
-			(typeof data === 'string' && data.indexOf('vgse_') > -1 && data.indexOf('vgse_track_viewer') < 0 ) ||
+			(typeof data === 'string' && data.indexOf('vgse_') > -1 && data.indexOf('vgse_track_viewer') < 0) ||
 			(typeof data === 'object' && JSON.stringify(data).indexOf('vgse_') > -1 && data.indexOf('vgse_track_viewer') < 0)
 		));
 	return isOurRequest;
@@ -1761,19 +2007,422 @@ jQuery(document).on('ajaxSend', function (event, jqXHR, ajaxOptions) {
 	}
 });
 
-jQuery.ajaxPrefilter(function(options, originalOptions, jqXHR) {
-    // Check if this is "our" request based on your custom logic
-    var isOurRequest = vgseIsOurRequest(options);
+jQuery.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+	// Check if this is "our" request based on your custom logic
+	var isOurRequest = vgseIsOurRequest(options);
 
-    if (isOurRequest) {
-        // We use .always() to handle both success and error scenarios.
-        // Because this is attached inside the prefilter, it runs BEFORE
-        // the success/error/complete callbacks defined in the $.ajax call.
-        jqXHR.always(function() {
-            window.vgseActiveAjaxCount = Math.max(0, window.vgseActiveAjaxCount - 1);
-        });
-    }
+	if (isOurRequest) {
+		// We use .always() to handle both success and error scenarios.
+		// Because this is attached inside the prefilter, it runs BEFORE
+		// the success/error/complete callbacks defined in the $.ajax call.
+		jqXHR.always(function () {
+			window.vgseActiveAjaxCount = Math.max(0, window.vgseActiveAjaxCount - 1);
+		});
+	}
 });
+
+function vgseUpdateLocalBackup(modifiedItems) {
+	if (typeof vgse_editor_settings === 'undefined') {
+		return;
+	}
+	if (!modifiedItems) {
+		modifiedItems = beGetModifiedItems();
+	}
+
+	if (window.wpseUnsavedBackupItems && window.wpseUnsavedBackupItems.length > 0) {
+		var modifiedIds = modifiedItems.map(function (item) { return parseInt(item.ID); });
+		window.wpseUnsavedBackupItems.forEach(function (backupItem) {
+			if (modifiedIds.indexOf(parseInt(backupItem.ID)) === -1) {
+				modifiedItems.push(backupItem);
+			} else {
+				var rowIndex = modifiedIds.indexOf(parseInt(backupItem.ID));
+				Object.keys(backupItem).forEach(function (key) {
+					if (key !== 'ID' && typeof modifiedItems[rowIndex][key] === 'undefined') {
+						modifiedItems[rowIndex][key] = backupItem[key];
+					}
+				});
+			}
+		});
+	}
+
+	var sheetKey = vgse_editor_settings.post_type;
+	var storageKey = 'wpse_unsaved_changes_' + sheetKey;
+
+	if (modifiedItems.length > 0) {
+		var backup = {
+			date: vgseGetLocalFormattedDateTime(),
+			items: modifiedItems
+		};
+		try {
+			localStorage.setItem(storageKey, JSON.stringify(backup));
+		} catch (e) {
+			console.warn('WPSE: LocalStorage quota exceeded. Cannot backup unsaved changes.');
+		}
+	} else {
+		localStorage.removeItem(storageKey);
+	}
+}
+
+function vgsePurgeLocalBackup() {
+	if (typeof vgse_editor_settings === 'undefined') {
+		return;
+	}
+	var sheetKey = vgse_editor_settings.post_type;
+	var storageKey = 'wpse_unsaved_changes_' + sheetKey;
+	localStorage.removeItem(storageKey);
+}
+
+function vgseCheckLocalBackup() {
+	if (window.wpseHasCheckedBackup) {
+		return;
+	}
+	window.wpseHasCheckedBackup = true;
+
+	if (typeof vgse_editor_settings === 'undefined') {
+		return;
+	}
+
+	var sheetKey = vgse_editor_settings.post_type;
+	var storageKey = 'wpse_unsaved_changes_' + sheetKey;
+	var backupJson = localStorage.getItem(storageKey);
+
+	if (backupJson) {
+		try {
+			var backup = JSON.parse(backupJson);
+			if (backup && backup.items && backup.items.length > 0) {
+				var cellsCount = 0;
+				backup.items.forEach(function (item) {
+					cellsCount += Object.keys(item).length - 1; // ID doesn't count as a modified cell
+				});
+
+				var $modal = jQuery('#vgse-unsaved-changes-modal');
+				var text = vgse_editor_settings.texts.unsaved_changes_message
+					.replace('{date}', backup.date)
+					.replace('{rows}', backup.items.length)
+					.replace('{cells}', cellsCount);
+				$modal.find('.unsaved-changes-message').text(text);
+				$modal.data('backupItems', backup.items);
+				$modal.remodal().open();
+			} else {
+				localStorage.removeItem(storageKey);
+			}
+		} catch (e) {
+			localStorage.removeItem(storageKey);
+		}
+	}
+}
+
+
+const SimpleSheetFormulas = (function () {
+	// 1. Define allowed text manipulation formulas
+	const AVAILABLE_FUNCTIONS = {
+		CONCAT: (...args) => args.join(''),
+		REPLACE: (str, search, rep) => String(str).replace(search, rep),
+		UPPER: (str) => String(str).toUpperCase(),
+		LOWER: (str) => String(str).toLowerCase(),
+		TRIM: (str) => String(str).trim().replace(/\s+/g, ' '),
+		PROPER: (str) => String(str).toLowerCase().replace(/\b\w/g, char => char.toUpperCase()),
+		SUBSTITUTE: (str, search, rep) => String(str).split(search).join(rep),
+		LEFT: (str, num = 1) => String(str).substring(0, num),
+		RIGHT: (str, num = 1) => num <= 0 ? "" : String(str).slice(-num),
+		MID: (str, start, num) => String(str).substring(start - 1, (start - 1) + num),
+		LEN: (str) => String(str).length,
+		EXACT: (str1, str2) => String(str1) === String(str2),
+		SEARCH: (search, str) => {
+			const idx = String(str).toLowerCase().indexOf(String(search).toLowerCase());
+			if (idx === -1) throw new Error(vgse_editor_settings.texts.formula_eval_value_not_found || "#VALUE! Not found");
+			return idx + 1;
+		},
+		TEXTJOIN: (delimiter, ignoreEmpty, ...textArgs) => {
+			let items = textArgs;
+			if (ignoreEmpty) {
+				items = items.filter(item => item !== null && item !== undefined && item !== "");
+			}
+			return items.join(delimiter);
+		}
+	};
+
+	const FUNCTION_SIGNATURES = {
+		CONCAT: 'CONCAT(text1, text2, ...)',
+		REPLACE: 'REPLACE(text, search_for, replace_with)',
+		UPPER: 'UPPER(text)',
+		LOWER: 'LOWER(text)',
+		TRIM: 'TRIM(text)',
+		PROPER: 'PROPER(text)',
+		SUBSTITUTE: 'SUBSTITUTE(text, search_for, replace_with)',
+		LEFT: 'LEFT(text, [num_chars])',
+		RIGHT: 'RIGHT(text, [num_chars])',
+		MID: 'MID(text, start_num, num_chars)',
+		LEN: 'LEN(text)',
+		EXACT: 'EXACT(text1, text2)',
+		SEARCH: 'SEARCH(search_for, text_to_search)',
+		TEXTJOIN: 'TEXTJOIN(delimiter, ignore_empty, text1, [text2], ...)'
+	};
+
+	let autocompleteDiv = null;
+
+	function createAutocompleteUI() {
+		if (autocompleteDiv) return;
+		autocompleteDiv = document.createElement('div');
+		autocompleteDiv.id = 'ssf-autocomplete';
+		autocompleteDiv.style.cssText = `
+				position: absolute; display: none; background: #fff; 
+				border: 1px solid #ccc; box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+				z-index: 9999; padding: 10px; font-family: sans-serif; font-size: 13px;
+				min-width: 220px; border-radius: 4px;
+			`;
+		document.body.appendChild(autocompleteDiv);
+	}
+
+	function checkNestingLimit(formula) {
+		let depth = 0;
+		let maxDepth = 0;
+		let inQuotes = false;
+		let escapeNext = false;
+		for (let char of formula) {
+			if (escapeNext) {
+				escapeNext = false;
+				continue;
+			}
+			if (char === '\\') {
+				escapeNext = true;
+				continue;
+			}
+			if (char === '"') {
+				inQuotes = !inQuotes;
+				continue;
+			}
+			if (!inQuotes) {
+				if (char === '(') depth++;
+				if (char === ')') depth--;
+				if (depth > maxDepth) maxDepth = depth;
+			}
+		}
+		if (maxDepth > 1) {
+			throw new Error(vgse_editor_settings.texts.formula_eval_max_nested_levels || "Nested formulas are not allowed.");
+		}
+	}
+
+	function resolveVariables(formula, row, prop, hot) {
+		const headers = hot.getColHeader();
+		
+		formula = formula.replace(/\$current_value\$/g, () => {
+			let val = prop !== null ? hot.getDataAtRowProp(row, prop) : '';
+			return (val !== null && !isNaN(val) && val !== '') ? Number(val) : JSON.stringify(val || "");
+		});
+
+		return formula.replace(/\$([^$]+)\$/g, (match, colName) => {
+			const colIndex = headers.indexOf(colName);
+			if (colIndex === -1) throw new Error((vgse_editor_settings.texts.formula_eval_column_not_found || "Column {colName} not found.").replace('{colName}', colName));
+			let val = hot.getDataAtCell(row, colIndex);
+			return (val !== null && !isNaN(val) && val !== '') ? Number(val) : JSON.stringify(val || "");
+		});
+	}
+
+	function evaluateFormulaString(formulaStr, row, prop, hot) {
+		if (!formulaStr.startsWith('=')) return formulaStr;
+		
+		if (/^=[\+\-\*\/\^\%]/.test(formulaStr)) {
+			formulaStr = formulaStr.replace(/^=/, '=$current_value$');
+		}
+
+		let expression = formulaStr.substring(1).trim();
+
+		if (expression === '') return '';
+
+		checkNestingLimit(expression);
+		expression = resolveVariables(expression, row, prop, hot);
+
+		const match = expression.match(/^([A-Za-z_]+)\s*\(([\s\S]*)\)$/);
+
+		if (!match) {
+			// Safe fallback for basic math expressions (+, -, *, /)
+			if (/^[\d\.\s\+\-\*\/\(\)]+$/.test(expression)) {
+				try {
+					return new Function("return " + expression)();
+				} catch (e) {
+					throw new Error(vgse_editor_settings.texts.formula_eval_invalid_chars || "Invalid math expression.");
+				}
+			}
+			throw new Error(vgse_editor_settings.texts.formula_eval_invalid_chars || "Invalid formula structure.");
+		}
+
+		const funcName = match[1].toUpperCase();
+		const argsString = match[2];
+
+		if (!AVAILABLE_FUNCTIONS[funcName]) {
+			throw new Error(vgse_editor_settings.texts.formula_eval_invalid_chars || `Unknown function: ${funcName}`);
+		}
+
+		const args = [];
+		let currentArg = '';
+		let inQuotes = false;
+		let escapeNext = false;
+
+		for (let i = 0; i < argsString.length; i++) {
+			const char = argsString[i];
+
+			if (escapeNext) {
+				currentArg += char;
+				escapeNext = false;
+				continue;
+			}
+
+			if (char === '\\') {
+				escapeNext = true;
+				currentArg += char;
+				continue;
+			}
+
+			if (char === '"') {
+				inQuotes = !inQuotes;
+				currentArg += char;
+				continue;
+			}
+
+			if (char === ',' && !inQuotes) {
+				args.push(currentArg.trim());
+				currentArg = '';
+				continue;
+			}
+
+			currentArg += char;
+		}
+
+		if (currentArg.trim() !== '') {
+			args.push(currentArg.trim());
+		}
+
+		const parsedArgs = args.map(arg => {
+			if (arg.startsWith('"') && arg.endsWith('"')) {
+				try {
+					return JSON.parse(arg);
+				} catch (e) {
+					return arg.slice(1, -1).replace(/\\"/g, '"');
+				}
+			}
+			if (!isNaN(arg) && arg !== '') {
+				return Number(arg);
+			}
+			if (arg.toLowerCase() === 'true') return true;
+			if (arg.toLowerCase() === 'false') return false;
+			if (arg.toLowerCase() === 'null') return null;
+
+			return arg;
+		});
+
+		return AVAILABLE_FUNCTIONS[funcName](...parsedArgs);
+	}
+
+	function updateAutocompleteUI(inputEl, value, row, prop, hot) {
+		if (!autocompleteDiv) createAutocompleteUI();
+
+		if (!value.startsWith('=')) {
+			autocompleteDiv.style.display = 'none';
+			return;
+		}
+
+		const rect = inputEl.getBoundingClientRect();
+		autocompleteDiv.style.top = (rect.bottom + window.scrollY + 2) + 'px';
+		autocompleteDiv.style.left = (rect.left + window.scrollX) + 'px';
+		autocompleteDiv.style.display = 'block';
+
+		const typedStr = value.toUpperCase().substring(1).split('(')[0].trim();
+		const matches = Object.keys(AVAILABLE_FUNCTIONS)
+			.filter(fn => fn.startsWith(typedStr) || value.length === 1)
+			.map(fn => `<div style="padding: 2px 0; font-family: monospace; font-size: 12px; color: #333;">${FUNCTION_SIGNATURES[fn] || fn}</div>`);
+
+		const mathHelpText = vgse_editor_settings.texts.formula_eval_math_help || '<strong>Math operations:</strong> +, -, *, /, ^, %<br><span style="color:#777;">e.g. = $current_value$ + 10</span>';
+		const isMathOrVariable = /^[=\s\d\+\-\*\/\^\%\.]*(?:\$[^$]*\$[=\s\d\+\-\*\/\^\%\.]*)*$/.test(value);
+
+		let html = `<div style="color: #666; margin-bottom: 8px; font-weight: bold; font-size: 11px; text-transform: uppercase;">${vgse_editor_settings.texts.formula_eval_options || 'Available Options:'}</div>`;
+
+		html += `<div style="margin-bottom: 8px; line-height: 1.6; max-height: 200px; overflow-y: auto;">`;
+		
+		if (value.trim() === '=' || isMathOrVariable) {
+			const borderStyle = matches.length ? 'border-bottom: 1px solid #eee; padding-bottom: 6px; margin-bottom: 6px;' : '';
+			html += `<div style="padding: 2px 0; font-family: monospace; font-size: 12px; color: #333; ${borderStyle}">${mathHelpText}</div>`;
+		}
+		html += `${matches.length ? matches.join('') : ''}`;
+		html += `</div>`;
+		html += `<div style="font-size: 11px; color: #555; margin-top: 5px; font-style: italic;">${vgse_editor_settings.texts.formula_eval_tooltip || 'You can reference other columns using the syntax $Column title$. Nested formulas are not allowed.'}</div>`;
+
+		// Attempt to evaluate silently. Only show success.
+		try {
+			const result = evaluateFormulaString(value, row, prop, hot);
+			// If the formula isn't complete (e.g. "=" or "=" + spaces), result might be undefined or empty
+			if (result !== undefined && result !== null && !Number.isNaN(result) && typeof result !== 'function') {
+				html += `<hr style="border: 0; border-top: 1px solid #eee; margin: 8px 0;">`;
+				html += `<div style="color: #2e7d32; font-weight: bold;">${vgse_editor_settings.texts.formula_eval_result || 'Result:'} ${result}</div>`;
+			}
+		} catch (e) {
+			// Silently fail if the formula is incomplete (e.g., waiting for a closing parenthesis)
+			// This prevents "undefined" or red error text from flashing while typing
+		}
+
+		autocompleteDiv.innerHTML = html;
+	}
+
+	return {
+		evaluate: function (string, row, prop, hotInstance) {
+			if (typeof prop === 'object' && !hotInstance) {
+				hotInstance = prop;
+				prop = null;
+			}
+			try {
+				return evaluateFormulaString(string, row, prop, hotInstance);
+			} catch (e) {
+				console.error("Formula Error: ", e.message);
+				return "#ERROR!";
+			}
+		},
+
+		init: function (hotInstance) {
+			let activeRow = null;
+			let activeProp = null;
+			let onInputHandler = null;
+			let boundInputEl = null;
+
+			hotInstance.addHook('afterBeginEditing', function (row, col) {
+				activeRow = row;
+				activeProp = hotInstance.colToProp(col);
+				const editor = hotInstance.getActiveEditor();
+				boundInputEl = editor.TEXTAREA || editor.INPUT;
+
+				if (boundInputEl) {
+					onInputHandler = (e) => updateAutocompleteUI(e.target, e.target.value, activeRow, activeProp, hotInstance);
+					boundInputEl.addEventListener('input', onInputHandler);
+				}
+			});
+
+			// Changed to afterChange to ensure the UI vanishes immediately when the cell stops being edited, 
+			// whether by clicking away, hitting enter, or tabbing.
+			hotInstance.addHook('afterChange', function () {
+				if (autocompleteDiv) autocompleteDiv.style.display = 'none';
+				if (boundInputEl && onInputHandler) {
+					boundInputEl.removeEventListener('input', onInputHandler);
+					boundInputEl = null;
+				}
+			});
+
+			hotInstance.addHook('beforeChange', function (changes, source) {
+				// Allows typing AND pasting formulas, but ignores database loading
+				if (source !== 'edit' && source !== 'CopyPaste.paste') return;
+
+				changes.forEach(change => {
+					let [row, prop, oldVal, newVal] = change;
+					if (typeof newVal === 'string' && newVal.startsWith('=')) {
+						try {
+							change[3] = evaluateFormulaString(newVal, row, prop, hotInstance);
+						} catch (e) {
+							change[3] = (vgse_editor_settings.texts.formula_eval_error || "#ERROR: ") + e.message;
+						}
+					}
+				});
+			});
+		}
+	};
+})();
 // Prevent undefined $ errors
 if (typeof window.$ === 'undefined') {
 	window.$ = jQuery;
@@ -2600,8 +3249,9 @@ jQuery(document).ready(function (e) {
 				lastTableHeight = currentContentHeight;
 			}
 		}, 1500),
-		afterChange: _throttle(function (changes) {
+		afterChange: _throttle(function (changes, source) {
 			var hasChanged = false;
+			var changesToApply = [];
 
 			if (changes && changes.length) {
 				changes.forEach(function (change) {
@@ -2610,13 +3260,54 @@ jQuery(document).ready(function (e) {
 					}
 					if (change[2] !== change[3]) {
 						hasChanged = true;
+
+						if (typeof change[3] === 'string') {
+							var variables = change[3].match(/\$[a-zA-Z0-9_\-\s]+\$/g);
+							if (variables) {
+								var newValue = change[3];
+								variables.forEach(function (variableStr) {
+									var variable = variableStr.slice(1, -1);
+									var actualValue = '';
+									var columnExists = false;
+
+									if (typeof vgse_editor_settings.colHeaders[variable] === 'undefined') {
+										var variableColumnIndex = vgObjectToArray(vgse_editor_settings.colHeaders).indexOf(variable);
+										if (variableColumnIndex >= 0) {
+											actualValue = hot.getDataAtCell(change[0], variableColumnIndex);
+											columnExists = true;
+										}
+									} else {
+										actualValue = hot.getDataAtRowProp(change[0], variable);
+										columnExists = true;
+									}
+
+									if (columnExists) {
+										newValue = newValue.split(variableStr).join(actualValue !== null && actualValue !== void 0 ? actualValue : '');
+									}
+								});
+
+								if (newValue !== change[3]) {
+									changesToApply.push([change[0], change[1], newValue]);
+								}
+							}
+						}
+
 						return true;
 					}
 				});
 			}
+
+			if (changesToApply.length > 0) {
+				setTimeout(function () {
+					hot.setDataAtRowProp(changesToApply, 'variable_replacement');
+				}, 10);
+			}
+
 			if (hasChanged) {
 				console.log('Change detected, enabled saving: ', new Date(), '. changes: ', changes);
-				beSetSaveButtonStatus(beGetModifiedItems().length > 0);
+				var modifiedItems = beGetModifiedItems();
+				beSetSaveButtonStatus(modifiedItems.length > 0);
+				vgseUpdateLocalBackup(modifiedItems);
 			}
 		}, 3000, {
 			leading: true,
@@ -2788,6 +3479,7 @@ jQuery(document).ready(function (e) {
 		}
 	}
 	hot = new Handsontable($container[0], finalHandsontableArgs);
+	SimpleSheetFormulas.init(hot);
 
 
 	beSetSaveButtonStatus(false);
@@ -2946,6 +3638,22 @@ jQuery(document).ready(function (e) {
 		var fullData = hot.getSourceData();
 
 		fullData = beGetModifiedItems(fullData, window.beOriginalData);
+
+		if (window.wpseUnsavedBackupItems && window.wpseUnsavedBackupItems.length > 0) {
+			var fullDataIds = fullData.map(function(item) { return parseInt(item.ID); });
+			window.wpseUnsavedBackupItems.forEach(function(backupItem) {
+				if (fullDataIds.indexOf(parseInt(backupItem.ID)) === -1) {
+					fullData.push(backupItem);
+				} else {
+					var rowIndex = fullDataIds.indexOf(parseInt(backupItem.ID));
+					Object.keys(backupItem).forEach(function(key) {
+						if (key !== 'ID' && typeof fullData[rowIndex][key] === 'undefined') {
+							fullData[rowIndex][key] = backupItem[key];
+						}
+					});
+				}
+			});
+		}
 
 		console.log(fullData);
 		console.log(!fullData);
@@ -3131,6 +3839,9 @@ jQuery(document).ready(function (e) {
 							hot.alter('remove_row', id);
 						}
 					});
+
+					vgsePurgeLocalBackup();
+					window.wpseUnsavedBackupItems = [];
 
 					// automatically close the popup if everything was saved in one batch and the modal is visible (not background save)
 					if (settings.totalCalls === 1 && jQuery('[data-remodal-id="bulk-save"]').is(':visible')) {
@@ -3520,6 +4231,45 @@ jQuery(document).ready(function (e) {
 		var content = beGetTinymceContent();
 		hot.setDataAtCell(cellCoords.row, cellCoords.col, content);
 	}
+
+	
+	jQuery('body').on('click', '#vgse-unsaved-changes-modal .restore-backup', function(e) {
+		e.preventDefault();
+		var $modal = jQuery('#vgse-unsaved-changes-modal');
+		var backupItems = $modal.data('backupItems');
+		var hotData = hot.getSourceData();
+		var hotIds = hotData.map(function(item) { return parseInt(item.ID); });
+		
+		backupItems.forEach(function(backupItem) {
+			var backupId = parseInt(backupItem.ID);
+			var rowIndex = hotIds.indexOf(backupId);
+			if (rowIndex > -1) {
+				Object.keys(backupItem).forEach(function(key) {
+					if (key !== 'ID') {
+						hotData[rowIndex][key] = backupItem[key];
+					}
+				});
+			}
+		});
+
+		window.wpseUnsavedBackupItems = backupItems;
+
+		hot.render(); // Update UI
+		$modal.remodal().close();
+		beSetSaveButtonStatus(true);
+		
+		setTimeout(function() {
+			jQuery('.wpse-save').trigger('click');
+		}, 200);
+	});
+
+	jQuery('body').on('click', '#vgse-unsaved-changes-modal .discard-backup', function(e) {
+		e.preventDefault();
+		vgsePurgeLocalBackup();
+		window.wpseUnsavedBackupItems = [];
+		jQuery('#vgse-unsaved-changes-modal').remodal().close();
+	});
+
 	/**
 	 * Save changes on tinymce editor
 	 */
@@ -3573,7 +4323,10 @@ jQuery(document).ready(function (e) {
 
 			if (response.success) {
 				vgseAddFoundRowsCount(response.data.total);
-				vgAddRowsToSheet(response.data.rows);
+				var isStreaming = vgse_editor_settings.stream_get_rows && (vgse_editor_settings.posts_per_page > 10);
+				if (!isStreaming) {
+					vgAddRowsToSheet(response.data.rows);
+				}
 
 				loading_ajax(false);
 				var successMessage = response.data.message || vgse_editor_settings.texts.posts_loaded;
@@ -4454,7 +5207,6 @@ jQuery(document).ready(function () {
 					nonce: nonce,
 					postId: data.modalSettings.post_id,
 					postType: data.modalSettings.post_type,
-					modalSettings: data.modalSettings,
 					data: attrData
 				}, function (response) {
 					console.log(response);
@@ -4660,10 +5412,49 @@ jQuery(document).ready(function () {
 			if (jQuery(this).is(':checked')) {
 
 				var label = jQuery(this).siblings('label').text();
-				var html = '<a class="button post-type-' + vgseStripHtml(postTypeKey) + '" href="admin.php?page=vgse-bulk-edit-' + vgseStripHtml(postTypeKey) + '">Edit ' + vgseStripHtml(label) + '</a> - ';
+				var html = '<div class="button-group" style="display: inline-flex; margin-right: 5px; margin-bottom: 5px;">' + 
+					'<a class="button post-type-' + vgseStripHtml(postTypeKey) + '" href="admin.php?page=vgse-bulk-edit-' + vgseStripHtml(postTypeKey) + '">Edit ' + vgseStripHtml(label) + '</a>' + 
+					'<button class="button vgse-remove-enabled-sheet" data-post-type="' + vgseStripHtml(postTypeKey) + '" title="Remove from enabled sheets">x</button>' + 
+					'</div>';
 				console.log('html: ', html);
 				$postTypesEnabled.append(html);
 			}
+		});
+	});
+
+	jQuery('body').on('click', '.vgse-remove-enabled-sheet', function (e) {
+		e.preventDefault();
+		if (!confirm('Are you sure you want to deactivate this sheet? Your data will remain saved and the sheet can be enabled again')) {
+			return;
+		}
+
+		var $btn = jQuery(this);
+		var postTypeToRemove = $btn.data('post-type');
+		var postTypesToSave = [];
+
+		jQuery('.vgse-remove-enabled-sheet').each(function () {
+			var pt = jQuery(this).data('post-type');
+			if (pt && pt !== postTypeToRemove) {
+				postTypesToSave.push(pt);
+			}
+		});
+
+		postTypesToSave = postTypesToSave.filter(function(item, pos) {
+			return postTypesToSave.indexOf(item) === pos;
+		});
+
+		$btn.prop('disabled', true).text('...');
+
+		jQuery.post(vgse_global_data.ajax_url, {
+			action: 'vgse_save_post_types_setting',
+			post_types: postTypesToSave,
+			append: 'no',
+			nonce: vgse_global_data.nonce
+		}).done(function (response) {
+			window.location.reload();
+		}).fail(function () {
+			alert('Server error. Please try again.');
+			$btn.prop('disabled', false).text('x');
 		});
 	});
 });

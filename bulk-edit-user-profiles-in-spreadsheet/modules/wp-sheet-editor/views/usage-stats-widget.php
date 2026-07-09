@@ -108,16 +108,18 @@
 	<div class="post-types-enabled">
 		<?php
 		$post_types = VGSE()->helpers->get_enabled_post_types();
+		$all_sheets         = wp_list_pluck( VGSE()->helpers->get_prepared_post_types(), 'label', 'key' );
 
 		if (!empty($post_types)) {
 			foreach ($post_types as $key => $post_type_name) {
 				if (is_numeric($key)) {
 					$key = $post_type_name;
 				}
+				$label = isset( $all_sheets[ $key ] ) ? $all_sheets[ $key ] : $key;				
 				?>
 				<a class="button post-type-<?php echo esc_attr($key); ?>" href="<?php echo esc_url( VGSE()->helpers->get_editor_url($key) ); ?>"><?php 
 				// translators: 1: post type name
-				printf( esc_html__('Edit %s', 'vg_sheet_editor' ), esc_html($post_type_name) ); ?></a>		
+				printf( esc_html__('Edit %s', 'vg_sheet_editor' ), esc_html($label) ); ?></a>		
 				   <?php
 			   }
 		   }

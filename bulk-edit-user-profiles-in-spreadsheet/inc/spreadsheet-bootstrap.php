@@ -176,7 +176,21 @@ if (!class_exists('WPSE_Users_Spreadsheet_Bootstrap')) {
 				'allow_to_save' => true,
 				'allow_to_rename' => true,
 				'is_locked' => true,
-				'lock_template_key' => 'enable_lock_cell_template'
+				'lock_template_key' => 'enable_lock_cell_template',
+				'formatted'             => array(
+					'editor'           => 'wp_datetime',
+					'type'             => 'date',
+					'dateFormatPhp'    => 'Y-m-d H:i:s',
+					'correctFormat'    => true,
+					'defaultDate'      => gmdate( 'Y-m-d H:i:s' ),
+					'datePickerConfig' => array(
+						'firstDay'       => 0,
+						'showWeekNumber' => true,
+						'numberOfMonths' => 1,
+						'yearRange'      => array( 1900, (int) gmdate( 'Y' ) + 20 ),
+					),
+				),
+				'value_type'        => 'date',
 			));
 			$this->columns->register_item('user_pass', $post_type, array(
 				'data_type' => 'post_data', 	
