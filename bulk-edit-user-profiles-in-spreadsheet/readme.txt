@@ -3,7 +3,7 @@ Contributors: wpsheeteditor,vegacorp,josevega
 Tags: woocommerce, bulk edit, users, spreadsheet, buddypress
 Stable tag: 1.6.0
 Requires at least: 4.7
-Tested up to: 7.0
+Tested up to: 7.1
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
