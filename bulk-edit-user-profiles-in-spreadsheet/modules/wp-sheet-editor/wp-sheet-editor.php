@@ -54,7 +54,7 @@ if ( ! class_exists( 'WP_Sheet_Editor' ) ) {
 	class WP_Sheet_Editor {
 
 		private $post_type;
-		public $version     = '2.27.0';
+		public $version     = '2.27.1';
 		public $textname    = 'vg_sheet_editor';
 		public $options_key = 'vg_sheet_editor';
 		public $plugin_url  = null;

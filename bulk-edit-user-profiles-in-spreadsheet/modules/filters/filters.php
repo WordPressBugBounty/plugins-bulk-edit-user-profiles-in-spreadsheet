@@ -467,7 +467,7 @@ if ( ! class_exists( 'WP_Sheet_Editor_Filters' ) ) {
 					$filters = $json_decoded;
 				}
 			} elseif ( is_string( $raw_filters ) ) {
-				parse_str( urldecode( html_entity_decode( $raw_filters ) ), $filters );
+				parse_str( html_entity_decode( $raw_filters ), $filters );
 			} elseif ( is_array( $raw_filters ) ) {
 				$filters = $raw_filters;
 			}

@@ -7,7 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-08T23:26:23+00:00\n"
+"POT-Creation-Date: 2026-10-20T01:01:57+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 
@@ -32,7 +32,7 @@ msgid "Titles"
 msgstr ""
 
 #: acf/acf.php:102
-#: wp-sheet-editor/dev/inc/options-init.php:438
+#: wp-sheet-editor/dev/inc/options-init.php:474
 msgid "Slugs"
 msgstr ""
 
@@ -65,7 +65,7 @@ msgstr ""
 msgid "Enter titles separated by %s"
 msgstr ""
 
-#: acf/acf.php:1341
+#: acf/acf.php:1335
 msgid "Row"
 msgstr ""
 
@@ -133,7 +133,7 @@ msgid "By default, only administrator can save and use the saved searches. Use t
 msgstr ""
 
 #: advanced-filters/advanced-filters.php:133
-#: columns-manager/inc/column-groups.php:396
+#: columns-manager/inc/column-groups.php:408
 #: columns-resizing/columns-resizing.php:57
 #: columns-visibility/columns-visibility.php:241
 #: formulas/formulas.php:644
@@ -300,7 +300,7 @@ msgstr ""
 #: woocommerce/inc/attributes.php:856
 #: woocommerce/inc/attributes.php:857
 #: woocommerce/inc/variations.php:778
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:875
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:876
 msgid "Value"
 msgstr ""
 
@@ -518,8 +518,8 @@ msgstr ""
 #: columns-manager/columns-manager.php:1332
 #: columns-manager/columns-manager.php:1384
 #: wp-sheet-editor/dev/inc/api/bootstrap.php:204
-#: wp-sheet-editor/dev/inc/options-init.php:687
-#: wp-sheet-editor/dev/inc/options-init.php:690
+#: wp-sheet-editor/dev/inc/options-init.php:723
+#: wp-sheet-editor/dev/inc/options-init.php:726
 #: wp-sheet-editor/dev/views/quick-setup.php:108
 msgid "Settings"
 msgstr ""
@@ -623,7 +623,7 @@ msgstr ""
 #: woocommerce/inc/downloadable.php:239
 #: woocommerce/inc/downloadable.php:240
 #: woocommerce/inc/variations.php:777
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:874
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:875
 msgid "Name"
 msgstr ""
 
@@ -922,7 +922,7 @@ msgid "Spreadsheet views"
 msgstr ""
 
 #: columns-manager/inc/column-groups.php:116
-#: wp-sheet-editor/dev/inc/options-init.php:685
+#: wp-sheet-editor/dev/inc/options-init.php:721
 #: wp-sheet-editor/dev/views/license-page-error.php:2
 #: wp-sheet-editor/dev/wp-sheet-editor.php:1295
 msgid "WP Sheet Editor"
@@ -941,11 +941,11 @@ msgstr ""
 msgid "Please enter the name of the spreadsheet views separated by commas."
 msgstr ""
 
-#: columns-manager/inc/column-groups.php:486
+#: columns-manager/inc/column-groups.php:498
 msgid "Add a name for this group of columns"
 msgstr ""
 
-#: columns-manager/inc/column-groups.php:486
+#: columns-manager/inc/column-groups.php:498
 msgid "We will save this group of columns as a spreadsheet view and you can switch between spreadsheets in the toolbar"
 msgstr ""
 
@@ -968,11 +968,11 @@ msgstr ""
 #: wp-sheet-editor/dev/inc/ajax.php:136
 #: wp-sheet-editor/dev/inc/ajax.php:267
 #: wp-sheet-editor/dev/inc/ajax.php:302
-#: wp-sheet-editor/dev/inc/ajax.php:327
-#: wp-sheet-editor/dev/inc/ajax.php:383
-#: wp-sheet-editor/dev/inc/ajax.php:406
-#: wp-sheet-editor/dev/inc/ajax.php:488
-#: wp-sheet-editor/dev/inc/ajax.php:520
+#: wp-sheet-editor/dev/inc/ajax.php:331
+#: wp-sheet-editor/dev/inc/ajax.php:387
+#: wp-sheet-editor/dev/inc/ajax.php:410
+#: wp-sheet-editor/dev/inc/ajax.php:492
+#: wp-sheet-editor/dev/inc/ajax.php:524
 msgid "Missing parameters."
 msgstr ""
 
@@ -1442,7 +1442,7 @@ msgstr ""
 #. translators: %s: Error message
 #. translators: %s: Error messages
 #: formulas/formulas.php:1345
-#: wp-sheet-editor/dev/inc/ajax.php:552
+#: wp-sheet-editor/dev/inc/ajax.php:556
 #: wp-sheet-editor/dev/inc/api/helpers.php:969
 msgid "Error: %s"
 msgstr ""
@@ -3413,37 +3413,37 @@ msgid "Used for variation?"
 msgstr ""
 
 #: woocommerce/inc/downloadable.php:111
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:656
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:657
 msgid "Downloadable"
 msgstr ""
 
 #: woocommerce/inc/downloadable.php:129
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:780
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:781
 msgid "Download limit"
 msgstr ""
 
 #: woocommerce/inc/downloadable.php:141
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:790
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:791
 msgid "Download expiry"
 msgstr ""
 
 #: woocommerce/inc/downloadable.php:153
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:800
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:801
 msgid "Download type"
 msgstr ""
 
 #: woocommerce/inc/downloadable.php:159
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:804
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:805
 msgid "Standard Product"
 msgstr ""
 
 #: woocommerce/inc/downloadable.php:160
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:805
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:806
 msgid "Application/Software"
 msgstr ""
 
 #: woocommerce/inc/downloadable.php:161
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:806
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:807
 msgid "Music"
 msgstr ""
 
@@ -3465,7 +3465,7 @@ msgstr ""
 
 #: woocommerce/inc/downloadable.php:210
 #: woocommerce/inc/downloadable.php:214
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:814
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:815
 msgid "Download files"
 msgstr ""
 
@@ -3538,7 +3538,7 @@ msgstr ""
 
 #: woocommerce/inc/import-export.php:213
 #: woocommerce/woocommerce.php:783
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:511
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:512
 msgid "Type"
 msgstr ""
 
@@ -3693,21 +3693,21 @@ msgid "We automatically allow columns for variations if at least one variation i
 msgstr ""
 
 #: woocommerce/inc/variations.php:719
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:826
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:827
 msgid "Variation description"
 msgstr ""
 
 #: woocommerce/inc/variations.php:731
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:837
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:838
 msgid "Variation enabled?"
 msgstr ""
 
 #: woocommerce/inc/variations.php:755
 #: woocommerce/inc/variations.php:757
 #: woocommerce/inc/variations.php:759
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:854
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:856
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:858
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:855
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:857
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:859
 msgid "Default attributes"
 msgstr ""
 
@@ -3718,7 +3718,7 @@ msgstr ""
 
 #. translators: %s: Variation title
 #: woocommerce/inc/variations.php:1243
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:143
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:144
 msgid "Variation: %s"
 msgstr ""
 
@@ -3734,7 +3734,7 @@ msgstr ""
 #: woocommerce/inc/variations.php:1590
 #: woocommerce/inc/variations.php:1621
 #: wp-sheet-editor/dev/inc/ajax.php:309
-#: wp-sheet-editor/dev/inc/ajax.php:335
+#: wp-sheet-editor/dev/inc/ajax.php:339
 msgid "Request not allowed. Try again later."
 msgstr ""
 
@@ -4126,7 +4126,7 @@ msgid "Import as meta data"
 msgstr ""
 
 #: woocommerce/woocommerce.php:489
-#: wp-sheet-editor/dev/inc/ajax.php:463
+#: wp-sheet-editor/dev/inc/ajax.php:467
 msgid "Tags"
 msgstr ""
 
@@ -4148,20 +4148,20 @@ msgid "We need to reload the Spreadsheet to remove the variations. Please save y
 msgstr ""
 
 #: woocommerce/woocommerce.php:708
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:472
 #: wp-sheet-editor/dev/inc/teasers/woocommerce.php:473
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:474
 msgid "Short description"
 msgstr ""
 
 #: woocommerce/woocommerce.php:712
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:478
 #: wp-sheet-editor/dev/inc/teasers/woocommerce.php:479
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:480
 msgid "Enable reviews"
 msgstr ""
 
 #: woocommerce/woocommerce.php:734
 #: wp-sheet-editor/dev/inc/api/helpers.php:554
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:903
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:904
 msgid "..."
 msgstr ""
 
@@ -4174,7 +4174,7 @@ msgid "Product gallery"
 msgstr ""
 
 #: woocommerce/woocommerce.php:809
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:521
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:522
 msgid "SKU"
 msgstr ""
 
@@ -4195,37 +4195,37 @@ msgid "Sale end date"
 msgstr ""
 
 #: woocommerce/woocommerce.php:905
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:592
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:593
 msgid "Manage stock"
 msgstr ""
 
 #: woocommerce/woocommerce.php:925
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:608
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:609
 msgid "Stock status"
 msgstr ""
 
 #: woocommerce/woocommerce.php:939
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:624
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:625
 msgid "Stock"
 msgstr ""
 
 #: woocommerce/woocommerce.php:962
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:553
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:554
 msgid "Weight"
 msgstr ""
 
 #: woocommerce/woocommerce.php:973
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:563
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:564
 msgid "Width"
 msgstr ""
 
 #: woocommerce/woocommerce.php:984
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:573
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:574
 msgid "Height"
 msgstr ""
 
 #: woocommerce/woocommerce.php:995
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:583
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:584
 msgid "Length"
 msgstr ""
 
@@ -4243,17 +4243,17 @@ msgid "Upsells"
 msgstr ""
 
 #: woocommerce/woocommerce.php:1041
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:634
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:635
 msgid "Visibility"
 msgstr ""
 
 #: woocommerce/woocommerce.php:1057
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:672
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:673
 msgid "Virtual"
 msgstr ""
 
 #: woocommerce/woocommerce.php:1076
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:709
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:710
 msgid "Sold individually"
 msgstr ""
 
@@ -4261,48 +4261,48 @@ msgstr ""
 msgid "Is featured?"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1111
+#: woocommerce/woocommerce.php:1108
 msgid "Backorders allowed?"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1117
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:745
+#: woocommerce/woocommerce.php:1114
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:746
 msgid "Do not allow"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1118
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:746
+#: woocommerce/woocommerce.php:1115
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:747
 msgid "Allow, but notify customer"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1119
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:747
+#: woocommerce/woocommerce.php:1116
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:748
 msgid "Allow"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1132
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:758
+#: woocommerce/woocommerce.php:1139
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:759
 msgid "Purchase note"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1144
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:769
+#: woocommerce/woocommerce.php:1151
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:770
 msgid "Shipping class"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1159
+#: woocommerce/woocommerce.php:1166
 msgid "Average rating"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1169
+#: woocommerce/woocommerce.php:1176
 msgid "Review count"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1179
+#: woocommerce/woocommerce.php:1186
 msgid "Total sales"
 msgstr ""
 
-#: woocommerce/woocommerce.php:1185
+#: woocommerce/woocommerce.php:1192
 msgid "These numbers are cached for 1 day for performance reasons. You can click on \"Settings > Scan DB\" to update the cache."
 msgstr ""
 
@@ -4311,9 +4311,9 @@ msgid "Rows deleted successfully"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/ajax.php:229
-#: wp-sheet-editor/dev/inc/ajax.php:525
 #: wp-sheet-editor/dev/inc/ajax.php:529
 #: wp-sheet-editor/dev/inc/ajax.php:533
+#: wp-sheet-editor/dev/inc/ajax.php:537
 msgid "You dont have enough permissions to save changes."
 msgstr ""
 
@@ -4325,25 +4325,25 @@ msgstr ""
 msgid "You dont have enough permissions to create new rows."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/ajax.php:358
+#: wp-sheet-editor/dev/inc/ajax.php:362
 msgid "No items found."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/ajax.php:389
-#: wp-sheet-editor/dev/inc/ajax.php:416
+#: wp-sheet-editor/dev/inc/ajax.php:393
+#: wp-sheet-editor/dev/inc/ajax.php:420
 msgid "You dont have enough permissions to search taxonomy terms."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/ajax.php:439
+#: wp-sheet-editor/dev/inc/ajax.php:443
 msgid "No taxonomies found."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/ajax.php:493
+#: wp-sheet-editor/dev/inc/ajax.php:497
 msgid "You dont have enough permissions to perform this action."
 msgstr ""
 
 #. translators: %s: Post title
-#: wp-sheet-editor/dev/inc/ajax.php:559
+#: wp-sheet-editor/dev/inc/ajax.php:563
 msgid "Saved: %s"
 msgstr ""
 
@@ -4415,7 +4415,7 @@ msgid "When this is enabled more items will be loaded to the bottom of the sprea
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/api/bootstrap.php:362
-#: wp-sheet-editor/dev/inc/options-init.php:508
+#: wp-sheet-editor/dev/inc/options-init.php:544
 msgid "Dark mode"
 msgstr ""
 
@@ -5015,8 +5015,16 @@ msgstr ""
 msgid "#ERROR: "
 msgstr ""
 
+#: wp-sheet-editor/dev/inc/api/editor.php:551
+msgid "Please type a search term"
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/api/editor.php:552
+msgid "No results found, enter another search term"
+msgstr ""
+
 #. translators: review URL
-#: wp-sheet-editor/dev/inc/api/editor.php:556
+#: wp-sheet-editor/dev/inc/api/editor.php:558
 msgid "<span class=\"review-tip\">Do we deserve a 5-star review? <a href=\"%s\" target=\"_blank\" class=\"dismiss-review-tip\">Yes, you deserve it</a> . - . <a href=\"\"  class=\"dismiss-review-tip\">No</a></span>"
 msgstr ""
 
@@ -5430,396 +5438,412 @@ msgstr ""
 msgid "We limit the list of fields to 1000 meta fields to avoid memory leaks/performance issues. If you want to search by a field that does not appear in the dropdown, increase this number."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:274
-msgid "Allow line breaks in values during the export and import process"
-msgstr ""
-
 #: wp-sheet-editor/dev/inc/options-init.php:275
-msgid "We will not execute our removal of duplicate rows when the line breaks are allowed, so you might see duplicate rows in the export files in rare cases."
+msgid "Maximum limit of posts returned by list_posts_by_title in dropdowns"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:281
-msgid "Allow safe html in post titles?"
+#: wp-sheet-editor/dev/inc/options-init.php:276
+msgid "Default is 500. You can increase this number if you need to load more posts in column dropdowns."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/options-init.php:282
-msgid "We will remove all the html tags by default. Activate this option to allow safe html tags, like b, span, i, etc"
+msgid "Allow line breaks in values during the export and import process"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:288
-msgid "Attach every taxonomy term in the hierarchy to the posts?"
+#: wp-sheet-editor/dev/inc/options-init.php:283
+msgid "We will not execute our removal of duplicate rows when the line breaks are allowed, so you might see duplicate rows in the export files in rare cases."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/options-init.php:289
-msgid "By default, we only attach the last term in the hierarchy to the posts because WordPress automatically handles them correctly. But if you want to assign each term to the post, including the parent categories, activate this option"
+msgid "Allow safe html in post titles?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:295
-msgid "Always run the save_post action after any post row is edited?"
+#: wp-sheet-editor/dev/inc/options-init.php:290
+msgid "We will remove all the html tags by default. Activate this option to allow safe html tags, like b, span, i, etc"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/options-init.php:296
-msgid "By default, we run the save_post action only when a post data field is updated (fields other than meta and taxonomies) for performance reasons. Enable this if other plugins aren't detecting our changes or webhooks aren't running."
+msgid "Attach every taxonomy term in the hierarchy to the posts?"
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/options-init.php:297
+msgid "By default, we only attach the last term in the hierarchy to the posts because WordPress automatically handles them correctly. But if you want to assign each term to the post, including the parent categories, activate this option"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/options-init.php:303
-msgid "Maximum number of unique meta fields to scan?"
+msgid "Always run the save_post action after any post row is edited?"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/options-init.php:304
-msgid "By default, we scan a maximum of 2500 unique meta keys to generate columns for the spreadsheet editor. But if you have a huge meta table, we might miss some meta fields and not show some columns. You can increase the number to scan more fields, which will help to display some missing columns, but it will use more server resources. The scan happens every 30 minutes on small sites, or weekly on medium-large sites."
-msgstr ""
-
-#: wp-sheet-editor/dev/inc/options-init.php:310
-msgid "Don't remove query parameters from external URLs when saving files?"
+msgid "By default, we run the save_post action only when a post data field is updated (fields other than meta and taxonomies) for performance reasons. Enable this if other plugins aren't detecting our changes or webhooks aren't running."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/options-init.php:311
-msgid "By default, we remove the query strings from external URLs when importing external files, this improves the cache hits and helps us avoid downloading duplicate images that have slight differences in the URLs. For example, site.com/logo.png?m=1 and site.com/logo.png?m=2 are considered the same by default and we save it as site.com/logo.png. But this can break the saving of dynamic images where the parameters change the content of the image, for example, site.com/image-generator.php?image=1 can return a different image than site.com/image-generator.php?image=2. You can activate this option to make the saving of external images accept URL parameters."
+msgid "Maximum number of unique meta fields to scan?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:317
-msgid "Enable the ultra performance mode?"
+#: wp-sheet-editor/dev/inc/options-init.php:312
+msgid "By default, we scan a maximum of 2500 unique meta keys to generate columns for the spreadsheet editor. But if you have a huge meta table, we might miss some meta fields and not show some columns. You can increase the number to scan more fields, which will help to display some missing columns, but it will use more server resources. The scan happens every 30 minutes on small sites, or weekly on medium-large sites."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/options-init.php:318
+msgid "Don't remove query parameters from external URLs when saving files?"
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/options-init.php:319
+msgid "By default, we remove the query strings from external URLs when importing external files, this improves the cache hits and helps us avoid downloading duplicate images that have slight differences in the URLs. For example, site.com/logo.png?m=1 and site.com/logo.png?m=2 are considered the same by default and we save it as site.com/logo.png. But this can break the saving of dynamic images where the parameters change the content of the image, for example, site.com/image-generator.php?image=1 can return a different image than site.com/image-generator.php?image=2. You can activate this option to make the saving of external images accept URL parameters."
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/options-init.php:325
+msgid "Enable the ultra performance mode?"
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/options-init.php:326
 msgid "If you enable this option, we will alter the functionality in our plugin to use as few server resources as possible. The content of some popups will be cached for one day (search, import, export, bulk edit, duplicate rows) which means they might not show your recently added fields until the cache expires in 24 hours or you manually click on Settings > Scan Db. The taxonomy columns will not have dropdowns (to avoid the load on your server of generating the list of terms). The product inventory stats will be deactivated in the products sheet (to avoid the load of adding the stock and prices for the stats). The meta fields scan will only look at the fields used by the 20 latest items to generate columns and advanced filters. All the caches can be purged by going to settings > scan db"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:327
+#: wp-sheet-editor/dev/inc/options-init.php:335
 msgid "Customize features"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:332
+#: wp-sheet-editor/dev/inc/options-init.php:340
 msgid "Disable the automatic purge of caches when a post is edited?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:333
+#: wp-sheet-editor/dev/inc/options-init.php:341
 msgid "By default, we will purge the cache of the specific posts edited for Litespeed Cache. We will integrate more cache systems in the future."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:339
+#: wp-sheet-editor/dev/inc/options-init.php:347
 msgid "Enable option to restrict spreadsheet views per user?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:340
+#: wp-sheet-editor/dev/inc/options-init.php:348
 msgid "If you enable this option, we will add fields to the user profiles where you can specify which spreadsheet views they can use, they can use all the spreadsheet views if this is deactivated."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:346
-msgid "Enable simple mode?"
-msgstr ""
-
-#: wp-sheet-editor/dev/inc/options-init.php:347
-msgid "If you enable this option, we will simplify the spreadsheet options and remove advanced examples, tips, and options rarely used in the search tool, bulk edit tool, import tool, export tool, and other places."
-msgstr ""
-
-#: wp-sheet-editor/dev/inc/options-init.php:353
-msgid "Disable the \"Unsaved changes detected\" popup?"
-msgstr ""
-
 #: wp-sheet-editor/dev/inc/options-init.php:354
-msgid "When you leave the page with unsaved changes, we save a backup. When you visit the page again, we ask if you want to restore the unsaved changes. You can disable this popup."
+msgid "Capability required to delete spreadsheet views"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:360
-msgid "Disable the automatic formatting detection?"
-msgstr ""
-
-#: wp-sheet-editor/dev/inc/options-init.php:361
-msgid "If you enable this option, some columns will appear as text. Normally we detect the date fields, image fields."
-msgstr ""
-
-#: wp-sheet-editor/dev/inc/options-init.php:367
-msgid "Disable cells lazy loading?"
-msgstr ""
-
-#: wp-sheet-editor/dev/inc/options-init.php:368
-msgid "The spreadsheet loads only the \"visible rows\" for performance reasons, so when you scroll up or down the rows are loaded dynamically. This way you can \"open\" thousands of posts in the spreadshet and it will work fast. However, if you want to use the browser search to find a specific cell, you need to disable the lazy loading in order to load all the rows at once and the browser will be able to find the cells. The browser search doesn't work by default because only the \"visible rows\" are actually created."
-msgstr ""
-
-#: wp-sheet-editor/dev/inc/options-init.php:374
-msgid "Disable usage stats widget?"
-msgstr ""
-
-#: wp-sheet-editor/dev/inc/options-init.php:375
-msgid "If you enable this option, the usage stats widget shown in the wp-admin dashboard will be removed."
-msgstr ""
-
-#: wp-sheet-editor/dev/inc/options-init.php:381
-msgid "Disable serialized columns support?"
+#: wp-sheet-editor/dev/inc/options-init.php:355
+msgid "Select the WordPress capability required to delete saved spreadsheet views. This does not control which views a user can see or use. Default: manage_options."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/options-init.php:382
-msgid "The spreadsheet automatically generates columns for serialized fields, but this can use a lot of CPU cycles depending on the number of serialized fields. You can disable this feature if the sheet is too slow to load or you get errors when loading the rows or you dont want to see columns with prefix \"SEIS\"."
+msgid "Enable simple mode?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:388
-msgid "Disable the heartbeat api in the spreadsheet?"
+#: wp-sheet-editor/dev/inc/options-init.php:383
+msgid "If you enable this option, we will simplify the spreadsheet options and remove advanced examples, tips, and options rarely used in the search tool, bulk edit tool, import tool, export tool, and other places."
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/options-init.php:389
-msgid "WordPress uses the heartbeat API to check the login status every few seconds. This can overload your server because it could make hundreds of requests when you are editing in the spreadsheet. You can disable it to reduce the stress on your server while editing in the sheet. However, if you keep the spreadsheet opened over multiple days your login session can expire and you wont be notified if you disable the heartbeat and this can cause issues while saving. So use this option only when you use the spreadsheet for a few hours only."
+msgid "Disable the \"Unsaved changes detected\" popup?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:394
-msgid "User roles that can use the spreadsheet editor"
+#: wp-sheet-editor/dev/inc/options-init.php:390
+msgid "When you leave the page with unsaved changes, we save a backup. When you visit the page again, we ask if you want to restore the unsaved changes. You can disable this popup."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:395
-msgid "The plugin will not initialize for the user roles not selected here. Leave empty and the editor will initialize for any role that has permission to edit this data source."
+#: wp-sheet-editor/dev/inc/options-init.php:396
+msgid "Disable the automatic formatting detection?"
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/options-init.php:397
+msgid "If you enable this option, some columns will appear as text. Normally we detect the date fields, image fields."
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/options-init.php:403
+msgid "Disable cells lazy loading?"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/options-init.php:404
-msgid "Enable the fancy taxonomy terms selector"
+msgid "The spreadsheet loads only the \"visible rows\" for performance reasons, so when you scroll up or down the rows are loaded dynamically. This way you can \"open\" thousands of posts in the spreadshet and it will work fast. However, if you want to use the browser search to find a specific cell, you need to disable the lazy loading in order to load all the rows at once and the browser will be able to find the cells. The browser search doesn't work by default because only the \"visible rows\" are actually created."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:405
-msgid "Backwards compatibility. This setting will be removed in future updates."
+#: wp-sheet-editor/dev/inc/options-init.php:410
+msgid "Disable usage stats widget?"
 msgstr ""
 
 #: wp-sheet-editor/dev/inc/options-init.php:411
+msgid "If you enable this option, the usage stats widget shown in the wp-admin dashboard will be removed."
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/options-init.php:417
+msgid "Disable serialized columns support?"
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/options-init.php:418
+msgid "The spreadsheet automatically generates columns for serialized fields, but this can use a lot of CPU cycles depending on the number of serialized fields. You can disable this feature if the sheet is too slow to load or you get errors when loading the rows or you dont want to see columns with prefix \"SEIS\"."
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/options-init.php:424
+msgid "Disable the heartbeat api in the spreadsheet?"
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/options-init.php:425
+msgid "WordPress uses the heartbeat API to check the login status every few seconds. This can overload your server because it could make hundreds of requests when you are editing in the spreadsheet. You can disable it to reduce the stress on your server while editing in the sheet. However, if you keep the spreadsheet opened over multiple days your login session can expire and you wont be notified if you disable the heartbeat and this can cause issues while saving. So use this option only when you use the spreadsheet for a few hours only."
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/options-init.php:430
+msgid "User roles that can use the spreadsheet editor"
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/options-init.php:431
+msgid "The plugin will not initialize for the user roles not selected here. Leave empty and the editor will initialize for any role that has permission to edit this data source."
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/options-init.php:440
+msgid "Enable the fancy taxonomy terms selector"
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/options-init.php:441
+msgid "Backwards compatibility. This setting will be removed in future updates."
+msgstr ""
+
+#: wp-sheet-editor/dev/inc/options-init.php:447
 msgid "What cell format to use for the taxonomy columns?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:413
+#: wp-sheet-editor/dev/inc/options-init.php:449
 msgid "New multi select dropdown (Default)"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:414
+#: wp-sheet-editor/dev/inc/options-init.php:450
 msgid "Old single select autocomplete"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:420
+#: wp-sheet-editor/dev/inc/options-init.php:456
 msgid "Show all the custom post statuses?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:421
+#: wp-sheet-editor/dev/inc/options-init.php:457
 msgid "By default we show the CORE statuses: published, draft, private, scheduled, trash. However, some plugins register custom statuses: job managers, woocommerce. Enable this option to show all the custom statuses in the \"status\" column. CAREFUL. We will show all the statuses from all the post types in the dropdown because it is impossible to know the post type of each status to we can not separate them. Do this only if you are a developer."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:427
+#: wp-sheet-editor/dev/inc/options-init.php:463
 msgid "Remove help messages from the cells?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:428
+#: wp-sheet-editor/dev/inc/options-init.php:464
 msgid "By default we show comments in some columns indicating the value format or why they are locked. for example, the category column shows a tip indicating to separate terms with a comma and how to add child categories, variation columns have a tip indicating why they are locked for parent products. You can activate this option to disable those tips."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:433
+#: wp-sheet-editor/dev/inc/options-init.php:469
 msgid "Value format for taxonomy columns"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:437
+#: wp-sheet-editor/dev/inc/options-init.php:473
 msgid "Names (Default)"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:439
+#: wp-sheet-editor/dev/inc/options-init.php:475
 msgid "Term IDs"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:445
+#: wp-sheet-editor/dev/inc/options-init.php:481
 msgid "Do you want to deactivate columns for new fields found?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:446
+#: wp-sheet-editor/dev/inc/options-init.php:482
 msgid "By default we automatically show columns for all the new fields found, so everytime we detect new fields you can see them and edit right away. But this might \"break\" your column sorting or annoy you if you have enabled specific columns. Enable this option to generate those columns but leave them deactivated so you can enable them later."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:453
+#: wp-sheet-editor/dev/inc/options-init.php:489
 msgid "Math formula roundup decimals"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:454
+#: wp-sheet-editor/dev/inc/options-init.php:490
 msgid "We automatically round up to 2 decimals. You can enter any number here, for example, 1 to round to 1 decimal, 0 to round to the nearest whole number (without decimals). Default: 2 decimals"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:460
+#: wp-sheet-editor/dev/inc/options-init.php:496
 msgid "Display raw value on select cells?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:461
+#: wp-sheet-editor/dev/inc/options-init.php:497
 msgid "By default, we show the label in the cell instead of the raw value. But you can enable this option to display the raw value in the cells."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:467
+#: wp-sheet-editor/dev/inc/options-init.php:503
 msgid "Disable the addition of file ID to the image URLs?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:468
+#: wp-sheet-editor/dev/inc/options-init.php:504
 msgid "By default, when you export the featured image column or gallery columns, we add the file ID to each image url so we can import them later faster. You can activate this option to not add the file id and the import will work fine later but it wont be as fast"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:474
+#: wp-sheet-editor/dev/inc/options-init.php:510
 msgid "Disable the display of file names in the image columns?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:475
+#: wp-sheet-editor/dev/inc/options-init.php:511
 msgid "By default, we show the file name as a preview next to the thumbnail, you can activate this to show the thumbnail and upload buttons only"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:481
+#: wp-sheet-editor/dev/inc/options-init.php:517
 msgid "Add html classes to the \"post status\" cells based on their values?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:482
+#: wp-sheet-editor/dev/inc/options-init.php:518
 msgid "You can activate this option if you want to add html classes, and use those html classes to change the cell colors for each status using custom CSS"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:489
+#: wp-sheet-editor/dev/inc/options-init.php:525
 msgid "Maximum number of characters displayed in the preview of the values of tinymce columns?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:490
+#: wp-sheet-editor/dev/inc/options-init.php:526
 msgid "By default, we only display 30 characters. You can increase the number here to view larger previews."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:496
+#: wp-sheet-editor/dev/inc/options-init.php:532
 msgid "Manage the post parent column using IDs?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:497
+#: wp-sheet-editor/dev/inc/options-init.php:533
 msgid "By default, the \"parent\" column displays titles and saves using titles. If you activate this option, the column will display IDs and save IDs. This is useful if you have duplicate titles and you need to save the exact parent by ID."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:502
+#: wp-sheet-editor/dev/inc/options-init.php:538
 msgid "Enable the dark mode?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:506
+#: wp-sheet-editor/dev/inc/options-init.php:542
 msgid "Auto (Default)"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:507
+#: wp-sheet-editor/dev/inc/options-init.php:543
 msgid "Light mode"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:513
+#: wp-sheet-editor/dev/inc/options-init.php:549
 msgid "Disable the automatic update of the \"modified date\" of the posts?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:515
+#: wp-sheet-editor/dev/inc/options-init.php:551
 msgid "By default, the \"modified date\" of each post is updated every time you edit a post in our spreadsheet editor. WordPress automatically updates the \"modified date\" when you a edit a post in the regular editor, so we do this to keep a consistent experience in our sheet editor as the regular editor. You can enable this option to stop this behavior but this behavior will stop only when you edit taxonomies or meta fields, WordPress will still update the modified date when you post titles, content, excerpt, and other fields stored in the wp_posts table in the database."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:521
+#: wp-sheet-editor/dev/inc/options-init.php:557
 msgid "Default field selected in the advanced filters > meta search"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:522
+#: wp-sheet-editor/dev/inc/options-init.php:558
 msgid "Enter the field key, for example: _sku"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:527
+#: wp-sheet-editor/dev/inc/options-init.php:563
 msgid "Delete all the configuration related to our plugin after uninstalling the plugin?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:528
+#: wp-sheet-editor/dev/inc/options-init.php:564
 msgid "By default, we don't delete the plugin configuration."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:541
+#: wp-sheet-editor/dev/inc/options-init.php:577
 msgid "Misc"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:547
+#: wp-sheet-editor/dev/inc/options-init.php:583
 msgid "Image preview width inside the cell"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:554
+#: wp-sheet-editor/dev/inc/options-init.php:590
 msgid "Image preview height inside the cell"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:561
+#: wp-sheet-editor/dev/inc/options-init.php:597
 msgid "Initial rows offset"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:562
+#: wp-sheet-editor/dev/inc/options-init.php:598
 msgid "When you have 1000 posts , you might want to open the spreadsheet and start editing from post 200. This option lets you skip a lot of rows. IMPORTANT. We use the pagination, so we will display the page closest to that number. For example. If you load 10 rows per page and enter 1205 as offset, the sheet will start from page 120 (index 1200) because it is the page closest to the defined offset."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:568
+#: wp-sheet-editor/dev/inc/options-init.php:604
 msgid "Delete the attached images when deleting a post?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:569
+#: wp-sheet-editor/dev/inc/options-init.php:605
 msgid "For example, when deleting a post completely (not moving to the trash), delete the featured image and product gallery images from the media library. CAREFUL.If you use the same images on multiple posts, it will break the images on other posts"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:577
+#: wp-sheet-editor/dev/inc/options-init.php:613
 msgid "Enabled spreadsheets"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:583
+#: wp-sheet-editor/dev/inc/options-init.php:619
 msgid "Disable the help toolbar?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:584
+#: wp-sheet-editor/dev/inc/options-init.php:620
 msgid "This will hide the \"help\" option in the top toolbar"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:591
+#: wp-sheet-editor/dev/inc/options-init.php:627
 msgid "Maximum visible characters in locked cells"
 msgstr ""
 
 #. translators: %d: Maximum character length
-#: wp-sheet-editor/dev/inc/options-init.php:593
+#: wp-sheet-editor/dev/inc/options-init.php:629
 msgid "Locked cells only show a preview of the value. The default character length is %d"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:599
+#: wp-sheet-editor/dev/inc/options-init.php:635
 msgid "Don't show read-only columns in the advanced search?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:605
+#: wp-sheet-editor/dev/inc/options-init.php:641
 msgid "Allow to remove duplicate rows by these meta fields"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:606
+#: wp-sheet-editor/dev/inc/options-init.php:642
 msgid "By default, our bulk edit allows you to remove duplicate posts by title+content, or by product SKU. You can add multiple meta keys separated with a comma here to allow to remove duplicate posts by a meta field. We don't allow this for any column because this should be used on meta fields that are supposed to contain unique values"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:612
+#: wp-sheet-editor/dev/inc/options-init.php:648
 msgid "Thumbnail size for the image cell previews"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:613
+#: wp-sheet-editor/dev/inc/options-init.php:649
 msgid "By default, we show a thumbnail with medium size in the cell values and preview on the Image columns, and we export images in full size when you use our export tool. If you want to see smaller or bigger images in the cell values or previews, select a different size here"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:618
+#: wp-sheet-editor/dev/inc/options-init.php:654
 msgid "Disable the \"add new row\" option from the toolbar?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:620
+#: wp-sheet-editor/dev/inc/options-init.php:656
 msgid "Enable this option if you don't want people to create rows in our live sheet. This can be useful if you want them to create items using the regular editor to have all the fields filled in with default values."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:628
+#: wp-sheet-editor/dev/inc/options-init.php:664
 msgid "Disable extension offerings?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:634
+#: wp-sheet-editor/dev/inc/options-init.php:670
 msgid "Don't display the disabled columns in the modules?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:635
+#: wp-sheet-editor/dev/inc/options-init.php:671
 msgid "By default, we show all the columns in the app modules (advanced search, bulk edit, export, import, etc), even if they're disabled in the columns manager. Activate this option to only display enabled columns."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:641
+#: wp-sheet-editor/dev/inc/options-init.php:677
 msgid "Allow users with the capability unfiltered_html to save any html in the post content column?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:642
+#: wp-sheet-editor/dev/inc/options-init.php:678
 msgid "By default, we remove any unsafe html from all the spreadsheet columns before saving the values. You can activate this option if you want to allow the WordPress super admins or administrators to add iframes, ad codes, etc to the post content. Use it at your own risk."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:649
+#: wp-sheet-editor/dev/inc/options-init.php:685
 msgid "Generate serialized fields columns based on these posts"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/options-init.php:650
+#: wp-sheet-editor/dev/inc/options-init.php:686
 msgid "This option allows you to indicate what posts to use as templates for specific serialized fields. Enter the field key and post ID separated with a colon. For example: serialized_key1:89, serializedkey2:90"
 msgstr ""
 
@@ -5915,7 +5939,7 @@ msgstr ""
 
 #: wp-sheet-editor/dev/inc/teasers/coupons.php:59
 #: wp-sheet-editor/dev/inc/teasers/users.php:56
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:433
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:434
 msgid "Download Plugin"
 msgstr ""
 
@@ -5999,7 +6023,7 @@ msgstr ""
 
 #: wp-sheet-editor/dev/inc/teasers/terms.php:73
 #: wp-sheet-editor/dev/inc/teasers/users.php:54
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:430
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:431
 msgid "Tip from WP Sheet Editor:"
 msgstr ""
 
@@ -6047,43 +6071,43 @@ msgstr ""
 msgid "You can view all the users in a table, view thousands of full profiles, edit hundreds of users at once without crashing your server, view all shipping/billing/buddypress information. Make advanced searches, create hundreds of users, and more."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:417
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:418
 msgid ". <b>Lite version.</b> Showing all products and all fields as columns, 15 columns are editable and the rest are read only. <br><b>Upgrade:</b> Edit in Excel/Google Sheets, export, import, bulk edit thousands of products at once."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:431
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:432
 msgid "You can view and edit Product Variations in a spreadsheet, bulk edit, make advanced searches, edit hundreds of variations at once, copy variations to multiple products, etc."
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:531
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:532
 msgid "Regular Price"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:543
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:544
 msgid "Sale Price"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:646
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:647
 msgid "Gallery"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:688
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:689
 msgid "Sales price date from"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:699
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:700
 msgid "Sales price date to"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:724
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:725
 msgid "is featured?"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:739
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:740
 msgid "Allow backorders"
 msgstr ""
 
-#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:859
+#: wp-sheet-editor/dev/inc/teasers/woocommerce.php:860
 msgid "Note: Separate values with the character %s<br/>The product must be variable and have existing variations for this to work, otherwise the default attributes won't be saved."
 msgstr ""
 
@@ -6848,62 +6872,62 @@ msgstr ""
 msgid "WP Sheet Editor Usage"
 msgstr ""
 
-#: wpml/inc/post.php:176
+#: wpml/inc/post.php:199
 msgid "WPML - Use IDs in the column \"Translation of\" instead of Titles?"
 msgstr ""
 
-#: wpml/inc/post.php:177
+#: wpml/inc/post.php:200
 msgid "By default, we use post titles to connect translations with the default language, but it can cause issues if you have duplicate titles, so you can enable this option to display IDs and save using IDs. This applies to all the spreadsheets related to a post type."
 msgstr ""
 
-#: wpml/inc/post.php:357
+#: wpml/inc/post.php:380
 #: wpml/inc/term.php:73
 msgid "WPML - Missing translations in these languages"
 msgstr ""
 
-#: wpml/inc/post.php:357
+#: wpml/inc/post.php:380
 msgid "For example, select \"Spanish\" and \"German\" here and we'll find products that don't have spanish translations or german translations."
 msgstr ""
 
-#: wpml/inc/post.php:692
+#: wpml/inc/post.php:717
 #: wpml/inc/term.php:212
 msgid "WPML - Duplicate"
 msgstr ""
 
 #. translators: %1$s: Term separator character, %2$s: Term separator character
-#: wpml/inc/post.php:704
+#: wpml/inc/post.php:729
 #: wpml/inc/term.php:224
 msgid "Enter multiple language codes separated by %1$s and we will create copies of the main language. For example: en%2$s es. Existing languages will be skipped."
 msgstr ""
 
-#: wpml/inc/post.php:716
+#: wpml/inc/post.php:741
 #: wpml/inc/term.php:196
 msgid "WPML - Translation of"
 msgstr ""
 
-#: wpml/inc/post.php:732
+#: wpml/inc/post.php:757
 msgid "WPML - Relationship"
 msgstr ""
 
-#: wpml/inc/post.php:740
+#: wpml/inc/post.php:765
 msgid "Duplicate from the main language"
 msgstr ""
 
-#: wpml/inc/post.php:741
+#: wpml/inc/post.php:766
 msgid "Translate separately"
 msgstr ""
 
-#: wpml/inc/post.php:756
+#: wpml/inc/post.php:781
 #: wpml/inc/term.php:236
 msgid "WPML - Language"
 msgstr ""
 
-#: wpml/inc/post.php:764
+#: wpml/inc/post.php:789
 #: wpml/inc/term.php:247
 msgid "You can change the language of this post. If the translation for the new language exists, this change will not be applied."
 msgstr ""
 
-#: wpml/inc/post.php:776
+#: wpml/inc/post.php:801
 msgid "WPML - Translation priority"
 msgstr ""
 

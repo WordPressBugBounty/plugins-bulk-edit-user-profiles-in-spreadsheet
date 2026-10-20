@@ -6911,3 +6911,429 @@ hardcoded commas.*/
     Handsontable.editors.registerEditor('chosen', ChosenEditor);
 
 })(Handsontable);
+
+
+/* Select2 Editor */
+(function (Handsontable) {
+    "use strict";
+
+    var WPSelect2Editor = Handsontable.editors.SelectEditor.prototype.extend();
+    WPSelect2Editor.prototype.prepare = function (row, col, prop, td, originalValue, cellProperties) {
+        Handsontable.editors.SelectEditor.prototype.prepare.apply(this, arguments);
+
+        this.options = {};
+        if (this.cellProperties.select2Options) {
+            this.options = jQuery.extend(this.options, cellProperties.select2Options);
+        }
+
+        if( this.options.multiple ){
+            this.select.setAttribute("multiple", "multiple");
+        }
+        cellProperties.select2Options = jQuery.extend({}, cellProperties.select2Options);
+    };
+
+    WPSelect2Editor.prototype.init = function () {
+        Handsontable.editors.SelectEditor.prototype.init.apply(this, arguments);
+        this.createElements();
+    };
+
+    WPSelect2Editor.prototype.createElements = function () {
+        this.$body = jQuery(document.body);
+        this.$select = jQuery(this.select);
+
+        this.TEXTAREA_PARENT = document.createElement('DIV');
+        Handsontable.dom.addClass(this.TEXTAREA_PARENT, 'handsontableInputHolder');
+
+        this.textareaParentStyle = this.TEXTAREA_PARENT.style;
+        this.textareaParentStyle.top = 0;
+        this.textareaParentStyle.left = 0;
+        this.textareaParentStyle.display = 'none';
+        this.textareaParentStyle.width = "200px";
+
+        this.TEXTAREA_PARENT.appendChild(this.select);
+        this.$parent = jQuery(this.TEXTAREA_PARENT);
+
+        this.instance.rootElement.appendChild(this.TEXTAREA_PARENT);
+
+        var that = this;
+        this.instance._registerTimeout(setTimeout(function () {
+            that.refreshDimensions();
+        }, 0));
+    };
+
+    WPSelect2Editor.prototype.open = function (keyboardEvent) {
+        this.instance.addHook('beforeKeyDown', onBeforeKeyDownSelect2);
+        Handsontable.editors.SelectEditor.prototype.open.apply(this, arguments);
+        this.$parent.css({
+            display: 'block',
+            top: this.$select.css('top'),
+            left: this.$select.css('left'),
+            margin: this.$select.css('margin'),
+        });
+
+        this.$select.css({
+            height: jQuery(this.TD).height() + 4,
+            'min-width': jQuery(this.TD).outerWidth() - 4
+        });
+
+        // Hide the select
+        this.$select.hide();
+
+        var options = jQuery.extend({}, this.options, {
+            width: "100%",
+        });
+
+        if (jQuery(this.TEXTAREA_PARENT).find(".select2-container").length) {
+            this.$select.select2("destroy");
+        }
+
+        var self = this;
+        if (typeof window.wpseSelect2Terms === 'undefined') {
+            window.wpseSelect2Terms = {};
+        }
+
+        if (this.cellProperties.wpAjaxAction) {
+            options.language = {
+                noResults: function () {
+                    var term = jQuery('.select2-container--open .select2-search__field').val() || '';
+                    if (term.length > 0) {
+                        return vgse_editor_settings.texts.select2_no_results_found_enter_another;
+                    }
+                    return vgse_editor_settings.texts.select2_please_enter_search_term;
+                }
+            };
+            options.ajax = {
+                url: vgse_global_data.ajax_url,
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    var ajaxParams = {};
+                    if (self.cellProperties.ajaxParams) {
+                        ajaxParams = jQuery.extend({}, self.cellProperties.ajaxParams);
+                    } else if (self.options.ajaxParams) {
+                        ajaxParams = jQuery.extend({}, self.options.ajaxParams);
+                    }
+                    ajaxParams.action = self.cellProperties.wpAjaxAction;
+                    ajaxParams.nonce = vgse_global_data.nonce;
+                    ajaxParams.columnKey = self.prop;
+                    ajaxParams.wpse_source = 'select2_column';
+                    ajaxParams.post_type = ajaxParams.post_type || vgse_editor_settings.post_type;
+                    ajaxParams.search_post_type = ajaxParams.post_type;
+                    ajaxParams.q = params.term || '';
+                    ajaxParams.search = params.term || '';
+                    return ajaxParams;
+                },
+                processResults: function (response) {
+                    var data = [];
+                    var responseData = response;
+                    if(response && response.data) {
+                        responseData = response.data;
+                        if(response.data.data) {
+                            responseData = response.data.data;
+                        }
+                    }
+                    
+                    if (Array.isArray(responseData)) {
+                        data = responseData.map(function(term) {
+                            if (typeof term === 'object' && term !== null) {
+                                return {
+                                    id: term.title !== undefined ? vgseStripHtml(term.title) : '',
+                                    text: term.title !== undefined ? vgseStripHtml(term.title) : ''
+                                };
+                            }
+                            var cleanTerm = vgseStripHtml(term);
+                            return {
+                                id: cleanTerm,
+                                text: cleanTerm
+                            };
+                        });
+                    }
+                    return {
+                        results: data
+                    };
+                },
+                transport: function (params, success, failure) {
+                    var keyword = params.data.q || '';
+                    var cacheKey = self.prop + '_' + keyword;
+                    
+                    if (window.wpseSelect2Terms[cacheKey]) {
+                        var deferred = jQuery.Deferred();
+                        deferred.resolve(window.wpseSelect2Terms[cacheKey]);
+                        success(window.wpseSelect2Terms[cacheKey]);
+                        return deferred.promise();
+                    }
+                    
+                    var $request = jQuery.ajax(params);
+                    $request.then(function(data){
+                        window.wpseSelect2Terms[cacheKey] = data;
+                        success(data);
+                    });
+                    $request.fail(failure);
+                    return $request;
+                }
+            };
+
+            // Setup initial values to display properly since ajax options aren't loaded yet
+            this.$select.empty();
+            var orig = this.originalValue;
+            if (orig) {
+                var currentValues = [];
+                if (this.options.multiple) {
+                    currentValues = (orig + "").split(vgse_editor_settings.taxonomy_terms_separator).map(function (item) {
+                        return item.trim();
+                    });
+                } else {
+                    currentValues = [ orig ];
+                }
+                currentValues = jQuery.unique(currentValues);
+                currentValues.forEach(function (singleValue) {
+                    if (singleValue) {
+                        var $option = jQuery('<option selected/>').attr('value', singleValue).text(singleValue);
+                        self.$select.append($option);
+                    }
+                });
+            }
+
+        } else {            
+            // "And also work when the column doesn't use ajax, in that case use the selectOptions parameter of handsontable to generate the options"
+            var selectOptions = [];
+            this.$select.find('option').each(function(){
+                var val = jQuery(this).attr('value');
+                if (val !== undefined && val !== null) {
+                     selectOptions.push(val);
+                }
+            });
+            this.$select.empty();
+            selectOptions.forEach(function (val) {
+                var $option = jQuery('<option/>').attr('value', vgseStripHtml(val)).text(vgseStripHtml(val));
+                self.$select.append($option);
+            });
+            
+            var orig = this.originalValue;
+            if (orig) {
+                var currentValues = [];
+                if (this.options.multiple) {
+                    currentValues = (orig + "").split(vgse_editor_settings.taxonomy_terms_separator).map(function (item) {
+                        return item.trim();
+                    });
+                } else {
+                    currentValues = [ orig ];
+                }
+                currentValues.forEach(function (singleValue) {
+                    self.$select.find('option').filter(function(){
+                        return jQuery(this).val() === singleValue;
+                    }).prop('selected', true);
+                });
+            }
+        }
+
+        this.$select.select2(options);
+
+        setTimeout(function () {
+            self.$select.on('change', onSelect2Changed.bind(self));
+            self.$select.on('select2:select', onSelect2Select.bind(self));
+            self.$select.on('select2:close', onSelect2Closed.bind(self));
+
+            self.$select.select2("open");
+
+            jQuery(self.TEXTAREA_PARENT).find("input.select2-search__field").on("keydown", function (e) {
+                if (e.keyCode === Handsontable.helper.KEY_CODES.ENTER) {
+                    if (jQuery(this).val()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    } else {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        self.close();
+                        self.finishEditing();
+                    }
+                }
+
+                if (e.keyCode === Handsontable.helper.KEY_CODES.ARROW_DOWN || e.keyCode === Handsontable.helper.KEY_CODES.ARROW_UP) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+
+            setTimeout(function () {
+                var searchField = jQuery(self.TEXTAREA_PARENT).find("input.select2-search__field");
+                searchField.focus();
+            }, 1);
+        }, 1);
+    };
+
+    var onSelect2Changed = function (event, params) {
+        // Handled via select2:select if needed
+    };
+    
+    var onSelect2Select = function (event) {
+        if (event.params && event.params.data) {
+            var selectedValue = event.params.data.id;
+            this.$select.find('option').filter(function(){
+                return jQuery(this).val() === selectedValue;
+            }).appendTo(this.$select);
+        }
+    };
+
+    var onSelect2Closed = function () {
+        var options = this.options || {};
+        if (!options.multiple) {
+            this.close();
+            this.finishEditing();
+        }
+    };
+
+    var onBeforeKeyDownSelect2 = function (event) {
+        var instance = this;
+        var that = instance.getActiveEditor();
+
+        var keyCodes = Handsontable.helper.KEY_CODES;
+        var ctrlDown = (event.ctrlKey || event.metaKey) && !event.altKey;
+
+        if (event.target.tagName !== "INPUT") {
+            return;
+        }
+        if (event.keyCode === 17 || event.keyCode === 224 || event.keyCode === 91 || event.keyCode === 93) {
+            event.stopImmediatePropagation();
+            return;
+        }
+
+        var target = event.target;
+
+        switch (event.keyCode) {
+            case keyCodes.ARROW_RIGHT:
+                if (Handsontable.dom.getCaretPosition(target) !== target.value.length) {
+                    event.stopImmediatePropagation();
+                } else {
+                    if (that.$select.data('select2')) {
+                        that.$select.select2("close");
+                    }
+                }
+                break;
+
+            case keyCodes.ARROW_LEFT:
+                if (Handsontable.dom.getCaretPosition(target) !== 0) {
+                    event.stopImmediatePropagation();
+                } else {
+                    if (that.$select.data('select2')) {
+                        that.$select.select2("close");
+                    }
+                }
+                break;
+
+            case keyCodes.ENTER:
+                if (that.options && that.options.multiple) {
+                    event.stopImmediatePropagation();
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                break;
+
+            case keyCodes.A:
+            case keyCodes.X:
+            case keyCodes.C:
+            case keyCodes.V:
+                if (ctrlDown) {
+                    event.stopImmediatePropagation();
+                }
+                break;
+
+            case keyCodes.DELETE:
+            case keyCodes.HOME:
+            case keyCodes.END:
+                event.stopImmediatePropagation();
+                break;
+        }
+    };
+
+    WPSelect2Editor.prototype.close = function () {
+        this.setValue(this.getValue());
+        Handsontable.editors.SelectEditor.prototype.close.apply(this, arguments);
+        this.instance.removeHook('beforeKeyDown', onBeforeKeyDownSelect2);
+        this.$parent.hide();
+        this.$select.off();
+        if (this.$select.data('select2')) {
+            this.$select.select2("destroy");
+        }
+        this.$select.hide();
+    };
+
+    WPSelect2Editor.prototype.finishEditing = function (isCancelled, ctrlDown) {
+        return Handsontable.editors.SelectEditor.prototype.finishEditing.apply(this, arguments);
+    };
+
+    WPSelect2Editor.prototype.beginEditing = function (initialValue, event ) {
+        var onBeginEditing = this.instance.getSettings().onBeginEditing;
+        if (onBeginEditing && onBeginEditing() === false) {
+            return;
+        }
+
+        var self = this;
+        if( event instanceof KeyboardEvent && event.key === 'Enter'){
+            setTimeout(function(){
+                Handsontable.editors.SelectEditor.prototype.beginEditing.apply(self, arguments);
+            }, 250);
+        } else {
+            Handsontable.editors.SelectEditor.prototype.beginEditing.apply(this, arguments);
+        }
+    };
+
+    WPSelect2Editor.prototype.getValue = function () {
+        var selectedValues = getSelect2Values(this.select);
+        var valuesString = jQuery.unique(selectedValues).join(vgse_editor_settings.taxonomy_terms_separator + " ");
+        return valuesString;
+    };
+
+    WPSelect2Editor.prototype.setValue = function (valueString) {
+        if (typeof valueString === 'string') {
+            if( this.options.multiple  ){
+                var valueArray = (valueString + "").split(vgse_editor_settings.taxonomy_terms_separator).map(function (item) {
+                    return item.trim();
+                });
+            } else {
+                var valueArray = [ valueString ];
+            }
+        } else {
+            var valueArray = valueString || [];
+        }
+        var that = this;
+        valueArray = jQuery.unique(valueArray);
+        valueArray.forEach(function (singleValue) {
+            var $option = that.$select.find('option').filter(function(){
+                return jQuery(this).val() === singleValue;
+            }).first();
+            if ($option.length === 0 && singleValue) {
+                $option = jQuery('<option/>').attr('value', singleValue).text(singleValue);
+                that.$select.append($option);
+            }
+            $option.prop('selected', true);
+        });
+        this.$select.trigger('change');
+        
+        // Change the original value only after the select options have loaded
+        if( this.$select.find('option').length ){
+            this.originalValue = valueArray.join(vgse_editor_settings.taxonomy_terms_separator + " ");
+        }
+    };
+
+    function getSelect2Values(select) {
+        var result = [];
+        var options = select && select.options;
+        var opt;
+
+        if (options) {
+            for (var i = 0, iLen = options.length; i < iLen; i++) {
+                opt = options[i];
+                var optionValue = opt.value || opt.text;
+                if (opt.selected && optionValue) {
+                    result.push(optionValue);
+                }
+            }
+        }
+        return result;
+    }
+
+    Handsontable.editors.WPSelect2Editor = WPSelect2Editor;
+    Handsontable.editors.registerEditor('wp_select2', WPSelect2Editor);
+
+})(Handsontable);

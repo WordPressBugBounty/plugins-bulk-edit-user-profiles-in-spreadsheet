@@ -3775,6 +3775,26 @@ html.remodal-is-locked.remodal-is-docked-body {
 #wpwrap #vgse-wrapper .vg-toolbar .toolbar-submenu .button[data-saved-item].wpse-active-group {
     font-weight: bold;
 }
+#vgse-wrapper .handsontableInputHolder input[type="search"] {
+    background: transparent;
+    margin-top: 0;
+}
+#vgse-wrapper .handsontableInputHolder .select2-search.select2-search--inline {
+    margin: 0;
+}
+.vgse-dark-mode #vgse-wrapper .handsontableInputHolder .select2-container {
+    background: #363636;;
+}
+#vgse-wrapper .handsontableInputHolder .select2-selection--multiple  {
+    background: transparent;
+    border: 0;
+    border-top: solid black 1px;
+}
+.select2-results__option {
+    font-size: 13px;
+    padding: 2px 6px !important;
+    line-height: 15px;
+}
 .be-loading-anim {
     position: relative;
     width: 50px;

@@ -269,6 +269,14 @@ if ( ! class_exists( 'WPSE_Options_Page' ) ) {
 						'default'  => 1000,
 					),
 					array(
+						'id'       => 'be_list_posts_by_title_limit',
+						'type'     => 'text',
+						'validate' => 'numeric',
+						'title'    => esc_html__( 'Maximum limit of posts returned by list_posts_by_title in dropdowns', 'vg_sheet_editor' ),
+						'desc'     => esc_html__( 'Default is 500. You can increase this number if you need to load more posts in column dropdowns.', 'vg_sheet_editor' ),
+						'default'  => 500,
+					),
+					array(
 						'id'      => 'allow_line_breaks_export_import',
 						'type'    => 'switch',
 						'title'   => esc_html__( 'Allow line breaks in values during the export and import process', 'vg_sheet_editor' ),
@@ -339,6 +347,34 @@ if ( ! class_exists( 'WPSE_Options_Page' ) ) {
 						'title'   => esc_html__( 'Enable option to restrict spreadsheet views per user?', 'vg_sheet_editor' ),
 						'desc'    => esc_html__( 'If you enable this option, we will add fields to the user profiles where you can specify which spreadsheet views they can use, they can use all the spreadsheet views if this is deactivated.', 'vg_sheet_editor' ),
 						'default' => false,
+					),
+					array(
+						'id'         => 'column_groups_delete_capability',
+						'type'       => 'new_select',
+						'title'      => esc_html__( 'Capability required to delete spreadsheet views', 'vg_sheet_editor' ),
+						'desc'       => esc_html__( 'Select the WordPress capability required to delete saved spreadsheet views. This does not control which views a user can see or use. Default: manage_options.', 'vg_sheet_editor' ),
+						'options'    => function () {
+							$capabilities = array();
+
+							foreach ( wp_roles()->roles as $role ) {
+								if ( empty( $role['capabilities'] ) || ! is_array( $role['capabilities'] ) ) {
+									continue;
+								}
+
+								foreach ( $role['capabilities'] as $capability => $granted ) {
+									if ( $granted ) {
+										$capabilities[ $capability ] = $capability;
+									}
+								}
+							}
+
+							$capabilities['manage_options'] = 'manage_options';
+							ksort( $capabilities );
+
+							return $capabilities;
+						},
+						'default'    => 'manage_options',
+						'class_name' => 'select2',
 					),
 					array(
 						'id'      => 'enable_simple_mode',

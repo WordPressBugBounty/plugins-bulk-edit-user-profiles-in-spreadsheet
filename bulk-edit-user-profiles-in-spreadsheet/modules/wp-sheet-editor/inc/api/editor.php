@@ -548,6 +548,8 @@ if ( ! class_exists( 'WP_Sheet_Editor_Factory' ) ) {
 				'formula_eval_invalid_chars'              => esc_html__( 'Invalid characters in formula.', 'vg_sheet_editor' ),
 				'formula_eval_tooltip'                    => esc_html__( 'You can reference other columns using the syntax $Column title$. Nested formulas are not allowed.', 'vg_sheet_editor' ),
 				'formula_eval_error'                      => esc_html__( '#ERROR: ', 'vg_sheet_editor' ),
+				'select2_please_enter_search_term'        => esc_html__( 'Please type a search term', 'vg_sheet_editor' ),
+				'select2_no_results_found_enter_another'  => esc_html__( 'No results found, enter another search term', 'vg_sheet_editor' ),
 			);
 
 			$extension            = VGSE()->helpers->get_extension_by_post_type( $current_provider_in_page );
